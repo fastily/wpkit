@@ -1,14 +1,13 @@
 package ft;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Scanner;
 
 import jwiki.commons.CStrings;
 import jwiki.core.Wiki;
+import jwiki.mbot.DeleteItem;
 import jwiki.mbot.WAction;
 import jwiki.util.FCLI;
-import jwiki.util.FString;
 import jwiki.util.WikiGen;
 
 import org.apache.commons.cli.CommandLine;
@@ -149,31 +148,38 @@ public class CCleaner
 	{
 		user.nullEdit("User:FastilyClone/UC");
 
-		ArrayList<String> fails = new ArrayList<String>();
+		ArrayList<DeleteItem> l = new ArrayList<DeleteItem>();
 		String baseLS = "you may [[Special:Upload|re-upload]] the file, but please %s";
-		for (String c : admin.getValidLinksOnPage("User:FastilyClone/UC"))
+
+		String[] cats = admin.getValidLinksOnPage("User:FastilyClone/UC");
+		for (String c : cats)
 		{
 			if (c.contains("permission"))
-				fails.addAll(Arrays.asList(com.categoryNuke(c,
-						String.format("[[COM:OTRS|No permission]] since %s: ", c.substring(c.indexOf("as of") + 6))
-								+ CStrings.baseP, true, "File")));
+				l.addAll(genUCDI(c, "[[COM:OTRS|No permission]] since", CStrings.baseP));
 			else if (c.contains("license"))
-				fails.addAll(Arrays.asList(com.categoryNuke(
-						c,
-						String.format("No license since %s: ", c.substring(c.indexOf("as of") + 6))
-								+ String.format(baseLS, "include a [[COM:CT|license tag]]"), true, "File")));
+				l.addAll(genUCDI(c, "No license since", String.format(baseLS, "include a [[COM:CT|license tag]]")));
 			else
-				fails.addAll(Arrays.asList(com.categoryNuke(
-						c,
-						String.format("No source since %s: ", c.substring(c.indexOf("as of") + 6))
-								+ String.format(baseLS, "cite the file's source"), true, "File")));
+				l.addAll(genUCDI(c, "No source since", String.format(baseLS, "cite the file's source")));
 		}
 
-		if (!fails.isEmpty())
-			System.out.println(String.format("CCleaner failed (%d) on:%n%s", fails.size(),
-					FString.fenceMaker("\n", fails.toArray(new String[0]))));
+		String[] fails = com.doAction(l.toArray(new WAction[0]), true);
+		com.emptyCatDel(cats);
+		return fails;
+		
+	}
 
-		return fails.toArray(new String[0]);
+	/**
+	 * Helper for unknownClear().  Parse out date from category and generate reason params for items to delete
+	 * 
+	 * @param cat The category to process
+	 * @param front The front part of the reason, before the colon.
+	 * @param back The back part of the reason, after the colon.
+	 * @return A list of DeleteItems we created.
+	 */
+	private static ArrayList<DeleteItem> genUCDI(String cat, String front, String back)
+	{
+		return DeleteItem.makeDeleteItems(String.format("%s %s: %s", front, cat.substring(cat.indexOf("as of") + 6), back),
+				admin.getCategoryMembers(cat, "File"));
 	}
 
 	/**

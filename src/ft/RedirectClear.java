@@ -13,7 +13,7 @@ public class RedirectClear
 	
 	public static void main(String[] args)
 	{
-		int process = 500;
+		int process = 250;
 		for (String s : args)
 			if (s.matches("\\d*?"))
 				process = Integer.parseInt(s);

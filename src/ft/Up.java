@@ -149,7 +149,7 @@ public class Up
 			else if (w.getExtension(false).matches("(?i)(txt)"))
 			{
 				l.clear();
-				for (String x : new ReadFile(w.getFile()).getList())
+				for (String x : new ReadFile(w.getFile().getAbsolutePath()).getList())
 					l.add(new WikiFile(x));
 				break;
 			}

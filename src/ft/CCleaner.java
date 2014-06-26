@@ -24,7 +24,7 @@ import static ft.Core.*;
  * @author Fastily
  * 
  */
-public class CCleaner
+ public class CCleaner
 {
 	/**
 	 * The reason parameter we'll be using to delete with, if applicable.

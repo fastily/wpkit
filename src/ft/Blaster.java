@@ -1,5 +1,7 @@
 package ft;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -7,8 +9,8 @@ import javax.security.auth.login.LoginException;
 
 import jwiki.core.Settings;
 import jwiki.core.Wiki;
+import jwiki.util.FIO;
 import jwiki.util.FString;
-import jwiki.util.WikiFile;
 
 public class Blaster
 {
@@ -19,10 +21,10 @@ public class Blaster
 		ConcurrentLinkedQueue<String> fails = new ConcurrentLinkedQueue<String>();
 
 		ArrayList<Thread> l = new ArrayList<Thread>();
-		for (WikiFile f : new WikiFile(args[2]).listFiles(true))
+		for (Path f : FIO.findFiles(Paths.get(args[2])))
 			l.add(new Thread(() -> {
-				if (!wiki.upload(f.getFile(), "File:" + makeName(f), "{{subst:Nld}}", ""))
-					fails.add(f.getName(true));
+				if (!wiki.upload(f.toFile(), "File:" + makeName(f), "{{subst:Nld}}", ""))
+					fails.add(FIO.getFileName(f));
 			}));
 
 		for (Thread t : l)
@@ -39,17 +41,16 @@ public class Blaster
 		}
 	}
 
-	protected static String makeName(WikiFile f)
+	protected static String makeName(Path f)
 	{
 		String x = "";
 		int i = 0;
-		for (char c : f.getName(true).toCharArray())
+		for (char c : FIO.getFileName(f).toCharArray())
 		{
 			x += (char) (c % 26 + 97);
 			if(++i > 10)
 				break;
 		}
-		return FString.capitalize(x + f.getExtension(true));
+		return FString.capitalize(x + FIO.getExtension(f, true));
 	}
-
 }

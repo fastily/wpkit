@@ -23,7 +23,7 @@ public class Blaster
 		ArrayList<Thread> l = new ArrayList<Thread>();
 		for (Path f : FIO.findFiles(Paths.get(args[2])))
 			l.add(new Thread(() -> {
-				if (!wiki.upload(f.toFile(), "File:" + makeName(f), "{{subst:Nld}}", ""))
+				if (!wiki.upload(f, "File:" + makeName(f), "{{subst:Nld}}", ""))
 					fails.add(FIO.getFileName(f));
 			}));
 

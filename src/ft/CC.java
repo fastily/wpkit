@@ -77,7 +77,7 @@ public class CC
 		
 		String[] ml = WAction.convertToString(new MBot(user, Integer.parseInt(l.getOptionValue('h', "1"))).start(ccwl));
 		if(ml.length > 0)
-			FIO.dumpToFile("./CCfails.txt", ml);
+			FIO.dumpToFile("./CCfails.txt", true, ml);
 	}
 	
 	/**

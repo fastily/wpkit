@@ -8,7 +8,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashSet;
 
-import jwiki.commons.CStrings;
+import commons.CStrings;
 import jwiki.core.Logger;
 import jwiki.core.Wiki;
 import jwiki.mbot.MBot;

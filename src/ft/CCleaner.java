@@ -3,7 +3,7 @@ package ft;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-import jwiki.commons.CStrings;
+import commons.CStrings;
 import jwiki.core.Wiki;
 import jwiki.mbot.DeleteItem;
 import jwiki.mbot.WAction;

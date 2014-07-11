@@ -248,7 +248,7 @@ public class Commons
 	{
 		ArrayList<String> l = new ArrayList<String>();
 		for (Contrib c : admin.getContribs(user, ns))
-			l.add(c.getTitle());
+			l.add(c.title);
 
 		return nuke(reason, l.toArray(new String[0]));
 	}

@@ -16,7 +16,6 @@ import jwiki.core.ClientRequest;
 import jwiki.core.Wiki;
 import jwiki.mbot.MBot;
 import jwiki.mbot.WAction;
-import jwiki.util.FCLI;
 import jwiki.util.FError;
 import jwiki.util.FIO;
 import jwiki.util.FString;

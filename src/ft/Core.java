@@ -5,7 +5,6 @@ import org.apache.commons.cli.Options;
 
 import commons.Commons;
 import jwiki.core.Wiki;
-import jwiki.util.FCLI;
 import jwiki.util.WikiGen;
 
 /**

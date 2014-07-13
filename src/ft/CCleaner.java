@@ -7,7 +7,6 @@ import commons.CStrings;
 import jwiki.core.Wiki;
 import jwiki.mbot.DeleteItem;
 import jwiki.mbot.WAction;
-import jwiki.util.FCLI;
 import jwiki.util.WikiGen;
 
 import org.apache.commons.cli.CommandLine;

@@ -19,7 +19,6 @@ import org.apache.commons.cli.Options;
 import jwiki.core.Wiki;
 import jwiki.mbot.MBot;
 import jwiki.mbot.WAction;
-import jwiki.util.FCLI;
 import jwiki.util.FIO;
 import jwiki.util.FString;
 import static ft.Core.*;

@@ -1,19 +1,21 @@
 package ft;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import jwiki.core.Logger;
+import org.apache.commons.cli.Options;
+
+import jwiki.core.ClientRequest;
+import jwiki.core.ColorLog;
 import jwiki.core.Namespace;
 import jwiki.core.Wiki;
 import jwiki.util.FError;
+import jwiki.util.FIO;
 import jwiki.util.FString;
 import jwiki.util.Tuple;
-import jwiki.util.WikiGen;
+import static ft.Core.*;
 
 /**
  * Reverts CommonsDelinker edits. Takes arguments via command line. Pass in as many files as you want, w/ or w/o "File:"
@@ -31,10 +33,10 @@ public class Relinker
 	 */
 	public static void main(String[] args)
 	{
-		for (String arg : args)
+		for (String arg : init(args, new Options(), "Relinker <list of files to re-link").getArgs())
 			process(makeList(arg));
 	}
-	
+
 	/**
 	 * Gets the table HTML for a CommonsDelinker log for the specified title.
 	 * 
@@ -43,18 +45,25 @@ public class Relinker
 	 */
 	private static String getTableText(String title)
 	{
-		String html = getHTMLOf(String.format("https://tools.wmflabs.org/delinker/index.php?image=%s&status=ok&max=500",
-				FString.enc(Namespace.nss(title))));
-		
-		Matcher m = Pattern.compile("(?si)class\\=\"table table\\-hover.*?\\</table\\>",
-				Pattern.CASE_INSENSITIVE | Pattern.DOTALL).matcher(html);
-		if (m.find())
-			return html.substring(m.start(), m.end());
-		
-		FError.errAndExit("Error: We didn't find a log for " + title);
+		try
+		{
+			URL u = new URL(String.format("https://tools.wmflabs.org/delinker/index.php?image=%s&status=ok&max=500",
+					FString.enc(Namespace.nss(title))));
+			String html = FIO.inputStreamToString(ClientRequest.genericGET(u, null));
+
+			Matcher m = Pattern.compile("(?si)class\\=\"table table\\-hover.*?\\</table\\>",
+					Pattern.CASE_INSENSITIVE | Pattern.DOTALL).matcher(html);
+			if (m.find())
+				return html.substring(m.start(), m.end());
+		}
+		catch (Throwable e)
+		{
+			FError.errAndExit("Error: We didn't find a log for " + title);
+		}
+
 		return null; // dead code. shut up compiler.
 	}
-	
+
 	/**
 	 * Makes a list of Tuples, where the first entry is the name of the page, and the second is the wiki url.
 	 * 
@@ -71,13 +80,13 @@ public class Relinker
 			String curr = text.substring(m.start(), m.end());
 			if (curr.contains("<b>Timestamp</b>")) // first group is table header.
 				continue;
-			
+
 			String[] cl = curr.split("\n");
 			l.add(new Tuple<String, String>(getAnchorArg(cl[4]), getAnchorArg(cl[3])));
 		}
 		return l;
 	}
-	
+
 	/**
 	 * Gets the argument of an anchor tag in html. PRECONDITION: The line MUST be an anchor tag.
 	 * 
@@ -88,33 +97,7 @@ public class Relinker
 	{
 		return l.substring(l.indexOf("\">") + 2, l.indexOf("</a>"));
 	}
-	
-	/**
-	 * Scrape HTML of Webpage.
-	 * 
-	 * @param url The URL to scrape from.
-	 * @return The text on the webpage.
-	 */
-	private static String getHTMLOf(String url)
-	{
-		try
-		{
-			BufferedReader in = new BufferedReader(new InputStreamReader(new URL(url).openConnection().getInputStream(), "UTF-8"));
-			String x = "";
-			String line;
-			while ((line = in.readLine()) != null)
-				x += line + "\n";
-			in.close();
-			
-			return x.trim();
-		}
-		catch (Throwable e)
-		{
-			FError.errAndExit(e);
-			return null; // dead code. shut up compiler.
-		}
-	}
-	
+
 	/**
 	 * Perform the actual reverts.
 	 * 
@@ -122,29 +105,18 @@ public class Relinker
 	 */
 	private static void process(ArrayList<Tuple<String, String>> l)
 	{
-		Wiki wiki = WikiGen.generate("FastilyClone");
-		String last = null;
-		
 		for (Tuple<String, String> t : l)
 		{
-			if (!t.y.equals(last))
-			{
-				Wiki temp = wiki.getWiki(t.y);
-				if(temp == null) //annoying, since mw sometimes prohibits account creation.
-					continue;
-				
-				wiki = temp;
-				last = t.y;
-			}
 			try
 			{
-				if (wiki.getRevisions(t.x, 1, false)[0].user.contains("CommonsDelinker"))
-					wiki.undo(t.x, "Reverting CommonsDelinker");
+				Wiki temp = user.getWiki(t.y);
+				if (temp.getRevisions(t.x, 1, false)[0].user.contains("CommonsDelinker"))
+					temp.undo(t.x, "Reverting CommonsDelinker");
 			}
 			catch (Throwable e)
 			{
-				System.out.println(t.x);
-				Logger.warn(t.x + " doesn't seem to exist");
+				e.printStackTrace();
+				ColorLog.warn(t.x + " doesn't seem to exist");
 			}
 		}
 	}

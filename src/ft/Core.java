@@ -3,6 +3,7 @@ package ft;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 
+import util.FCLI;
 import commons.Commons;
 import jwiki.core.Wiki;
 import jwiki.util.WikiGen;
@@ -19,17 +20,17 @@ public class Core
 	 * Use this to perform admin tasks
 	 */
 	protected static Wiki admin = null;
-	
+
 	/**
 	 * Used to perform normal tasks
 	 */
 	protected static Wiki user = null;
-	
+
 	/**
 	 * Use this to perform mass Commons actions
 	 */
 	protected static Commons com = null;
-	
+
 	/**
 	 * Reads command line args and sets up Wiki objects accordingly.
 	 * 
@@ -43,12 +44,12 @@ public class Core
 		ol.addOption("help", false, "Print this help message and exit");
 		ol.addOption(FCLI.makeArgOption("user", "Set the user to login as", "username"));
 		ol.addOption(FCLI.makeArgOption("admin", "Set the admin account to use", "username"));
-		
+
 		CommandLine l = FCLI.gnuParse(ol, args, hstring);
-		
+
 		boolean hasUser = l.hasOption("user");
 		boolean hasAdmin = l.hasOption("admin");
-		
+
 		if (hasUser && hasAdmin)
 		{
 			admin = WikiGen.generate(l.getOptionValue("admin"));

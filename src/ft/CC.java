@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 import commons.CStrings;
-import jwiki.core.Logger;
+import jwiki.core.ColorLog;
 import jwiki.core.Wiki;
 import jwiki.mbot.MBot;
 import jwiki.mbot.WAction;
@@ -20,6 +20,8 @@ import jwiki.util.ReadFile;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+
+import util.FCLI;
 
 /**
  * Random file uploader. Use in conjunction with bash tools for diagnostics.
@@ -158,7 +160,7 @@ public class CC
 			for (int i = 0; i < repeats; i++)
 			{
 				String fn = "File:" + FString.generateRandomFileName(p);
-				Logger.fyi(wiki, String.format("(%d/%d): Upload '%s' -> '%s'", i + 1, repeats, FIO.getFileName(p), fn));
+				ColorLog.fyi(String.format("(%d/%d): Upload '%s' -> '%s'", i + 1, repeats, FIO.getFileName(p), fn));
 				
 				if (wiki.upload(p, fn, text, " "))
 				{

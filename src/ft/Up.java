@@ -16,6 +16,7 @@ import java.util.HashSet;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 
+import util.FCLI;
 import jwiki.core.Wiki;
 import jwiki.mbot.MBot;
 import jwiki.mbot.WAction;

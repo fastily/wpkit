@@ -1,4 +1,4 @@
-package ft;
+package util;
 
 import jwiki.util.FError;
 

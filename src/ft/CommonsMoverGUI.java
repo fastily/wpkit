@@ -17,8 +17,9 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 import jwiki.core.Namespace;
-import jwiki.util.FGUI;
 import jwiki.util.FString;
+
+import util.FGUI;
 
 /**
  * GUI Wrapper for CommonsMover.
@@ -59,12 +60,12 @@ public class CommonsMoverGUI
 	{
 		com = FGUI.login();
 		enwp = com.getWiki("en.wikipedia.org");
-		
+
 		String signtitle = "Commons:CommonsMover/Sign-in";
-		String signtext = com.getPageText(signtitle); 
-		if(!signtext.toLowerCase().contains(com.whoami().toLowerCase()))
+		String signtext = com.getPageText(signtitle);
+		if (!signtext.toLowerCase().contains(com.whoami().toLowerCase()))
 			com.edit(signtitle, signtext + "\n#~~~~", "Signing in");
-		
+
 		SwingUtilities.invokeLater(() -> createAndShowGUI());
 	}
 

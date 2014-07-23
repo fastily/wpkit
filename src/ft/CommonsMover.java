@@ -10,7 +10,7 @@ import java.util.Arrays;
 import java.util.Random;
 
 import jwiki.core.ClientTask;
-import jwiki.core.Logger;
+import jwiki.core.ColorLog;
 import jwiki.core.Namespace;
 import jwiki.core.ClientRequest;
 import jwiki.core.Wiki;
@@ -22,6 +22,8 @@ import jwiki.util.FString;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
+
+import util.FCLI;
 
 /**
  * Command line utility to transwiki items from enwp to Commons. Performs rudimentary checks for inappropriate files.
@@ -219,7 +221,7 @@ public class CommonsMover
 		 */
 		private String getDesc()
 		{
-			Logger.fyi("Generating description page for " + title);
+			ColorLog.fyi("Generating description page for " + title);
 			try
 			{
 				String tl = FString.enc(titleNNS);

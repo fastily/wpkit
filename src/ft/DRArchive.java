@@ -21,18 +21,18 @@ public class DRArchive
 	 * The list of singleton DRs. This list is dumped to wiki after program finishes normal execution.
 	 */
 	private static ConcurrentLinkedQueue<String> singles = new ConcurrentLinkedQueue<String>();
-	
+
 	/**
 	 * Matches a single signature timestamp
 	 */
 	private static final String stamp = "\\d{2}?:\\d{2}?, \\d{1,}? (January|February|March|April|"
 			+ "May|June|July|August|September|October|November|December) \\d{4}?";
-	
+
 	/**
 	 * Wiki representing the archive bot.
 	 */
 	private static final Wiki archivebot = WikiGen.generate("ArchiveBot");
-	
+
 	/**
 	 * Main driver.
 	 * 
@@ -45,13 +45,13 @@ public class DRArchive
 		for (String s : archivebot.getValidLinksOnPage("User:ArchiveBot/DL"))
 			pl.add(new ProcLog(s));
 		WikiGen.genM("ArchiveBot", 1).start(pl.toArray(new ProcLog[0]));
-		
+
 		String x = "Report generated @ ~~~~~\n";
 		for (String s : singles)
 			x += String.format("%n{{%s}}", s);
 		archivebot.edit("User:ArchiveBot/SingletonDR", x, "Update report");
 	}
-	
+
 	/**
 	 * Represents a log to process.
 	 * 
@@ -64,12 +64,12 @@ public class DRArchive
 		 * This log's archive. Generated in constructor.
 		 */
 		private String archive;
-		
+
 		/**
-		 * The archive's header.  We'll apply this if we're creating a new archive.
+		 * The archive's header. We'll apply this if we're creating a new archive.
 		 */
 		private String aHeader;
-		
+
 		/**
 		 * Constructor, takes a log title as the argument.
 		 * 
@@ -78,12 +78,12 @@ public class DRArchive
 		private ProcLog(String title)
 		{
 			super(title, null, "Archiving %d threads %s [[%s]]");
-			
+
 			String d = title.substring(title.indexOf('/'));
 			aHeader = String.format("{{Deletion requests/Archive%s}}\n", d.replace('/', '|'));
 			archive = "Commons:Deletion requests/Archive" + d;
 		}
-		
+
 		/**
 		 * Performs the analysis and archive.
 		 * 
@@ -94,7 +94,7 @@ public class DRArchive
 		{
 			DRItem[] l = fetchDRs(wiki);
 			new MBot(wiki, 5).start(l);
-			
+
 			ArrayList<String> toArchive = new ArrayList<String>();
 			for (DRItem d : l)
 			{
@@ -103,17 +103,18 @@ public class DRArchive
 				else if (d.isSingle)
 					singles.add(d.title);
 			}
-			
+
 			String[] al = toArchive.toArray(new String[0]);
 			if (al.length > 0) // for efficiency.
 			{
 				String archiveText = wiki.getPageText(archive);
-				wiki.edit(archive, (archiveText != null ? archiveText : aHeader) + pool(al), String.format(summary, toArchive.size(), "from", title));
+				wiki.edit(archive, (archiveText != null ? archiveText : aHeader) + pool(al),
+						String.format(summary, toArchive.size(), "from", title));
 				wiki.edit(title, extract(wiki.getPageText(title), al), String.format(summary, toArchive.size(), "to", archive));
-				}
+			}
 			return true;
 		}
-		
+
 		/**
 		 * Convert <tt>titles</tt> to template form, one per newline.
 		 * 
@@ -127,7 +128,7 @@ public class DRArchive
 				x += String.format("%n{{%s}}", s);
 			return x;
 		}
-		
+
 		/**
 		 * Remove all template instances of <tt>titles</tt> from <tt>base</tt>.
 		 * 
@@ -142,7 +143,7 @@ public class DRArchive
 				x = x.replaceAll("(?i)\\s\\{\\{(" + FString.makePageTitleRegex(s) + ").*?\\}\\}", "");
 			return x;
 		}
-		
+
 		/**
 		 * Grabs a list of DRs transcluded on the log represented by this object.
 		 * 
@@ -158,7 +159,7 @@ public class DRArchive
 			return l.toArray(new DRItem[0]);
 		}
 	}
-	
+
 	/**
 	 * Represents a DR.
 	 * 
@@ -171,17 +172,17 @@ public class DRArchive
 		 * The raw text of this DR
 		 */
 		private String text;
-		
+
 		/**
 		 * Flag indicating if this is a singleton DR.
 		 */
 		private boolean isSingle = false;
-		
+
 		/**
 		 * Flag indicating if this DR is ready to be archived.
 		 */
 		private boolean canA = false;
-		
+
 		/**
 		 * Constructor, creates a DRItem.
 		 * 
@@ -191,7 +192,7 @@ public class DRArchive
 		{
 			super(title, null, null);
 		}
-		
+
 		/**
 		 * Analyzes the DR.
 		 * 
@@ -206,7 +207,7 @@ public class DRArchive
 				isSingleton(wiki);
 			return true;
 		}
-		
+
 		/**
 		 * Tests if this DR is ready for archiving & sets flags.
 		 */
@@ -223,7 +224,7 @@ public class DRArchive
 						.matches("(?si)\\{\\{(delh|DeletionHeader).*?\\}\\}.*?\\{(DeletionFooter/Old|Delf|DeletionFooter|Udelf).*?\\}\\}");
 			}
 		}
-		
+
 		/**
 		 * Tests if this DR is a Singleton DR (one contributor, one file, uncontested).
 		 * 
@@ -232,7 +233,8 @@ public class DRArchive
 		private void isSingleton(Wiki wiki)
 		{
 			isSingle = text != null
-					&& !text.matches("(?si).*?\\{\\{(delh|DeletionHeader|DeletionFooter/Old|Delf|DeletionFooter|Udelf).*?\\}\\}.*?")
+					&& !text
+							.matches("(?si).*?\\{\\{(delh|DeletionHeader|DeletionFooter/Old|Delf|DeletionFooter|Udelf).*?\\}\\}.*?")
 					&& !text.matches(String.format("(?si).*?%s.*?%s.*?", stamp, stamp))
 					&& wiki.getLinksOnPage(title, "File").length == 1;
 		}

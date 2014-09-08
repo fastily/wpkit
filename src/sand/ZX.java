@@ -1,8 +1,12 @@
 package sand;
 
+import java.util.ArrayList;
+
 import commons.CStrings;
 import commons.Commons;
+import jwiki.core.Contrib;
 import jwiki.core.Wiki;
+import jwiki.util.ReadFile;
 import jwiki.util.WikiGen;
 
 public class ZX
@@ -15,7 +19,11 @@ public class ZX
 
 	public static void main(String[] args)
 	{
-		for (String s : admin.getCategoryMembers(CStrings.osd, "Category talk"))
-			admin.delete(s, CStrings.test);
+		
+
+		for(String s : clone.getCategoryMembers(CStrings.osd, "File"))
+			if(clone.getPageText(s).contains("COM:FOP#Turkmenistan"))
+				admin.delete(s, CStrings.dw);
+	
 	}
 }

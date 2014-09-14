@@ -158,7 +158,7 @@ public class CommonsMover
 		 */
 		public boolean doJob(Wiki wiki)
 		{
-			if (FString.arraysIntersect(enwp.getCategoriesOnPage(title), blacklist)) // check copyright
+			if (FString.arraysIntersect(enwp.getCategoriesOnPage(title).toArray(new String[0]), blacklist)) // check copyright
 				return FError.printErrorAndReturn(title + " is not eligible for transfer", false);
 			else if (!checkForDupes())
 				return true;

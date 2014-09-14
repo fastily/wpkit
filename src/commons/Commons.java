@@ -46,7 +46,7 @@ public class Commons
 	 */
 	public Commons(Wiki wiki)
 	{
-		this(wiki, (wiki.isAdmin() ? wiki : null));
+		this(wiki, wiki.listGroupsRights(wiki.whoami()).contains("sysop") ? wiki : null);
 	}
 
 	/**
@@ -91,7 +91,7 @@ public class Commons
 	{
 		return doAction(mb, pages.toArray(new WAction[0]));
 	}
-	
+
 	/**
 	 * Process a bunch of WActions with a specified account.
 	 * 
@@ -103,7 +103,6 @@ public class Commons
 	{
 		return useAdmin ? doAction(mbadmin, wl) : doAction(mbwiki, wl);
 	}
-	
 
 	/**
 	 * Deletes everything in Category:Fastily Test as uploader requested.
@@ -294,6 +293,17 @@ public class Commons
 	}
 
 	/**
+	 * Delete pages on Commons. Dummy sit in method for compilation while we upgrade jwiki and ctools.
+	 * @param reason The reason to use
+	 * @param l Pages to delete
+	 * @return List of titles we couldn't delete.
+	 */
+	protected String[] nuke(String reason, ArrayList<String> l)
+	{
+		return nuke(reason, l.toArray(new String[0]));
+	}
+
+	/**
 	 * Delete pages on Commons.
 	 * 
 	 * @param reason Delete reason.
@@ -411,7 +421,7 @@ public class Commons
 			});
 
 		doAction(mbwiki, wl);
-		
+
 		String x = "";
 		for (String s : files)
 			x += String.format("\n{{%s%s}}", header, s);

@@ -6,11 +6,11 @@ import java.io.File;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Random;
 
 import jwiki.core.ClientTask;
 import jwiki.core.ColorLog;
+import jwiki.core.MassClientQuery;
 import jwiki.core.Namespace;
 import jwiki.core.ClientRequest;
 import jwiki.core.Wiki;
@@ -87,15 +87,15 @@ public class CommonsMover
 
 		ArrayList<String> tl = new ArrayList<String>();
 		if (l.hasOption('c'))
-			tl.addAll(Arrays.asList(enwp.getCategoryMembers(l.getOptionValue('c'), "File")));
+			tl.addAll(enwp.getCategoryMembers(l.getOptionValue('c'), "File"));
 		else if (l.hasOption('u'))
-			tl.addAll(Arrays.asList(enwp.getUserUploads(l.getOptionValue('u'))));
+			tl.addAll(enwp.getUserUploads(l.getOptionValue('u')));
 		else if (l.getArgs().length > 0)
 		{
 			ArrayList<String> x = new ArrayList<String>();
 			for (String s : l.getArgs())
 				x.add(enwp.convertIfNotInNS(s, "File"));
-			tl.addAll(Arrays.asList(enwp.exists(x.toArray(new String[0]), true)));
+			tl.addAll(MassClientQuery.exists(enwp, true, x.toArray(new String[0])));
 		}
 
 		ArrayList<TransferItem> tfl = new ArrayList<TransferItem>();
@@ -181,7 +181,7 @@ public class CommonsMover
 		 */
 		private boolean checkForDupes()
 		{
-			String[] dl = FString.booleanTuple(enwp.getDuplicatesOf(title), true);
+			String[] dl = enwp.getDuplicatesOf(title, true).toArray(new String[0]);
 			if(dl.length > 0)
 			{
 				flagF8(dl[0]);

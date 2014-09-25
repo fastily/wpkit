@@ -3,10 +3,12 @@ package ft;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import jwiki.core.MassClientQuery;
 import jwiki.core.Wiki;
 import jwiki.mbot.MBot;
 import jwiki.mbot.WAction;
 import jwiki.util.FString;
+import jwiki.util.Tuple;
 import jwiki.util.WikiGen;
 
 /**
@@ -42,7 +44,7 @@ public class DRArchive
 	{
 		archivebot.nullEdit("User:ArchiveBot/DL");
 		ArrayList<ProcLog> pl = new ArrayList<ProcLog>();
-		for (String s : archivebot.getValidLinksOnPage("User:ArchiveBot/DL"))
+		for (String s : archivebot.getLinksOnPage(true, "User:ArchiveBot/DL"))
 			pl.add(new ProcLog(s));
 		WikiGen.genM("ArchiveBot", 1).start(pl.toArray(new ProcLog[0]));
 
@@ -153,9 +155,10 @@ public class DRArchive
 		private DRItem[] fetchDRs(Wiki wiki)
 		{
 			ArrayList<DRItem> l = new ArrayList<DRItem>();
-			for (String s : wiki.exists(wiki.getTemplatesOnPage(title), true))
-				if (s.startsWith("Commons:Deletion requests/"))
-					l.add(new DRItem(s));
+			for (Tuple<String, Boolean> t : MassClientQuery.exists(wiki, wiki.getTemplatesOnPage(title).toArray(new String[0])))
+				if (t.y.booleanValue())
+					if (t.x.startsWith("Commons:Deletion requests/"))
+						l.add(new DRItem(t.x));
 			return l.toArray(new DRItem[0]);
 		}
 	}
@@ -236,7 +239,7 @@ public class DRArchive
 					&& !text
 							.matches("(?si).*?\\{\\{(delh|DeletionHeader|DeletionFooter/Old|Delf|DeletionFooter|Udelf).*?\\}\\}.*?")
 					&& !text.matches(String.format("(?si).*?%s.*?%s.*?", stamp, stamp))
-					&& wiki.getLinksOnPage(title, "File").length == 1;
+					&& wiki.getLinksOnPage(title, "File").size() == 1;
 		}
 	}
 }

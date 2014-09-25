@@ -4,6 +4,7 @@ import static ft.CommonsMover.*;
 
 import java.awt.BorderLayout;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import javax.security.auth.login.LoginException;
 import javax.swing.BoxLayout;
@@ -18,7 +19,6 @@ import javax.swing.SwingUtilities;
 
 import jwiki.core.Namespace;
 import jwiki.util.FString;
-
 import util.FGUI;
 
 /**
@@ -130,7 +130,7 @@ public class CommonsMoverGUI
 		go.setEnabled(false); // disable button until we're done.
 
 		// Determine what we've been asked to transfer, and collect filenames.
-		String[] tl;
+		ArrayList<String> tl;
 		if (cat_b.isSelected())
 			tl = enwp.getCategoryMembers(cat_t.getText().trim(), "File");
 		else if (user_b.isSelected())
@@ -144,17 +144,17 @@ public class CommonsMoverGUI
 				go.setEnabled(true);
 				return;
 			}
-			tl = new String[] { temp };
+			tl = new ArrayList<String>(Arrays.asList(new String[] { temp }));
 		}
 
 		// Do the transfer, with hooks to progress bar.
 		ArrayList<String> fails = new ArrayList<String>();
 		pb.setValue(0);
-		pb.setMaximum(tl.length);
+		pb.setMaximum(tl.size());
 		int i = 0;
 		for (String s : tl)
 		{
-			pb.setString(String.format("Transferring %s (%d/%d)", s, i, tl.length));
+			pb.setString(String.format("Transferring %s (%d/%d)", s, i, tl.size()));
 			if (!new TransferItem(s).doJob(com))
 				fails.add(s);
 			pb.setValue(++i);

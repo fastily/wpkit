@@ -81,9 +81,9 @@ import static ft.Core.*;
 		// generic tasks. Should only run if 0 args specified, or something wasn't set right.
 		{
 			com.categoryNuke(CStrings.cv, CStrings.copyvio, false, "File");
-			com.emptyCatDel(admin.getCategoryMembers(CStrings.osd, "Category"));
-			com.emptyCatDel(admin.getCategoryMembers("Non-media deletion requests", "Category"));
-			com.nukeEmptyFiles(admin.getCategoryMembers(CStrings.osd, "File"));
+			com.emptyCatDel(admin.getCategoryMembers(CStrings.osd, "Category").toArray(new String[0]));
+			com.emptyCatDel(admin.getCategoryMembers("Non-media deletion requests", "Category").toArray(new String[0]));
+			com.nukeEmptyFiles(admin.getCategoryMembers(CStrings.osd, "File").toArray(new String[0]));
 
 			if (l.hasOption('d'))
 				unknownClear();
@@ -151,7 +151,7 @@ import static ft.Core.*;
 		ArrayList<DeleteItem> l = new ArrayList<DeleteItem>();
 		String baseLS = "you may [[Special:Upload|re-upload]] the file, but please %s";
 
-		String[] cats = admin.getValidLinksOnPage("User:FastilyClone/UC");
+		String[] cats = admin.getLinksOnPage(true, "User:FastilyClone/UC").toArray(new String[0]);
 		for (String c : cats)
 		{
 			if (c.contains("permission"))
@@ -179,7 +179,7 @@ import static ft.Core.*;
 	private static ArrayList<DeleteItem> genUCDI(String cat, String front, String back)
 	{
 		return DeleteItem.makeDeleteItems(String.format("%s %s: %s", front, cat.substring(cat.indexOf("as of") + 6), back),
-				admin.getCategoryMembers(cat, "File"));
+				admin.getCategoryMembers(cat, "File").toArray(new String[0]));
 	}
 
 	/**

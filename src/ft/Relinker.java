@@ -110,7 +110,7 @@ public class Relinker
 			try
 			{
 				Wiki temp = user.getWiki(t.y);
-				if (temp.getRevisions(t.x, 1, false)[0].user.contains("CommonsDelinker"))
+				if (temp.getRevisions(t.x, 1, false).get(0).user.contains("CommonsDelinker"))
 					temp.undo(t.x, "Reverting CommonsDelinker");
 			}
 			catch (Throwable e)

@@ -81,9 +81,9 @@ import static ft.Core.*;
 		// generic tasks. Should only run if 0 args specified, or something wasn't set right.
 		{
 			com.categoryNuke(CStrings.cv, CStrings.copyvio, false, "File");
-			com.emptyCatDel(admin.getCategoryMembers(CStrings.osd, "Category").toArray(new String[0]));
-			com.emptyCatDel(admin.getCategoryMembers("Non-media deletion requests", "Category").toArray(new String[0]));
-			com.nukeEmptyFiles(admin.getCategoryMembers(CStrings.osd, "File").toArray(new String[0]));
+			com.emptyCatDel(admin.getCategoryMembers(CStrings.osd, "Category"));
+			com.emptyCatDel(admin.getCategoryMembers("Non-media deletion requests", "Category"));
+			//com.nukeEmptyFiles(admin.getCategoryMembers(CStrings.osd, "File"));
 
 			if (l.hasOption('d'))
 				unknownClear();
@@ -124,9 +124,9 @@ import static ft.Core.*;
 	 * 
 	 * @return A list of pages we failed to process
 	 */
-	private static String[] talkPageClear()
+	private static ArrayList<String> talkPageClear()
 	{
-		ArrayList<String> l = new ArrayList<String>();
+		ArrayList<String> l = new ArrayList<>();
 		Scanner m = new Scanner(admin.getPageText("Commons:Database reports/Orphaned talk pages"));
 
 		String ln;
@@ -135,7 +135,7 @@ import static ft.Core.*;
 				l.add(ln.substring(ln.indexOf("=") + 1, ln.indexOf("}}")));
 		m.close();
 
-		return com.nuke("Orphaned talk page", l.toArray(new String[0]));
+		return com.nuke("Orphaned talk page", l);
 	}
 
 	/**
@@ -144,14 +144,14 @@ import static ft.Core.*;
 	 * 
 	 * @return A list of pages we failed to process
 	 */
-	private static String[] unknownClear()
+	private static ArrayList<String> unknownClear()
 	{
 		user.nullEdit("User:FastilyClone/UC");
 
-		ArrayList<DeleteItem> l = new ArrayList<DeleteItem>();
+		ArrayList<DeleteItem> l = new ArrayList<>();
 		String baseLS = "you may [[Special:Upload|re-upload]] the file, but please %s";
 
-		String[] cats = admin.getLinksOnPage(true, "User:FastilyClone/UC").toArray(new String[0]);
+		ArrayList<String> cats = admin.getLinksOnPage(true, "User:FastilyClone/UC");
 		for (String c : cats)
 		{
 			if (c.contains("permission"))
@@ -162,7 +162,7 @@ import static ft.Core.*;
 				l.addAll(genUCDI(c, "No source since", String.format(baseLS, "cite the file's source")));
 		}
 
-		String[] fails = com.doAction(l.toArray(new WAction[0]), true);
+		ArrayList<String> fails = com.doAction(l, true);
 		com.emptyCatDel(cats);
 		return fails;
 		
@@ -179,7 +179,7 @@ import static ft.Core.*;
 	private static ArrayList<DeleteItem> genUCDI(String cat, String front, String back)
 	{
 		return DeleteItem.makeDeleteItems(String.format("%s %s: %s", front, cat.substring(cat.indexOf("as of") + 6), back),
-				admin.getCategoryMembers(cat, "File").toArray(new String[0]));
+				admin.getCategoryMembers(cat, "File"));
 	}
 
 	/**
@@ -187,13 +187,13 @@ import static ft.Core.*;
 	 * 
 	 * @return A list of titles we didn't process.
 	 */
-	private static String[] processDRs()
+	private static ArrayList<String> processDRs()
 	{
-		ArrayList<ProcDR> dl = new ArrayList<ProcDR>();
+		ArrayList<ProcDR> dl = new ArrayList<>();
 		for (String s : admin.getTemplatesOnPage("User:ArchiveBot/SingletonDR"))
 			if (s.startsWith("Commons:Deletion requests/"))
 				dl.add(new ProcDR(s));
-		return WAction.convertToString(WikiGen.genM("Fastily").start(dl.toArray(new ProcDR[0])));
+		return WAction.convertToString(WikiGen.genM("Fastily").start(dl));
 	}
 
 	/**

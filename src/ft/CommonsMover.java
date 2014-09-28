@@ -101,7 +101,7 @@ public class CommonsMover
 		ArrayList<TransferItem> tfl = new ArrayList<TransferItem>();
 		for (String s : tl)
 			tfl.add(new TransferItem(s));
-		new MBot(user, maxthreads).start(tfl.toArray(new TransferItem[0]));
+		new MBot(user, maxthreads).start(tfl);
 	}
 
 	/**

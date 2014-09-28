@@ -6,7 +6,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 
 import commons.CStrings;
 import jwiki.core.ColorLog;
@@ -70,14 +72,14 @@ public class CC
 		nd = l.hasOption("nd") || l.hasOption("sd");
 		repeats = Integer.parseInt(l.getOptionValue('r', "1"));
 		
-		CCW[] ccwl;
+		ArrayList<CCW> ccwl;
 		if (l.hasOption('t'))
-			ccwl = generateCCW(new ReadFile(l.getOptionValue('t')).getList());
+			ccwl = generateCCW(new ReadFile(l.getOptionValue('t')).l);
 		else
-			ccwl = generateCCW(l.getArgs());
+			ccwl = generateCCW(Arrays.asList(l.getArgs()));
 		
-		String[] ml = WAction.convertToString(new MBot(user, Integer.parseInt(l.getOptionValue('h', "1"))).start(ccwl));
-		if(ml.length > 0)
+		ArrayList<String> ml = WAction.convertToString(new MBot(user, Integer.parseInt(l.getOptionValue('h', "1"))).start(ccwl));
+		if(ml.size() > 0)
 			FIO.dumpToFile("./CCfails.txt", true, ml);
 	}
 	
@@ -88,9 +90,9 @@ public class CC
 	 * @param paths The paths of the file(s) or directories to search for files.
 	 * @return A list of uploadable files we found.
 	 */
-	private static CCW[] generateCCW(String... paths)
+	private static ArrayList<CCW> generateCCW(List<String> paths)
 	{
-		HashSet<Path> sl = new HashSet<Path>();
+		HashSet<Path> sl = new HashSet<>();
 		for (String s : paths)
 		{
 			Path t = Paths.get(s);
@@ -103,10 +105,10 @@ public class CC
 		if (sl.isEmpty())
 			sl.addAll(FIO.findFiles(Paths.get(".")));
 		
-		ArrayList<CCW> x = new ArrayList<CCW>();
+		ArrayList<CCW> x = new ArrayList<>();
 		for (Path p : sl)
 			x.add(new CCW(p));
-		return x.toArray(new CCW[0]);
+		return x;
 	}
 	
 	/**

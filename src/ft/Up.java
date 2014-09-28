@@ -69,9 +69,9 @@ public class Up
 
 		try
 		{
-			String[] fails = WAction.convertToString(new MBot(admin, Integer.parseInt(l.getOptionValue('t', "1")))
+			ArrayList<String> fails = WAction.convertToString(new MBot(admin, Integer.parseInt(l.getOptionValue('t', "1")))
 					.start(generateUploadItem(args)));
-			if (fails.length > 0)
+			if (fails.size() > 0)
 				FIO.dumpToFile("./Up fails.txt", true, fails);
 		}
 		catch (Throwable e)
@@ -96,22 +96,22 @@ public class Up
 	 * @return The list of UploadItems we found.
 	 * @throws IOException If i/o error.
 	 */
-	private static UploadItem[] generateUploadItem(String[] args) throws IOException
+	private static ArrayList<UploadItem> generateUploadItem(String[] args) throws IOException
 	{
-		HashSet<Path> l = new HashSet<Path>();
+		HashSet<Path> l = new HashSet<>();
 		for (String s : args)
 		{
 			Path temp = Paths.get(s).toAbsolutePath();
 
 			if (!Files.exists(temp)) // precondition: files must exist
 				continue;
-			else if (Files.isDirectory(temp)) // recusrive search directories for goodies
+			else if (Files.isDirectory(temp)) // recursive search directories for goodies
 				l.addAll(FIO.findFiles(temp));
 			else if (FIO.canUploadToWMF(temp)) // individual files ok
 				l.add(temp);
 		}
 
-		ArrayList<UploadItem> ul = new ArrayList<UploadItem>();
+		ArrayList<UploadItem> ul = new ArrayList<>();
 		for (Path p : l)
 		{
 			String titlebase = FString.capitalize(FIO.getFileName(p.getParent()));
@@ -130,7 +130,7 @@ public class Up
 			ul.add(new UploadItem(p, filename, String.format(descbase, titlebase, filedate, titlebase)));
 		}
 
-		return ul.toArray(new UploadItem[0]);
+		return ul;
 	}
 
 	/**

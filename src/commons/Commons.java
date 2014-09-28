@@ -3,9 +3,9 @@ package commons;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import jwiki.core.Contrib;
+import jwiki.core.Namespace;
 import jwiki.core.Wiki;
 import jwiki.mbot.MBot;
 import jwiki.mbot.WAction;
@@ -73,58 +73,32 @@ public class Commons
 	 * 
 	 * @param mb The MBot to use.
 	 * @param pages The pages to process.
-	 * @return A list of titles we didn't process.
+	 * @return A list of actions that failed.
 	 */
-	private String[] doAction(MBot mb, WAction... pages)
+	public <T extends WAction> ArrayList<String> doAction(ArrayList<T> pages, boolean useAdmin)
 	{
-		return WAction.convertToString(mb.start(pages));
-	}
-
-	/**
-	 * Process a list of WActions.
-	 * 
-	 * @param mb The MBot to use
-	 * @param pages The pages to process
-	 * @return A list of objects we couldn't process.
-	 */
-	private String[] doAction(MBot mb, ArrayList<WAction> pages)
-	{
-		return doAction(mb, pages.toArray(new WAction[0]));
-	}
-
-	/**
-	 * Process a bunch of WActions with a specified account.
-	 * 
-	 * @param wl the list of WActions to process
-	 * @param useAdmin True if we're using our admin account
-	 * @return A list of items we couldn't process.
-	 */
-	public String[] doAction(WAction[] wl, boolean useAdmin)
-	{
-		return useAdmin ? doAction(mbadmin, wl) : doAction(mbwiki, wl);
+		return WAction.convertToString((useAdmin ? mbadmin : mbwiki).start(pages));
 	}
 
 	/**
 	 * Deletes everything in Category:Fastily Test as uploader requested.
 	 * 
 	 * @param exit Set to true if program should exit after procedure completes.
-	 * @return A list of files we didn't delete.
+	 * @return A list of titles which couldn't be deleted.
 	 */
-	public String[] nukeFastilyTest(boolean exit)
+	public  ArrayList<String> nukeFastilyTest(boolean exit)
 	{
-		ArrayList<String> fails = new ArrayList<String>();
-		fails.addAll(Arrays.asList(categoryNuke("Fastily Test", CStrings.ur, false)));
-		fails.addAll(Arrays.asList(nukeUploads("FSVI", CStrings.ur)));
+		ArrayList<String> fails = new ArrayList<>(categoryNuke("Fastily Test", CStrings.ur, false));
 		if (exit)
 			System.exit(0);
-		return fails.toArray(new String[0]);
+		return fails;
 	}
 
 	/**
 	 * Deletes all the files in <a href="http://commons.wikimedia.org/wiki/Category:Copyright_violations"
 	 * >Category:Copyright violations</a>.
 	 */
-	public String[] clearCopyVios()
+	public  ArrayList<String> clearCopyVios()
 	{
 		return categoryNuke(CStrings.cv, CStrings.copyvio, false, "File");
 	}
@@ -137,7 +111,7 @@ public class Commons
 	 * @param ns Namespace(s) to restrict deletion to. Leave blank to ignore namespace.
 	 * @return A list of titles we didn't delete.
 	 */
-	public String[] clearOSD(String reason, String... ns)
+	public  ArrayList<String> clearOSD(String reason, String... ns)
 	{
 		return categoryNuke(CStrings.osd, reason, false, ns);
 	}
@@ -153,33 +127,33 @@ public class Commons
 	 *           select all namesapces
 	 * @return A list of titles we didn't delete.
 	 */
-	public String[] categoryNuke(String cat, String reason, boolean delCat, String... ns)
+	public  ArrayList<String> categoryNuke(String cat, String reason, boolean delCat, String... ns)
 	{
-		String[] fails = nuke(reason, admin.getCategoryMembers(cat, ns));
+		 ArrayList<String> fails = nuke(reason, admin.getCategoryMembers(cat, ns));
 		if (delCat && admin.getCategorySize(cat) == 0)
 			admin.delete(cat, CStrings.ec);
 		return fails;
 	}
 
 	/**
-	 * Delete all files on a page.
+	 * Delete all files linked to a DR.  Sets deletion log reason to a link of to the DR.
 	 * 
 	 * @param dr The dr from which to get files.
 	 * @return A list of pages we failed to delete.
 	 */
-	public String[] drDel(String dr)
+	public  ArrayList<String> drDel(String dr)
 	{
 		return nukeLinksOnPage(dr, "[[" + dr + "]]", "File");
 	}
 
 	/**
-	 * Performs a mass restoration.
+	 * Perform mass restoration.
 	 * 
 	 * @param reason The reason to use.
 	 * @param pages The pages to restore
-	 * @return A list of pages we didn't/couldn't restore.
+	 * @return A list of pages which weren't restored.
 	 */
-	public String[] restore(String reason, String... pages)
+	public  ArrayList<String> restore(String reason, ArrayList<String> pages)
 	{
 		return WAction.convertToString(mbadmin.massRestore(reason, pages));
 	}
@@ -191,20 +165,20 @@ public class Commons
 	 * @param path The path to the file
 	 * @return A list of pages we didn't/couldn't restore.
 	 */
-	public String[] restoreFromFile(String path, String reason)
+	public  ArrayList<String> restoreFromFile(String path, String reason)
 	{
-		return restore(reason, new ReadFile(path).getList());
+		return restore(reason, new ReadFile(path).l);
 	}
 
 	/**
-	 * Nukes empty files (ie file description pages without an associated file).
+	 * Nukes empty files or files without an associated description page.
 	 * 
 	 * @param files A list of pages in the file namespace. PRECONDITION -- The files must be in the filenamespace.
-	 * @return A list ofpages we failed to process.
+	 * @return A list of titles which couldn't be processed
 	 */
-	public String[] nukeEmptyFiles(String... files)
+	public ArrayList<String> nukeEmptyFiles(ArrayList<String> files)
 	{
-		ArrayList<WAction> l = new ArrayList<WAction>();
+		ArrayList<WAction> l = new ArrayList<>();
 		for (String s : files)
 			l.add(new WAction(s, null, CStrings.nfu) {
 				public boolean doJob(Wiki wiki)
@@ -213,7 +187,7 @@ public class Commons
 				}
 			});
 
-		return doAction(mbadmin, l);
+		return doAction(l, true);
 	}
 
 	/**
@@ -222,9 +196,9 @@ public class Commons
 	 * @param cats The categories to check and delete.
 	 * @return A list of titles we failed to delete.
 	 */
-	public String[] emptyCatDel(String... cats)
+	public ArrayList<String> emptyCatDel(ArrayList<String> cats)
 	{
-		ArrayList<WAction> l = new ArrayList<WAction>();
+		ArrayList<WAction> l = new ArrayList<>();
 		for (String s : cats)
 			l.add(new WAction(s, null, CStrings.ec) {
 				public boolean doJob(Wiki wiki)
@@ -232,7 +206,7 @@ public class Commons
 					return wiki.getCategorySize(title) <= 0 ? wiki.delete(title, summary) : true;
 				}
 			});
-		return doAction(mbadmin, l);
+		return doAction(l, true);
 	}
 
 	/**
@@ -243,25 +217,25 @@ public class Commons
 	 * @param ns Namespace(s) of the items to delete.
 	 * @return A list of titles we didn't delete.
 	 */
-	public String[] nukeContribs(String user, String reason, String... ns)
+	public  ArrayList<String> nukeContribs(String user, String reason, String... ns)
 	{
-		ArrayList<String> l = new ArrayList<String>();
+		ArrayList<String> l = new ArrayList<>();
 		for (Contrib c : admin.getContribs(user, ns))
 			l.add(c.title);
 
-		return nuke(reason, l.toArray(new String[0]));
+		return nuke(reason, l);
 	}
 
 	/**
 	 * Delete uploads of a user.
 	 * 
-	 * @param user The user whose uploads we'll be deleting. Do not use "User:" prefix.
+	 * @param user The user whose uploads we'll be deleting.
 	 * @param reason The reason to use
-	 * @return A list of titles we didn't delet
+	 * @return A list of titles we didn't delete
 	 */
-	public String[] nukeUploads(String user, String reason)
+	public ArrayList<String> nukeUploads(String user, String reason)
 	{
-		return nuke(reason, admin.getUserUploads(user));
+		return nuke(reason, admin.getUserUploads(Namespace.nss(user)));
 	}
 
 	/**
@@ -269,13 +243,11 @@ public class Commons
 	 * 
 	 * @param title The title to fetch links from
 	 * @param reason Delete reason
-	 * @param ns links returned will be in these namespace(s). Optional param -- leave blank to select all namespaces.
+	 * @param ns Only delete pages in this/these namespace(s). Optional param -- leave blank to select all namespaces.
 	 * @return The links on the title in the requested namespace
 	 * 
-	 * @see #nukeLinksOnPage(String, String)
-	 * 
 	 */
-	public String[] nukeLinksOnPage(String title, String reason, String... ns)
+	public ArrayList<String> nukeLinksOnPage(String title, String reason, String... ns)
 	{
 		return nuke(reason, admin.getLinksOnPage(title, ns));
 	}
@@ -287,20 +259,9 @@ public class Commons
 	 * @param reason The reason to use when deleting
 	 * @return A list of files we failed to process.
 	 */
-	public String[] nukeImagesOnPage(String title, String reason)
+	public  ArrayList<String> nukeImagesOnPage(String title, String reason)
 	{
 		return nuke(reason, admin.getImagesOnPage(title));
-	}
-
-	/**
-	 * Delete pages on Commons. Dummy sit in method for compilation while we upgrade jwiki and ctools.
-	 * @param reason The reason to use
-	 * @param l Pages to delete
-	 * @return List of titles we couldn't delete.
-	 */
-	protected String[] nuke(String reason, ArrayList<String> l)
-	{
-		return nuke(reason, l.toArray(new String[0]));
 	}
 
 	/**
@@ -310,9 +271,8 @@ public class Commons
 	 * @param pages Pages to delete.
 	 * 
 	 * @return A list of pages we failed to delete
-	 * @see #nuke(String, String, String...)
 	 */
-	public String[] nuke(String reason, String... pages)
+	public ArrayList<String> nuke(String reason, ArrayList<String> pages)
 	{
 		return WAction.convertToString(mbadmin.massDelete(reason, pages));
 	}
@@ -327,19 +287,10 @@ public class Commons
 	 * @param pages The pages to screen and then delete.
 	 * 
 	 * @return A list of pages we failed to delete
-	 * 
-	 * @see #nuke(String, String...)
 	 */
-	public String[] nuke(String reason, String ns, String... pages)
+	public ArrayList<String> nuke(String reason, String ns, ArrayList<String> pages)
 	{
-		int ni = admin.whichNS(ns);
-		ArrayList<String> todo = new ArrayList<String>();
-
-		for (String s : pages)
-			if (admin.whichNS(s) == ni)
-				todo.add(s);
-
-		return nuke(reason, todo.toArray(new String[0]));
+		return nuke(reason, admin.filterByNS(pages, ns));
 	}
 
 	/**
@@ -350,9 +301,9 @@ public class Commons
 	 * @return A list of pages we failed to delete.
 	 * @see #nuke(String, String...)
 	 */
-	public String[] nukeFromFile(String path, String reason)
+	public ArrayList<String> nukeFromFile(String path, String reason)
 	{
-		return nuke(reason, new ReadFile(path).getList());
+		return nuke(reason, new ReadFile(path).l);
 	}
 
 	/**
@@ -362,7 +313,7 @@ public class Commons
 	 * @param titles The titles to remove <tt>{{delete}}</tt> from
 	 * @return A list of titles we didn't remove the templates froms.
 	 */
-	public String[] removeDelete(String reason, String... titles)
+	public ArrayList<String> removeDelete(String reason, ArrayList<String> titles)
 	{
 		return WAction.convertToString(mbwiki.massEdit(reason, "", CStrings.drregex, "", titles));
 	}
@@ -374,7 +325,7 @@ public class Commons
 	 * @param titles The titles to remove no perm/lic/src templates from
 	 * @return A list of titles we failed to remove the templates from.
 	 */
-	public String[] removeLSP(String reason, String... titles)
+	public  ArrayList<String> removeLSP(String reason, ArrayList<String> titles)
 	{
 		return WAction.convertToString(mbwiki.massEdit(reason, "", CStrings.delregex, "", titles));
 	}
@@ -387,7 +338,7 @@ public class Commons
 	 * @param titles The titles to work with.
 	 * @return A list of titles we couldn't add text to.
 	 */
-	public String[] addText(String reason, String text, String... titles)
+	public  ArrayList<String> addText(String reason, String text, ArrayList<String> titles)
 	{
 		return WAction.convertToString(mbwiki.massEdit(reason, text, null, null, titles));
 	}
@@ -420,7 +371,7 @@ public class Commons
 				}
 			});
 
-		doAction(mbwiki, wl);
+		doAction(wl, false);
 
 		String x = "";
 		for (String s : files)

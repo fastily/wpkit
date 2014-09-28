@@ -22,7 +22,7 @@ public class DRArchive
 	/**
 	 * The list of singleton DRs. This list is dumped to wiki after program finishes normal execution.
 	 */
-	private static ConcurrentLinkedQueue<String> singles = new ConcurrentLinkedQueue<String>();
+	private static ConcurrentLinkedQueue<String> singles = new ConcurrentLinkedQueue<>();
 
 	/**
 	 * Matches a single signature timestamp
@@ -43,10 +43,10 @@ public class DRArchive
 	public static void main(String[] args)
 	{
 		archivebot.nullEdit("User:ArchiveBot/DL");
-		ArrayList<ProcLog> pl = new ArrayList<ProcLog>();
+		ArrayList<ProcLog> pl = new ArrayList<>();
 		for (String s : archivebot.getLinksOnPage(true, "User:ArchiveBot/DL"))
 			pl.add(new ProcLog(s));
-		WikiGen.genM("ArchiveBot", 1).start(pl.toArray(new ProcLog[0]));
+		WikiGen.genM("ArchiveBot", 1).start(pl);
 
 		String x = "Report generated @ ~~~~~\n";
 		for (String s : singles)
@@ -94,7 +94,7 @@ public class DRArchive
 		 */
 		public boolean doJob(Wiki wiki)
 		{
-			DRItem[] l = fetchDRs(wiki);
+			ArrayList<DRItem> l = fetchDRs(wiki);
 			new MBot(wiki, 5).start(l);
 
 			ArrayList<String> toArchive = new ArrayList<String>();
@@ -152,14 +152,14 @@ public class DRArchive
 		 * @param wiki Wiki object to use
 		 * @return A list of DRs transcluded on this log.
 		 */
-		private DRItem[] fetchDRs(Wiki wiki)
+		private ArrayList<DRItem> fetchDRs(Wiki wiki)
 		{
-			ArrayList<DRItem> l = new ArrayList<DRItem>();
+			ArrayList<DRItem> l = new ArrayList<>();
 			for (Tuple<String, Boolean> t : MassClientQuery.exists(wiki, wiki.getTemplatesOnPage(title).toArray(new String[0])))
 				if (t.y.booleanValue())
 					if (t.x.startsWith("Commons:Deletion requests/"))
 						l.add(new DRItem(t.x));
-			return l.toArray(new DRItem[0]);
+			return l;
 		}
 	}
 

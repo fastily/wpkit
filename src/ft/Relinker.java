@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.cli.Options;
 
-import jwiki.core.ClientRequest;
+import jwiki.core.CRequest;
 import jwiki.core.ColorLog;
 import jwiki.core.Namespace;
 import jwiki.core.Wiki;
@@ -49,7 +49,7 @@ public class Relinker
 		{
 			URL u = new URL(String.format("https://tools.wmflabs.org/delinker/index.php?image=%s&status=ok&max=500",
 					FString.enc(Namespace.nss(title))));
-			String html = FIO.inputStreamToString(ClientRequest.genericGET(u, null));
+			String html = FIO.inputStreamToString(CRequest.genericGET(u, null));
 
 			Matcher m = Pattern.compile("(?si)class\\=\"table table\\-hover.*?\\</table\\>",
 					Pattern.CASE_INSENSITIVE | Pattern.DOTALL).matcher(html);

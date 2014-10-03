@@ -3,7 +3,7 @@ package ft;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import jwiki.core.MassClientQuery;
+import jwiki.core.MQuery;
 import jwiki.core.Wiki;
 import jwiki.mbot.MBot;
 import jwiki.mbot.WAction;
@@ -155,7 +155,7 @@ public class DRArchive
 		private ArrayList<DRItem> fetchDRs(Wiki wiki)
 		{
 			ArrayList<DRItem> l = new ArrayList<>();
-			for (Tuple<String, Boolean> t : MassClientQuery.exists(wiki, wiki.getTemplatesOnPage(title).toArray(new String[0])))
+			for (Tuple<String, Boolean> t : MQuery.exists(wiki, wiki.getTemplatesOnPage(title).toArray(new String[0])))
 				if (t.y.booleanValue())
 					if (t.x.startsWith("Commons:Deletion requests/"))
 						l.add(new DRItem(t.x));

@@ -8,11 +8,11 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Random;
 
-import jwiki.core.ClientTask;
+import jwiki.core.CRequest;
+import jwiki.core.CTask;
 import jwiki.core.ColorLog;
-import jwiki.core.MassClientQuery;
+import jwiki.core.MQuery;
 import jwiki.core.Namespace;
-import jwiki.core.ClientRequest;
 import jwiki.core.Wiki;
 import jwiki.mbot.MBot;
 import jwiki.mbot.WAction;
@@ -95,7 +95,7 @@ public class CommonsMover
 			ArrayList<String> x = new ArrayList<String>();
 			for (String s : l.getArgs())
 				x.add(enwp.convertIfNotInNS(s, "File"));
-			tl.addAll(MassClientQuery.exists(enwp, true, x.toArray(new String[0])));
+			tl.addAll(MQuery.exists(enwp, true, x.toArray(new String[0])));
 		}
 
 		ArrayList<TransferItem> tfl = new ArrayList<TransferItem>();
@@ -211,7 +211,7 @@ public class CommonsMover
 		private File downloadFile()
 		{
 			String tx = String.format("%d%s", Math.abs(titleNNS.hashCode()), titleNNS.substring(titleNNS.lastIndexOf(".")));
-			return ClientTask.downloadFile(title, tx, enwp) ? new File(tx) : null;
+			return CTask.downloadFile(title, tx, enwp) ? new File(tx) : null;
 		}
 
 		/**
@@ -226,7 +226,7 @@ public class CommonsMover
 			{
 				String tl = FString.enc(titleNNS);
 				String s = FIO.inputStreamToString(
-						ClientRequest.genericPOST(new URL(url), null, ClientRequest.urlenc, String.format(posttext, tl)));
+						CRequest.genericPOST(new URL(url), null, CRequest.urlenc, String.format(posttext, tl)));
 				return s.substring(s.indexOf("{{Info"), s.indexOf("</textarea>"));
 			}
 			catch (Throwable e)

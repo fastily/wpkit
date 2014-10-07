@@ -193,7 +193,7 @@ import static ft.Core.*;
 		for (String s : admin.getTemplatesOnPage("User:ArchiveBot/SingletonDR"))
 			if (s.startsWith("Commons:Deletion requests/"))
 				dl.add(new ProcDR(s));
-		return WAction.convertToString(WikiGen.genM("Fastily").start(dl));
+		return WAction.toString(WikiGen.genM("Fastily").start(dl));
 	}
 
 	/**

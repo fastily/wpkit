@@ -69,7 +69,7 @@ public class Up
 
 		try
 		{
-			ArrayList<String> fails = WAction.convertToString(new MBot(admin, Integer.parseInt(l.getOptionValue('t', "1")))
+			ArrayList<String> fails = WAction.toString(new MBot(admin, Integer.parseInt(l.getOptionValue('t', "1")))
 					.start(generateUploadItem(args)));
 			if (fails.size() > 0)
 				FIO.dumpToFile("./Up fails.txt", true, fails);

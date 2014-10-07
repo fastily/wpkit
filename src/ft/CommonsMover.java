@@ -95,7 +95,7 @@ public class CommonsMover
 			ArrayList<String> x = new ArrayList<String>();
 			for (String s : l.getArgs())
 				x.add(enwp.convertIfNotInNS(s, "File"));
-			tl.addAll(MQuery.exists(enwp, true, x.toArray(new String[0])));
+			tl.addAll(MQuery.exists(enwp, true, x));
 		}
 
 		ArrayList<TransferItem> tfl = new ArrayList<TransferItem>();

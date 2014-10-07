@@ -78,7 +78,7 @@ public class CC
 		else
 			ccwl = generateCCW(Arrays.asList(l.getArgs()));
 		
-		ArrayList<String> ml = WAction.convertToString(new MBot(user, Integer.parseInt(l.getOptionValue('h', "1"))).start(ccwl));
+		ArrayList<String> ml = WAction.toString(new MBot(user, Integer.parseInt(l.getOptionValue('h', "1"))).start(ccwl));
 		if(ml.size() > 0)
 			FIO.dumpToFile("./CCfails.txt", true, ml);
 	}

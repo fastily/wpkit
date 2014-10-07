@@ -5,11 +5,13 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 
 import jwiki.core.Contrib;
+import jwiki.core.MQuery;
 import jwiki.core.Namespace;
 import jwiki.core.Wiki;
 import jwiki.mbot.MBot;
 import jwiki.mbot.WAction;
 import jwiki.util.ReadFile;
+import jwiki.util.Tuple;
 
 /**
  * Special multi-threaded commons.wikimedia.org exclusive methods which make life so much easier.
@@ -77,7 +79,7 @@ public class Commons
 	 */
 	public <T extends WAction> ArrayList<String> doAction(ArrayList<T> pages, boolean useAdmin)
 	{
-		return WAction.convertToString((useAdmin ? mbadmin : mbwiki).start(pages));
+		return WAction.toString((useAdmin ? mbadmin : mbwiki).start(pages));
 	}
 
 	/**
@@ -155,7 +157,7 @@ public class Commons
 	 */
 	public  ArrayList<String> restore(String reason, ArrayList<String> pages)
 	{
-		return WAction.convertToString(mbadmin.massRestore(reason, pages));
+		return WAction.toString(mbadmin.massRestore(reason, pages));
 	}
 
 	/**
@@ -198,15 +200,12 @@ public class Commons
 	 */
 	public ArrayList<String> emptyCatDel(ArrayList<String> cats)
 	{
-		ArrayList<WAction> l = new ArrayList<>();
-		for (String s : cats)
-			l.add(new WAction(s, null, CStrings.ec) {
-				public boolean doJob(Wiki wiki)
-				{
-					return wiki.getCategorySize(title) <= 0 ? wiki.delete(title, summary) : true;
-				}
-			});
-		return doAction(l, true);
+		ArrayList<String> l = new ArrayList<>();
+		for(Tuple<String, Integer> t : MQuery.getCategorySize(admin, cats))
+			if(t.y.intValue() == 0)
+				l.add(t.x);
+		
+		return WAction.toString(mbadmin.massDelete(CStrings.ec, l));
 	}
 
 	/**
@@ -249,7 +248,7 @@ public class Commons
 	 */
 	public ArrayList<String> nukeLinksOnPage(String title, String reason, String... ns)
 	{
-		return nuke(reason, admin.getLinksOnPage(title, ns));
+		return nuke(reason, admin.getLinksOnPage(true, title, ns));
 	}
 
 	/**
@@ -261,7 +260,7 @@ public class Commons
 	 */
 	public  ArrayList<String> nukeImagesOnPage(String title, String reason)
 	{
-		return nuke(reason, admin.getImagesOnPage(title));
+		return nuke(reason, MQuery.exists(admin, true, admin.getImagesOnPage(title)));
 	}
 
 	/**
@@ -274,7 +273,7 @@ public class Commons
 	 */
 	public ArrayList<String> nuke(String reason, ArrayList<String> pages)
 	{
-		return WAction.convertToString(mbadmin.massDelete(reason, pages));
+		return WAction.toString(mbadmin.massDelete(reason, pages));
 	}
 
 	/**
@@ -315,7 +314,7 @@ public class Commons
 	 */
 	public ArrayList<String> removeDelete(String reason, ArrayList<String> titles)
 	{
-		return WAction.convertToString(mbwiki.massEdit(reason, "", CStrings.drregex, "", titles));
+		return WAction.toString(mbwiki.massEdit(reason, "", CStrings.drregex, "", titles));
 	}
 
 	/**
@@ -327,7 +326,7 @@ public class Commons
 	 */
 	public  ArrayList<String> removeLSP(String reason, ArrayList<String> titles)
 	{
-		return WAction.convertToString(mbwiki.massEdit(reason, "", CStrings.delregex, "", titles));
+		return WAction.toString(mbwiki.massEdit(reason, "", CStrings.delregex, "", titles));
 	}
 
 	/**
@@ -340,7 +339,7 @@ public class Commons
 	 */
 	public  ArrayList<String> addText(String reason, String text, ArrayList<String> titles)
 	{
-		return WAction.convertToString(mbwiki.massEdit(reason, text, null, null, titles));
+		return WAction.toString(mbwiki.massEdit(reason, text, null, null, titles));
 	}
 
 	/**

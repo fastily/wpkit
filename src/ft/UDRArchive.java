@@ -1,7 +1,7 @@
 package ft;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,7 +27,7 @@ public class UDRArchive
 		String target = "Commons:Undeletion requests/Current requests";
 		String text = wiki.getPageText(target);
 		Matcher m = Pattern.compile("(?si)\\s*?\\{\\{(udelh)\\}\\}.+?\\{\\{(udelf)\\}\\}\\s*?").matcher(text);
-		
+
 		String dump = "";
 		int cnt = 0;
 		while (m.find())
@@ -35,14 +35,16 @@ public class UDRArchive
 			dump += text.substring(m.start(), m.end());
 			cnt++;
 		}
-		
+
 		String summary = "Archiving %d thread(s) %s [[%s]]";
-		String archive = new SimpleDateFormat("'Commons:Undeletion requests/Archive/'yyyy-MM").format(new Date());
+		String archive = "Commons:Undeletion requests/Archive/"
+				+ LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM"));
+
+		if(cnt == 0) // check if there were no threads to archive
+			return;
 		
-		if (wiki.exists(archive))
-			dump = wiki.getPageText(archive) + dump;
-		
-		wiki.edit(archive, dump, String.format(summary, cnt, "from", target));
+		wiki.edit(archive, wiki.exists(archive) ? wiki.getPageText(archive) + dump : dump,
+				String.format(summary, cnt, "from", target));
 		wiki.edit(target, m.replaceAll(""), String.format(summary, cnt, "to", archive));
 	}
 }

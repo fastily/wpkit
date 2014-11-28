@@ -82,7 +82,7 @@ public class FCLI
 		}
 		catch (Throwable e)
 		{
-			FError.errAndExit(e);
+			FError.errAndExit(e, null);
 			return null; //dead code to shut up compiler.
 		}
 	}

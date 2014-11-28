@@ -40,9 +40,9 @@ public class UDRArchive
 		String archive = "Commons:Undeletion requests/Archive/"
 				+ LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM"));
 
-		if(cnt == 0) // check if there were no threads to archive
+		if (cnt == 0) // check if there were no threads to archive
 			return;
-		
+
 		wiki.edit(archive, wiki.exists(archive) ? wiki.getPageText(archive) + dump : dump,
 				String.format(summary, cnt, "from", target));
 		wiki.edit(target, m.replaceAll(""), String.format(summary, cnt, "to", archive));

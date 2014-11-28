@@ -1,6 +1,7 @@
 package ft;
 
 import static ft.Core.*;
+import static jwiki.core.MBot.Task;
 
 import java.io.File;
 import java.net.URL;
@@ -14,8 +15,6 @@ import jwiki.core.ColorLog;
 import jwiki.core.MQuery;
 import jwiki.core.Namespace;
 import jwiki.core.Wiki;
-import jwiki.mbot.MBot;
-import jwiki.mbot.WAction;
 import jwiki.util.FError;
 import jwiki.util.FIO;
 import jwiki.util.FString;
@@ -101,7 +100,7 @@ public class CommonsMover
 		ArrayList<TransferItem> tfl = new ArrayList<TransferItem>();
 		for (String s : tl)
 			tfl.add(new TransferItem(s));
-		new MBot(user, maxthreads).start(tfl);
+		user.submit(tfl, maxthreads);
 	}
 
 	/**
@@ -126,7 +125,7 @@ public class CommonsMover
 	 * @author Fastily
 	 * 
 	 */
-	protected static class TransferItem extends WAction
+	protected static class TransferItem extends Task
 	{
 		/**
 		 * The title passed into the constructor, without the namespace.
@@ -158,8 +157,9 @@ public class CommonsMover
 		 */
 		public boolean doJob(Wiki wiki)
 		{
-			if (FString.arraysIntersect(enwp.getCategoriesOnPage(title).toArray(new String[0]), blacklist)) // check copyright
-				return FError.printErrorAndReturn(title + " is not eligible for transfer", false);
+			if (FString.arraysIntersect(enwp.getCategoriesOnPage(title).toArray(new String[0]), blacklist)) // check
+																																			// copyright
+				return FError.printErrAndRet(title + " is not eligible for transfer", false);
 			else if (!checkForDupes())
 				return true;
 
@@ -169,7 +169,8 @@ public class CommonsMover
 			String desc;
 			File f;
 			if ((desc = getDesc()) != null && (f = downloadFile()) != null)
-				return wiki.upload(Paths.get(f.getAbsolutePath()), transferTo, desc, String.format("from [[w:%s]] ([[Commons:CommonsMover|CM]])", title))
+				return wiki.upload(Paths.get(f.getAbsolutePath()), transferTo, desc,
+						String.format("from [[w:%s]] ([[Commons:CommonsMover|CM]])", title))
 						&& flagF8(transferTo);
 			return false;
 		}
@@ -182,7 +183,7 @@ public class CommonsMover
 		private boolean checkForDupes()
 		{
 			String[] dl = enwp.getDuplicatesOf(title, true).toArray(new String[0]);
-			if(dl.length > 0)
+			if (dl.length > 0)
 			{
 				flagF8(dl[0]);
 				return false;
@@ -225,8 +226,8 @@ public class CommonsMover
 			try
 			{
 				String tl = FString.enc(titleNNS);
-				String s = FIO.inputStreamToString(
-						CRequest.genericPOST(new URL(url), null, CRequest.urlenc, String.format(posttext, tl)));
+				String s = FIO.inputStreamToString(CRequest.genericPOST(new URL(url), null, CRequest.urlenc,
+						String.format(posttext, tl)));
 				return s.substring(s.indexOf("{{Info"), s.indexOf("</textarea>"));
 			}
 			catch (Throwable e)

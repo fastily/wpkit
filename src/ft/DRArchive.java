@@ -5,11 +5,11 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import jwiki.core.MQuery;
 import jwiki.core.Wiki;
-import jwiki.mbot.MBot;
-import jwiki.mbot.WAction;
 import jwiki.util.FString;
 import jwiki.util.Tuple;
 import jwiki.util.WikiGen;
+
+import static jwiki.core.MBot.Task;
 
 /**
  * Archives all closed DRs older than 7 days.
@@ -46,7 +46,7 @@ public class DRArchive
 		ArrayList<ProcLog> pl = new ArrayList<>();
 		for (String s : archivebot.getLinksOnPage(true, "User:ArchiveBot/DL"))
 			pl.add(new ProcLog(s));
-		WikiGen.genM("ArchiveBot", 1).start(pl);
+		archivebot.submit(pl, 1);
 
 		String x = "Report generated @ ~~~~~\n";
 		for (String s : singles)
@@ -60,7 +60,7 @@ public class DRArchive
 	 * @author Fastily
 	 * 
 	 */
-	private static class ProcLog extends WAction
+	private static class ProcLog extends Task
 	{
 		/**
 		 * This log's archive. Generated in constructor.
@@ -95,7 +95,7 @@ public class DRArchive
 		public boolean doJob(Wiki wiki)
 		{
 			ArrayList<DRItem> l = fetchDRs(wiki);
-			new MBot(wiki, 5).start(l);
+			wiki.submit(l, 5);
 
 			ArrayList<String> toArchive = new ArrayList<String>();
 			for (DRItem d : l)
@@ -169,7 +169,7 @@ public class DRArchive
 	 * @author Fastily
 	 * 
 	 */
-	private static class DRItem extends WAction
+	private static class DRItem extends Task
 	{
 		/**
 		 * The raw text of this DR

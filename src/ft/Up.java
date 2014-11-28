@@ -18,11 +18,10 @@ import org.apache.commons.cli.Options;
 
 import util.FCLI;
 import jwiki.core.Wiki;
-import jwiki.mbot.MBot;
-import jwiki.mbot.WAction;
 import jwiki.util.FIO;
 import jwiki.util.FString;
 import static ft.Core.*;
+import static jwiki.core.MBot.Task;
 
 /**
  * Uploads my files to Commons. Accepts directories as arguments; Commons-acceptable files in the directories will be
@@ -69,8 +68,8 @@ public class Up
 
 		try
 		{
-			ArrayList<String> fails = WAction.toString(new MBot(admin, Integer.parseInt(l.getOptionValue('t', "1")))
-					.start(generateUploadItem(args)));
+			ArrayList<String> fails = Task.toString(admin.submit(generateUploadItem(args),
+					Integer.parseInt(l.getOptionValue('t', "1"))));
 			if (fails.size() > 0)
 				FIO.dumpToFile("./Up fails.txt", true, fails);
 		}
@@ -139,7 +138,7 @@ public class Up
 	 * @author Fastily
 	 * 
 	 */
-	private static class UploadItem extends WAction
+	private static class UploadItem extends Task
 	{
 		/**
 		 * The path pointing to the file we'd like to upload

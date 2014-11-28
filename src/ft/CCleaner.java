@@ -4,10 +4,8 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 import commons.CStrings;
+import jwiki.core.CAction;
 import jwiki.core.Wiki;
-import jwiki.mbot.DeleteItem;
-import jwiki.mbot.WAction;
-import jwiki.util.WikiGen;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
@@ -16,6 +14,7 @@ import org.apache.commons.cli.Options;
 
 import util.FCLI;
 import static ft.Core.*;
+import static jwiki.core.MBot.Task;
 
 /**
  * Assistant with common deletion jobs on Commons. Caveat: files should be manually reviewed in a browser before using
@@ -24,7 +23,7 @@ import static ft.Core.*;
  * @author Fastily
  * 
  */
- public class CCleaner
+public class CCleaner
 {
 	/**
 	 * The reason parameter we'll be using to delete with, if applicable.
@@ -83,7 +82,7 @@ import static ft.Core.*;
 			com.categoryNuke(CStrings.cv, CStrings.copyvio, false, "File");
 			com.emptyCatDel(admin.getCategoryMembers(CStrings.osd, "Category"));
 			com.emptyCatDel(admin.getCategoryMembers("Non-media deletion requests", "Category"));
-			//com.nukeEmptyFiles(admin.getCategoryMembers(CStrings.osd, "File"));
+			// com.nukeEmptyFiles(admin.getCategoryMembers(CStrings.osd, "File"));
 
 			if (l.hasOption('d'))
 				unknownClear();
@@ -135,7 +134,7 @@ import static ft.Core.*;
 				l.add(ln.substring(ln.indexOf("=") + 1, ln.indexOf("}}")));
 		m.close();
 
-		return com.nuke("Orphaned talk page", l);
+		return CAction.delete(admin, "Orphaned talk page", l);
 	}
 
 	/**
@@ -148,7 +147,7 @@ import static ft.Core.*;
 	{
 		user.nullEdit("User:FastilyClone/UC");
 
-		ArrayList<DeleteItem> l = new ArrayList<>();
+		ArrayList<Task> l = new ArrayList<>();
 		String baseLS = "you may [[Special:Upload|re-upload]] the file, but please %s";
 
 		ArrayList<String> cats = admin.getLinksOnPage(true, "User:FastilyClone/UC");
@@ -162,28 +161,37 @@ import static ft.Core.*;
 				l.addAll(genUCDI(c, "No source since", String.format(baseLS, "cite the file's source")));
 		}
 
-		ArrayList<String> fails = com.doAction(l, true);
+		ArrayList<String> fails = Task.toString(admin.submit(l, 20));
 		com.emptyCatDel(cats);
 		return fails;
-		
+
 	}
 
 	/**
-	 * Helper for unknownClear().  Parse out date from category and generate reason params for items to delete
+	 * Helper for unknownClear(). Parse out date from category and generate reason params for items to delete
 	 * 
 	 * @param cat The category to process
 	 * @param front The front part of the reason, before the colon.
 	 * @param back The back part of the reason, after the colon.
 	 * @return A list of DeleteItems we created.
 	 */
-	private static ArrayList<DeleteItem> genUCDI(String cat, String front, String back)
+	private static ArrayList<Task> genUCDI(String cat, String front, String back)
 	{
-		return DeleteItem.makeDeleteItems(String.format("%s %s: %s", front, cat.substring(cat.indexOf("as of") + 6), back),
-				admin.getCategoryMembers(cat, "File"));
+		ArrayList<Task> l = new ArrayList<Task>();
+		String rsn = String.format("%s %s: %s", front, cat.substring(cat.indexOf("as of") + 6), back);
+
+		for (String s : admin.getCategoryMembers(cat, "File"))
+			l.add(new Task(s, null, rsn) {
+				public boolean doJob(Wiki wiki)
+				{
+					return admin.delete(title, summary);
+				}
+			});
+		return l;
 	}
 
 	/**
-	 * Process (close & delete) all DRs on 'User:Fastily/SingletonDR'
+	 * Process (close & delete) all DRs on 'User:ArchiveBot/SingletonDR'
 	 * 
 	 * @return A list of titles we didn't process.
 	 */
@@ -193,7 +201,7 @@ import static ft.Core.*;
 		for (String s : admin.getTemplatesOnPage("User:ArchiveBot/SingletonDR"))
 			if (s.startsWith("Commons:Deletion requests/"))
 				dl.add(new ProcDR(s));
-		return WAction.toString(WikiGen.genM("Fastily").start(dl));
+		return Task.toString(admin.submit(dl, 20));
 	}
 
 	/**
@@ -202,7 +210,7 @@ import static ft.Core.*;
 	 * @author Fastily
 	 * 
 	 */
-	private static class ProcDR extends WAction
+	private static class ProcDR extends Task
 	{
 		/**
 		 * Constructor.

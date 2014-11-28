@@ -4,12 +4,12 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 
+import jwiki.core.CAction;
 import jwiki.core.Contrib;
+import jwiki.core.MBot;
 import jwiki.core.MQuery;
 import jwiki.core.Namespace;
 import jwiki.core.Wiki;
-import jwiki.mbot.MBot;
-import jwiki.mbot.WAction;
 import jwiki.util.ReadFile;
 import jwiki.util.Tuple;
 
@@ -23,7 +23,7 @@ public class Commons
 	/**
 	 * The admin object to use.
 	 */
-	private Wiki admin;
+	private Wiki admin = null;
 
 	/**
 	 * The normal user object to use.
@@ -31,55 +31,20 @@ public class Commons
 	private Wiki clone;
 
 	/**
-	 * Admin MBot
-	 */
-	private MBot mbwiki;
-
-	/**
-	 * Wiki MBot
-	 */
-	private MBot mbadmin;
-
-	/**
-	 * Creates a Commons object for us. Current domain of <tt>wiki</tt> does not have to be set to Commons. All tasks
-	 * will be run out of this wiki object.
-	 * 
-	 * @param wiki The wiki object to create the Commons object from.
-	 */
-	public Commons(Wiki wiki)
-	{
-		this(wiki, wiki.listGroupsRights(wiki.whoami()).contains("sysop") ? wiki : null);
-	}
-
-	/**
 	 * Creates a Commons object for us. Non-admin tasks will be assigned to <tt>wiki</tt>, whereas admin tasks will be
 	 * run from <tt>admin</tt>. Current domain of either object does not have to be set to Commons.
 	 * 
-	 * @param wiki wiki object to use for non-admin tasks.
+	 * @param wiki wiki object to use for non-admin tasks. PRECONDITION: this field cannot be null.
 	 * @param admin wiki object for admin tasks. If you're not an admin, you ought to specify this to be null, otherwise
 	 *           you may get strange behavior if you execute admin tasks.
 	 */
 	public Commons(Wiki wiki, Wiki admin)
 	{
 		clone = wiki;
-		mbwiki = new MBot(wiki, 3);
-		if (admin != null)
-		{
-			this.admin = admin.getWiki("commons.wikimedia.org");
-			mbadmin = new MBot(admin);
-		}
-	}
+		if (admin != null && !admin.listGroupsRights(admin.whoami()).contains("sysop"))
+			throw new IllegalArgumentException(String.format("%s is not an admin but was claimed to be one!", admin.whoami()));
 
-	/**
-	 * Process a list of WActions.
-	 * 
-	 * @param mb The MBot to use.
-	 * @param pages The pages to process.
-	 * @return A list of actions that failed.
-	 */
-	public <T extends WAction> ArrayList<String> doAction(ArrayList<T> pages, boolean useAdmin)
-	{
-		return WAction.toString((useAdmin ? mbadmin : mbwiki).start(pages));
+		this.admin = admin;
 	}
 
 	/**
@@ -88,9 +53,9 @@ public class Commons
 	 * @param exit Set to true if program should exit after procedure completes.
 	 * @return A list of titles which couldn't be deleted.
 	 */
-	public  ArrayList<String> nukeFastilyTest(boolean exit)
+	public ArrayList<String> nukeFastilyTest(boolean exit)
 	{
-		ArrayList<String> fails = new ArrayList<>(categoryNuke("Fastily Test", CStrings.ur, false));
+		ArrayList<String> fails = categoryNuke("Fastily Test", CStrings.ur, false);
 		if (exit)
 			System.exit(0);
 		return fails;
@@ -100,7 +65,7 @@ public class Commons
 	 * Deletes all the files in <a href="http://commons.wikimedia.org/wiki/Category:Copyright_violations"
 	 * >Category:Copyright violations</a>.
 	 */
-	public  ArrayList<String> clearCopyVios()
+	public ArrayList<String> clearCopyVios()
 	{
 		return categoryNuke(CStrings.cv, CStrings.copyvio, false, "File");
 	}
@@ -113,7 +78,7 @@ public class Commons
 	 * @param ns Namespace(s) to restrict deletion to. Leave blank to ignore namespace.
 	 * @return A list of titles we didn't delete.
 	 */
-	public  ArrayList<String> clearOSD(String reason, String... ns)
+	public ArrayList<String> clearOSD(String reason, String... ns)
 	{
 		return categoryNuke(CStrings.osd, reason, false, ns);
 	}
@@ -129,35 +94,23 @@ public class Commons
 	 *           select all namesapces
 	 * @return A list of titles we didn't delete.
 	 */
-	public  ArrayList<String> categoryNuke(String cat, String reason, boolean delCat, String... ns)
+	public ArrayList<String> categoryNuke(String cat, String reason, boolean delCat, String... ns)
 	{
-		 ArrayList<String> fails = nuke(reason, admin.getCategoryMembers(cat, ns));
+		ArrayList<String> fails = CAction.delete(admin, reason, admin.getCategoryMembers(cat, ns));
 		if (delCat && admin.getCategorySize(cat) == 0)
 			admin.delete(cat, CStrings.ec);
 		return fails;
 	}
 
 	/**
-	 * Delete all files linked to a DR.  Sets deletion log reason to a link of to the DR.
+	 * Delete all files linked to a DR. Sets deletion log reason to a link of to the DR.
 	 * 
 	 * @param dr The dr from which to get files.
 	 * @return A list of pages we failed to delete.
 	 */
-	public  ArrayList<String> drDel(String dr)
+	public ArrayList<String> drDel(String dr)
 	{
 		return nukeLinksOnPage(dr, "[[" + dr + "]]", "File");
-	}
-
-	/**
-	 * Perform mass restoration.
-	 * 
-	 * @param reason The reason to use.
-	 * @param pages The pages to restore
-	 * @return A list of pages which weren't restored.
-	 */
-	public  ArrayList<String> restore(String reason, ArrayList<String> pages)
-	{
-		return WAction.toString(mbadmin.massRestore(reason, pages));
 	}
 
 	/**
@@ -165,13 +118,14 @@ public class Commons
 	 * 
 	 * @param reason The reason to use
 	 * @param path The path to the file
-	 * @return A list of pages we didn't/couldn't restore.
+	 * @return A list of pages we didn't restore.
 	 */
-	public  ArrayList<String> restoreFromFile(String path, String reason)
+	public ArrayList<String> restoreFromFile(String path, String reason)
 	{
-		return restore(reason, new ReadFile(path).l);
+		return CAction.undelete(admin, true, reason, new ReadFile(path).l);
 	}
 
+	// TODO: This likely won't be necessary once fileinfo is released. Disabled for now.
 	/**
 	 * Nukes empty files or files without an associated description page.
 	 * 
@@ -180,16 +134,14 @@ public class Commons
 	 */
 	public ArrayList<String> nukeEmptyFiles(ArrayList<String> files)
 	{
-		ArrayList<WAction> l = new ArrayList<>();
-		for (String s : files)
-			l.add(new WAction(s, null, CStrings.nfu) {
-				public boolean doJob(Wiki wiki)
-				{
-					return wiki.getImageInfo(title) == null ? wiki.delete(title, summary) : true;
-				}
-			});
-
-		return doAction(l, true);
+		/*
+		 * ArrayList<WAction> l = new ArrayList<>(); for (String s : files) l.add(new WAction(s, null, CStrings.nfu) {
+		 * public boolean doJob(Wiki wiki) { return wiki.getImageInfo(title) == null ? wiki.delete(title, summary) : true;
+		 * } });
+		 * 
+		 * return WAction.toString(admin.mbot.start(l));
+		 */
+		throw new UnsupportedOperationException();
 	}
 
 	/**
@@ -201,11 +153,10 @@ public class Commons
 	public ArrayList<String> emptyCatDel(ArrayList<String> cats)
 	{
 		ArrayList<String> l = new ArrayList<>();
-		for(Tuple<String, Integer> t : MQuery.getCategorySize(admin, cats))
-			if(t.y.intValue() == 0)
+		for (Tuple<String, Integer> t : MQuery.getCategorySize(admin, cats))
+			if (t.y.intValue() == 0)
 				l.add(t.x);
-		
-		return WAction.toString(mbadmin.massDelete(CStrings.ec, l));
+		return CAction.delete(admin, CStrings.ec, l);
 	}
 
 	/**
@@ -216,13 +167,12 @@ public class Commons
 	 * @param ns Namespace(s) of the items to delete.
 	 * @return A list of titles we didn't delete.
 	 */
-	public  ArrayList<String> nukeContribs(String user, String reason, String... ns)
+	public ArrayList<String> nukeContribs(String user, String reason, String... ns)
 	{
 		ArrayList<String> l = new ArrayList<>();
 		for (Contrib c : admin.getContribs(user, ns))
 			l.add(c.title);
-
-		return nuke(reason, l);
+		return CAction.delete(admin, reason, l);
 	}
 
 	/**
@@ -234,7 +184,7 @@ public class Commons
 	 */
 	public ArrayList<String> nukeUploads(String user, String reason)
 	{
-		return nuke(reason, admin.getUserUploads(Namespace.nss(user)));
+		return CAction.delete(admin, reason, admin.getUserUploads(Namespace.nss(user)));
 	}
 
 	/**
@@ -248,7 +198,7 @@ public class Commons
 	 */
 	public ArrayList<String> nukeLinksOnPage(String title, String reason, String... ns)
 	{
-		return nuke(reason, admin.getLinksOnPage(true, title, ns));
+		return CAction.delete(admin, reason, admin.getLinksOnPage(true, title, ns));
 	}
 
 	/**
@@ -258,38 +208,9 @@ public class Commons
 	 * @param reason The reason to use when deleting
 	 * @return A list of files we failed to process.
 	 */
-	public  ArrayList<String> nukeImagesOnPage(String title, String reason)
+	public ArrayList<String> nukeImagesOnPage(String title, String reason)
 	{
-		return nuke(reason, MQuery.exists(admin, true, admin.getImagesOnPage(title)));
-	}
-
-	/**
-	 * Delete pages on Commons.
-	 * 
-	 * @param reason Delete reason.
-	 * @param pages Pages to delete.
-	 * 
-	 * @return A list of pages we failed to delete
-	 */
-	public ArrayList<String> nuke(String reason, ArrayList<String> pages)
-	{
-		return WAction.toString(mbadmin.massDelete(reason, pages));
-	}
-
-	/**
-	 * Nukes the pages that are in the specified namespace. Anything not in the specified namespace will not be deleted,
-	 * even if it passed in.
-	 * 
-	 * @param reason Delete reason.
-	 * @param ns Namespace to include only. This should be the namespace header, without the ":" (e.g. "File"). For main
-	 *           namespace, specify the empty String.
-	 * @param pages The pages to screen and then delete.
-	 * 
-	 * @return A list of pages we failed to delete
-	 */
-	public ArrayList<String> nuke(String reason, String ns, ArrayList<String> pages)
-	{
-		return nuke(reason, admin.filterByNS(pages, ns));
+		return CAction.delete(admin, reason, MQuery.exists(admin, true, admin.getImagesOnPage(title)));
 	}
 
 	/**
@@ -298,23 +219,22 @@ public class Commons
 	 * @param path The path to the file to use.
 	 * @param reason Reason to use when deleting
 	 * @return A list of pages we failed to delete.
-	 * @see #nuke(String, String...)
 	 */
 	public ArrayList<String> nukeFromFile(String path, String reason)
 	{
-		return nuke(reason, new ReadFile(path).l);
+		return CAction.delete(admin, reason, new ReadFile(path).l);
 	}
 
 	/**
-	 * Removes <tt>{{delete}}</tt> templates from the listed titles.
+	 * Removes <code>{{delete}}</code> templates from the listed titles.
 	 * 
 	 * @param reason Reason to use
-	 * @param titles The titles to remove <tt>{{delete}}</tt> from
-	 * @return A list of titles we didn't remove the templates froms.
+	 * @param titles The titles to remove <code>{{delete}}</code> from
+	 * @return A list of titles we didn't remove the templates from.
 	 */
 	public ArrayList<String> removeDelete(String reason, ArrayList<String> titles)
 	{
-		return WAction.toString(mbwiki.massEdit(reason, "", CStrings.drregex, "", titles));
+		return CAction.replace(clone, CStrings.drregex, "", reason, titles);
 	}
 
 	/**
@@ -324,22 +244,9 @@ public class Commons
 	 * @param titles The titles to remove no perm/lic/src templates from
 	 * @return A list of titles we failed to remove the templates from.
 	 */
-	public  ArrayList<String> removeLSP(String reason, ArrayList<String> titles)
+	public ArrayList<String> removeLSP(String reason, ArrayList<String> titles)
 	{
-		return WAction.toString(mbwiki.massEdit(reason, "", CStrings.delregex, "", titles));
-	}
-
-	/**
-	 * Adds text to pages.
-	 * 
-	 * @param reason The reason to use.
-	 * @param text The text to add.
-	 * @param titles The titles to work with.
-	 * @return A list of titles we couldn't add text to.
-	 */
-	public  ArrayList<String> addText(String reason, String text, ArrayList<String> titles)
-	{
-		return WAction.toString(mbwiki.massEdit(reason, text, null, null, titles));
+		return CAction.replace(clone, CStrings.delregex, "", reason, titles);
 	}
 
 	/**
@@ -359,9 +266,9 @@ public class Commons
 		int month = zdt.getMonthValue();
 		int year = zdt.getYear();
 
-		ArrayList<WAction> wl = new ArrayList<WAction>();
+		ArrayList<MBot.Task> wl = new ArrayList<>();
 		for (String file : files)
-			wl.add(new WAction(file, null, null) {
+			wl.add(new MBot.Task(file, null, null) {
 				public boolean doJob(Wiki wiki)
 				{
 					return wiki.addText(title, String.format("{{delete|reason=%s|subpage=%s|day=%02d|month=%02d|year=%d}}\n",
@@ -370,7 +277,7 @@ public class Commons
 				}
 			});
 
-		doAction(wl, false);
+		clone.submit(wl, 2);
 
 		String x = "";
 		for (String s : files)

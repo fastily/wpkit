@@ -1,6 +1,7 @@
 package ft;
 
 import static ft.Core.*;
+import static jwiki.core.MBot.Task;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -13,8 +14,6 @@ import java.util.List;
 import commons.CStrings;
 import jwiki.core.ColorLog;
 import jwiki.core.Wiki;
-import jwiki.mbot.MBot;
-import jwiki.mbot.WAction;
 import jwiki.util.FIO;
 import jwiki.util.FString;
 import jwiki.util.ReadFile;
@@ -39,23 +38,22 @@ public class CC
 	private static final String utt = "Recreating [[bugzilla:36587]] (i.e. [[Special:UploadStash|upload stash]] bug) & "
 			+ "collecting data to log.\n{{Warning|'''Test area only!  File may be non-free.''' This is just a test"
 			+ " file and any license does not apply.}}\n[[Category:Fastily Test]]";
-	
+
 	/**
 	 * The help string for this method.
 	 */
 	private static final String hstring = "CC [-nr] [-help] [-h number] [-r retries] [-f] [-nd|-sd] [-t <textfile>|<files or directories>]";
-	
+
 	/**
 	 * Flag indicating whether we should suppress deletions
 	 */
 	private static boolean nd;
-	
+
 	/**
 	 * The number of times we should repeat in event of failure
 	 */
 	private static int repeats;
-	
-	
+
 	/**
 	 * Main driver.
 	 * 
@@ -65,24 +63,24 @@ public class CC
 	public static void main(String[] args) throws ParseException
 	{
 		CommandLine l = init(args, makeOptList(), hstring);
-		
+
 		if (l.hasOption('f'))
 			com.nukeFastilyTest(true);
-		
+
 		nd = l.hasOption("nd") || l.hasOption("sd");
 		repeats = Integer.parseInt(l.getOptionValue('r', "1"));
-		
+
 		ArrayList<CCW> ccwl;
 		if (l.hasOption('t'))
 			ccwl = generateCCW(new ReadFile(l.getOptionValue('t')).l);
 		else
 			ccwl = generateCCW(Arrays.asList(l.getArgs()));
-		
-		ArrayList<String> ml = WAction.toString(new MBot(user, Integer.parseInt(l.getOptionValue('h', "1"))).start(ccwl));
-		if(ml.size() > 0)
+
+		ArrayList<String> ml = Task.toString(user.submit(ccwl, Integer.parseInt(l.getOptionValue('h', "1"))));
+		if (ml.size() > 0)
 			FIO.dumpToFile("./CCfails.txt", true, ml);
 	}
-	
+
 	/**
 	 * Grabs the files we're planning to upload and converts them to CCW objects. If nothing is passed into
 	 * <tt>paths</tt>, search the classpath for files to uplaod.
@@ -101,16 +99,16 @@ public class CC
 			else
 				sl.add(t);
 		}
-		
+
 		if (sl.isEmpty())
 			sl.addAll(FIO.findFiles(Paths.get(".")));
-		
+
 		ArrayList<CCW> x = new ArrayList<>();
 		for (Path p : sl)
 			x.add(new CCW(p));
 		return x;
 	}
-	
+
 	/**
 	 * Makes a list of options for us.
 	 * 
@@ -119,33 +117,34 @@ public class CC
 	private static Options makeOptList()
 	{
 		Options ol = new Options();
-		
+
 		ol.addOption("nd", false, "Surpress deletion after upload");
 		ol.addOption("sd", false, "Alias of '-nd'");
 		ol.addOption("f", false, "Nuke 'Category:Fastily Test' and exit.  Overrides other options");
-		
+
 		ol.addOption(FCLI.makeArgOption("h", "Sets the number of threads of execution", "#threads"));
 		ol.addOption(FCLI.makeArgOption("r", "Number of times to repeat in event of failure", "#retries"));
 		ol.addOption(FCLI.makeArgOption("t", "Select files to upload from a text file", "<textfile>"));
-		
+
 		return ol;
 	}
-	
+
 	/**
 	 * Inner class implementing WAction so we can use this class with MBot.
 	 * 
 	 * @author Fastily
 	 * 
 	 */
-	private static class CCW extends WAction
+	private static class CCW extends Task
 	{
 		/**
 		 * The path pointing to the file to upload
 		 */
 		private Path p;
-		
+
 		/**
-		 * Constructor, takes a path pointing to the file to upload. 
+		 * Constructor, takes a path pointing to the file to upload.
+		 * 
 		 * @param p The path pointing to the file to upload.
 		 */
 		private CCW(Path p)
@@ -153,7 +152,7 @@ public class CC
 			super(p.toAbsolutePath().toString(), utt, "");
 			this.p = p;
 		}
-		
+
 		/**
 		 * Performs upload & delete
 		 */
@@ -163,7 +162,7 @@ public class CC
 			{
 				String fn = "File:" + FString.generateRandomFileName(p);
 				ColorLog.fyi(String.format("(%d/%d): Upload '%s' -> '%s'", i + 1, repeats, FIO.getFileName(p), fn));
-				
+
 				if (wiki.upload(p, fn, text, " "))
 				{
 					if (!nd)

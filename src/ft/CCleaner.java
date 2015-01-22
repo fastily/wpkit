@@ -38,13 +38,7 @@ public class CCleaner
 	public static void main(String[] args)
 	{
 		CommandLine l = init(args, makeOptList(),
-				"CCleaner [-dr|-t|[-p <title>|-u <user>|-c <cat> -f <filepath>] -r <reason>|-oos|-ur|-fu] [-d] [-a|-ac]");
-
-		// Perform DR archiving if requested.
-		if (l.hasOption('a'))
-			DRArchive.main(new String[0]);
-		else if (l.hasOption("ac"))
-			processDRs();
+				"CCleaner [-dr|-t|[-p <title>|-u <user>|-c <cat> -f <filepath>] -r <reason>|-oos|-ur|-fu] [-d]");
 
 		// Set reason param if applicable.
 		if (l.hasOption('r'))
@@ -101,8 +95,6 @@ public class CCleaner
 		og.addOption(FCLI.makeArgOption("f", "Set mode to delete all titles, separated by new line, in text file", "filepath"));
 		og.addOption(new Option("o", false, "Delete all members of a Other Speedy Deletions"));
 		og.addOption(new Option("t", false, "Clears orphaned talk pages from DBR"));
-		og.addOption(new Option("a", false, "Archive DRs ready for archiving"));
-		og.addOption(new Option("ac", false, "Close all Singleton DRs"));
 		ol.addOptionGroup(og);
 
 		og = new OptionGroup();
@@ -188,54 +180,5 @@ public class CCleaner
 				}
 			});
 		return l;
-	}
-
-	/**
-	 * Process (close & delete) all DRs on 'User:ArchiveBot/SingletonDR'
-	 * 
-	 * @return A list of titles we didn't process.
-	 */
-	private static ArrayList<String> processDRs()
-	{
-		ArrayList<ProcDR> dl = new ArrayList<>();
-		for (String s : admin.getTemplatesOnPage("User:ArchiveBot/SingletonDR"))
-			if (s.startsWith("Commons:Deletion requests/"))
-				dl.add(new ProcDR(s));
-		return Task.toString(admin.submit(dl, 20));
-	}
-
-	/**
-	 * Represents a DR to process and close.
-	 * 
-	 * @author Fastily
-	 * 
-	 */
-	private static class ProcDR extends Task
-	{
-		/**
-		 * Constructor.
-		 * 
-		 * @param title The DR to process
-		 */
-		private ProcDR(String title)
-		{
-			super(title, null, String.format("[[%s]]", title));
-		}
-
-		/**
-		 * Delete all files on the page and mark the DR as closed.
-		 * 
-		 * @param wiki The wiki object to use
-		 * @return True if we were successful
-		 */
-		public boolean doJob(Wiki wiki)
-		{
-			for (String s : admin.getLinksOnPage(title, "File"))
-				wiki.delete(s, summary);
-
-			text = wiki.getPageText(title);
-			return text != null ? wiki.edit(title, String.format("{{delh}}%n%s%n----%n'''Deleted''' -~~~~%n{{delf}}", text),
-					"deleted") : false;
-		}
 	}
 }

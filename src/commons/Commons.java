@@ -96,6 +96,7 @@ public class Commons
 	 */
 	public ArrayList<String> categoryNuke(String cat, String reason, boolean delCat, String... ns)
 	{
+		//TODO: getCategorySize breaks if namespace not supplied
 		ArrayList<String> fails = CAction.delete(admin, reason, admin.getCategoryMembers(cat, ns));
 		if (delCat && admin.getCategorySize(cat) == 0)
 			admin.delete(cat, CStrings.ec);

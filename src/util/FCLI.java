@@ -86,4 +86,16 @@ public class FCLI
 			return null; //dead code to shut up compiler.
 		}
 	}
+	
+	/**
+	 * Creates some default options for us.
+	 * @return The list of options we made.
+	 */
+	public static Options makeDefaultOptions()
+	{
+		Options ol = new Options();
+		ol.addOption("help", false, "Print this help message and exit");
+		ol.addOption(makeArgOption("user", "Set the the user to login as", "username"));		
+		return ol;
+	}
 }

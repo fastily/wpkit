@@ -5,8 +5,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import util.WikiGen;
 import jwiki.core.Wiki;
-import jwiki.util.WikiGen;
 
 /**
  * A tiny COM:UD archiving bot.
@@ -23,7 +23,7 @@ public class UDRArchive
 	 */
 	public static void main(String[] args)
 	{
-		Wiki wiki = WikiGen.generate("ArchiveBot");
+		Wiki wiki = WikiGen.wg.get("ArchiveBot");
 		String target = "Commons:Undeletion requests/Current requests";
 		String text = wiki.getPageText(target);
 		Matcher m = Pattern.compile("(?si)\\s*?\\{\\{(udelh)\\}\\}.+?\\{\\{(udelf)\\}\\}\\s*?").matcher(text);
@@ -40,7 +40,7 @@ public class UDRArchive
 		String archive = "Commons:Undeletion requests/Archive/"
 				+ LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM"));
 
-		if (cnt == 0) // check if there were no threads to archive
+		if (cnt == 0) // if there were no threads to archive, exit
 			return;
 
 		wiki.edit(archive, wiki.exists(archive) ? wiki.getPageText(archive) + dump : dump,

@@ -265,7 +265,7 @@ public class WikiGen
 	 * 'commons.wikimedia.org'
 	 * 
 	 * @param rank The preferred wiki object at this rank
-	 * @return The requtested wiki obejct, or null if we have no such user-password combo
+	 * @return The requested wiki obejct, or null if we have no such user-password combo
 	 */
 	public synchronized Wiki get(int rank)
 	{

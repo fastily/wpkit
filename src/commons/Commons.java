@@ -5,11 +5,12 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 
 import jwiki.core.CAction;
-import jwiki.core.Contrib;
 import jwiki.core.MBot;
 import jwiki.core.MQuery;
 import jwiki.core.Namespace;
 import jwiki.core.Wiki;
+import jwiki.dwrap.Contrib;
+import jwiki.dwrap.ImageInfo;
 import jwiki.util.ReadFile;
 import jwiki.util.Tuple;
 
@@ -20,68 +21,6 @@ import jwiki.util.Tuple;
  */
 public class Commons
 {
-	/**
-	 * The admin object to use.
-	 */
-	private Wiki admin = null;
-
-	/**
-	 * The normal user object to use.
-	 */
-	private Wiki clone;
-
-	/**
-	 * Creates a Commons object for us. Non-admin tasks will be assigned to <tt>wiki</tt>, whereas admin tasks will be
-	 * run from <tt>admin</tt>. Current domain of either object does not have to be set to Commons.
-	 * 
-	 * @param wiki wiki object to use for non-admin tasks. PRECONDITION: this field cannot be null.
-	 * @param admin wiki object for admin tasks. If you're not an admin, you ought to specify this to be null, otherwise
-	 *           you may get strange behavior if you execute admin tasks.
-	 */
-	public Commons(Wiki wiki, Wiki admin)
-	{
-		clone = wiki;
-		if (admin != null && !admin.listGroupsRights(admin.whoami()).contains("sysop"))
-			throw new IllegalArgumentException(String.format("%s is not an admin but was claimed to be one!", admin.whoami()));
-
-		this.admin = admin;
-	}
-
-	/**
-	 * Deletes everything in Category:Fastily Test as uploader requested.
-	 * 
-	 * @param exit Set to true if program should exit after procedure completes.
-	 * @return A list of titles which couldn't be deleted.
-	 */
-	public ArrayList<String> nukeFastilyTest(boolean exit)
-	{
-		ArrayList<String> fails = categoryNuke("Fastily Test", CStrings.ur, false);
-		if (exit)
-			System.exit(0);
-		return fails;
-	}
-
-	/**
-	 * Deletes all the files in <a href="http://commons.wikimedia.org/wiki/Category:Copyright_violations"
-	 * >Category:Copyright violations</a>.
-	 */
-	public ArrayList<String> clearCopyVios()
-	{
-		return categoryNuke(CStrings.cv, CStrings.copyvio, false, "File");
-	}
-
-	/**
-	 * Deletes everything in <a href= "http://commons.wikimedia.org/wiki/Category:Other_speedy_deletions" >Category:Other
-	 * speedy deletions</a>
-	 * 
-	 * @param reason Delete reason
-	 * @param ns Namespace(s) to restrict deletion to. Leave blank to ignore namespace.
-	 * @return A list of titles we didn't delete.
-	 */
-	public ArrayList<String> clearOSD(String reason, String... ns)
-	{
-		return categoryNuke(CStrings.osd, reason, false, ns);
-	}
 
 	/**
 	 * Deletes the titles in a category.
@@ -94,12 +33,12 @@ public class Commons
 	 *           select all namesapces
 	 * @return A list of titles we didn't delete.
 	 */
-	public ArrayList<String> categoryNuke(String cat, String reason, boolean delCat, String... ns)
+	public static ArrayList<String> categoryNuke(Wiki wiki, String cat, String reason, boolean delCat, String... ns)
 	{
-		//TODO: getCategorySize breaks if namespace not supplied
-		ArrayList<String> fails = CAction.delete(admin, reason, admin.getCategoryMembers(cat, ns));
-		if (delCat && admin.getCategorySize(cat) == 0)
-			admin.delete(cat, CStrings.ec);
+		//TODO: getCategorySize breaks if namespace not supplied - Does it really?
+		ArrayList<String> fails = CAction.delete(wiki, reason, wiki.getCategoryMembers(cat, ns));
+		if (delCat && wiki.getCategorySize(cat) == 0)
+			wiki.delete(cat, CStrings.ec);
 		return fails;
 	}
 
@@ -109,9 +48,9 @@ public class Commons
 	 * @param dr The dr from which to get files.
 	 * @return A list of pages we failed to delete.
 	 */
-	public ArrayList<String> drDel(String dr)
+	public static ArrayList<String> drDel(Wiki wiki, String dr)
 	{
-		return nukeLinksOnPage(dr, "[[" + dr + "]]", "File");
+		return nukeLinksOnPage(wiki, dr, "[[" + dr + "]]", "File");
 	}
 
 	/**
@@ -121,28 +60,24 @@ public class Commons
 	 * @param path The path to the file
 	 * @return A list of pages we didn't restore.
 	 */
-	public ArrayList<String> restoreFromFile(String path, String reason)
+	public static ArrayList<String> restoreFromFile(Wiki wiki, String path, String reason)
 	{
-		return CAction.undelete(admin, true, reason, new ReadFile(path).l);
+		return CAction.undelete(wiki, true, reason, new ReadFile(path).l);
 	}
 
-	// TODO: This likely won't be necessary once fileinfo is released. Disabled for now.
 	/**
 	 * Nukes empty files or files without an associated description page.
 	 * 
 	 * @param files A list of pages in the file namespace. PRECONDITION -- The files must be in the filenamespace.
 	 * @return A list of titles which couldn't be processed
 	 */
-	public ArrayList<String> nukeEmptyFiles(ArrayList<String> files)
+	public static ArrayList<String> nukeEmptyFiles(Wiki wiki, ArrayList<String> files)
 	{
-		/*
-		 * ArrayList<WAction> l = new ArrayList<>(); for (String s : files) l.add(new WAction(s, null, CStrings.nfu) {
-		 * public boolean doJob(Wiki wiki) { return wiki.getImageInfo(title) == null ? wiki.delete(title, summary) : true;
-		 * } });
-		 * 
-		 * return WAction.toString(admin.mbot.start(l));
-		 */
-		throw new UnsupportedOperationException();
+		ArrayList<String> l = new ArrayList<>();
+		for(Tuple<String, ImageInfo> ix : MQuery.getImageInfo(wiki, -1, -1, files))
+			if(ix.y.redirectsTo != null || ix.y.dimensions == null)
+				l.add(ix.x);
+		return CAction.delete(wiki, CStrings.nfu, files);
 	}
 
 	/**
@@ -151,13 +86,13 @@ public class Commons
 	 * @param cats The categories to check and delete.
 	 * @return A list of titles we failed to delete.
 	 */
-	public ArrayList<String> emptyCatDel(ArrayList<String> cats)
+	public static ArrayList<String> emptyCatDel(Wiki wiki, ArrayList<String> cats)
 	{
 		ArrayList<String> l = new ArrayList<>();
-		for (Tuple<String, Integer> t : MQuery.getCategorySize(admin, cats))
+		for (Tuple<String, Integer> t : MQuery.getCategorySize(wiki, cats))
 			if (t.y.intValue() == 0)
 				l.add(t.x);
-		return CAction.delete(admin, CStrings.ec, l);
+		return CAction.delete(wiki, CStrings.ec, l);
 	}
 
 	/**
@@ -168,12 +103,12 @@ public class Commons
 	 * @param ns Namespace(s) of the items to delete.
 	 * @return A list of titles we didn't delete.
 	 */
-	public ArrayList<String> nukeContribs(String user, String reason, String... ns)
+	public static ArrayList<String> nukeContribs(Wiki wiki, String user, String reason, String... ns)
 	{
 		ArrayList<String> l = new ArrayList<>();
-		for (Contrib c : admin.getContribs(user, ns))
+		for (Contrib c : wiki.getContribs(user, ns))
 			l.add(c.title);
-		return CAction.delete(admin, reason, l);
+		return CAction.delete(wiki, reason, l);
 	}
 
 	/**
@@ -183,9 +118,9 @@ public class Commons
 	 * @param reason The reason to use
 	 * @return A list of titles we didn't delete
 	 */
-	public ArrayList<String> nukeUploads(String user, String reason)
+	public static ArrayList<String> nukeUploads(Wiki wiki, String user, String reason)
 	{
-		return CAction.delete(admin, reason, admin.getUserUploads(Namespace.nss(user)));
+		return CAction.delete(wiki, reason, wiki.getUserUploads(Namespace.nss(user)));
 	}
 
 	/**
@@ -197,9 +132,9 @@ public class Commons
 	 * @return The links on the title in the requested namespace
 	 * 
 	 */
-	public ArrayList<String> nukeLinksOnPage(String title, String reason, String... ns)
+	public static ArrayList<String> nukeLinksOnPage(Wiki wiki, String title, String reason, String... ns)
 	{
-		return CAction.delete(admin, reason, admin.getLinksOnPage(true, title, ns));
+		return CAction.delete(wiki, reason, wiki.getLinksOnPage(true, title, ns));
 	}
 
 	/**
@@ -209,9 +144,9 @@ public class Commons
 	 * @param reason The reason to use when deleting
 	 * @return A list of files we failed to process.
 	 */
-	public ArrayList<String> nukeImagesOnPage(String title, String reason)
+	public static ArrayList<String> nukeImagesOnPage(Wiki wiki, String title, String reason)
 	{
-		return CAction.delete(admin, reason, MQuery.exists(admin, true, admin.getImagesOnPage(title)));
+		return CAction.delete(wiki, reason, MQuery.exists(wiki, true, wiki.getImagesOnPage(title)));
 	}
 
 	/**
@@ -221,9 +156,9 @@ public class Commons
 	 * @param reason Reason to use when deleting
 	 * @return A list of pages we failed to delete.
 	 */
-	public ArrayList<String> nukeFromFile(String path, String reason)
+	public static ArrayList<String> nukeFromFile(Wiki wiki, String path, String reason)
 	{
-		return CAction.delete(admin, reason, new ReadFile(path).l);
+		return CAction.delete(wiki, reason, new ReadFile(path).l);
 	}
 
 	/**
@@ -233,9 +168,9 @@ public class Commons
 	 * @param titles The titles to remove <code>{{delete}}</code> from
 	 * @return A list of titles we didn't remove the templates from.
 	 */
-	public ArrayList<String> removeDelete(String reason, ArrayList<String> titles)
+	public static ArrayList<String> removeDelete(Wiki wiki, String reason, ArrayList<String> titles)
 	{
-		return CAction.replace(clone, CStrings.drregex, "", reason, titles);
+		return CAction.replace(wiki, CStrings.drregex, "", reason, titles);
 	}
 
 	/**
@@ -245,9 +180,9 @@ public class Commons
 	 * @param titles The titles to remove no perm/lic/src templates from
 	 * @return A list of titles we failed to remove the templates from.
 	 */
-	public ArrayList<String> removeLSP(String reason, ArrayList<String> titles)
+	public static ArrayList<String> removeLSP(Wiki wiki, String reason, ArrayList<String> titles)
 	{
-		return CAction.replace(clone, CStrings.delregex, "", reason, titles);
+		return CAction.replace(wiki, CStrings.delregex, "", reason, titles);
 	}
 
 	/**
@@ -257,7 +192,7 @@ public class Commons
 	 * @param files The files to send to DR.
 	 * @return True if we were able to post to today's log.
 	 */
-	public boolean sendToDR(String reason, String... files)
+	public static boolean sendToDR(Wiki wiki, String reason, String... files)
 	{
 		ZonedDateTime zdt = ZonedDateTime.now(ZoneId.of("UTC"));
 		String header = "Commons:Deletion requests/";
@@ -278,12 +213,12 @@ public class Commons
 				}
 			});
 
-		clone.submit(wl, 2);
+		wiki.submit(wl, 2);
 
 		String x = "";
 		for (String s : files)
 			x += String.format("\n{{%s%s}}", header, s);
 
-		return clone.addText(String.format("%s%d/%02d/%02d", header, year, month, day), x, "+", false);
+		return wiki.addText(String.format("%s%d/%02d/%02d", header, year, month, day), x, "+", false);
 	}
 }

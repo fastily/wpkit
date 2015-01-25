@@ -1,9 +1,9 @@
 package ft;
 
 import java.util.ArrayList;
-import java.util.Scanner;
 
 import commons.CStrings;
+import commons.Commons;
 import jwiki.core.CAction;
 import jwiki.core.Wiki;
 
@@ -13,7 +13,7 @@ import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 
 import util.FCLI;
-import static ft.Core.*;
+import util.WikiGen;
 import static jwiki.core.MBot.Task;
 
 /**
@@ -37,9 +37,11 @@ public class CCleaner
 	 */
 	public static void main(String[] args)
 	{
-		CommandLine l = init(args, makeOptList(),
+		CommandLine l = FCLI.gnuParse(makeOptList(), args,
 				"CCleaner [-dr|-t|[-p <title>|-u <user>|-c <cat> -f <filepath>] -r <reason>|-oos|-ur|-fu] [-d]");
 
+		Wiki wiki = WikiGen.wg.get(1);
+		
 		// Set reason param if applicable.
 		if (l.hasOption('r'))
 			rsn = l.getOptionValue('r');
@@ -56,27 +58,25 @@ public class CCleaner
 		if (!rsn.isEmpty())
 		{
 			if (l.hasOption('p'))
-				com.nukeLinksOnPage(l.getOptionValue('p'), rsn, "File");
+				Commons.nukeLinksOnPage(wiki, l.getOptionValue('p'), rsn, "File");
 			else if (l.hasOption('u'))
-				com.nukeUploads(l.getOptionValue('u'), rsn);
+				Commons.nukeUploads(wiki, l.getOptionValue('u'), rsn);
 			else if (l.hasOption('c'))
-				com.categoryNuke(l.getOptionValue('c'), rsn, false);
+				Commons.categoryNuke(wiki, l.getOptionValue('c'), rsn, false);
 			else if (l.hasOption('o'))
-				com.clearOSD(rsn);
+				Commons.categoryNuke(wiki, CStrings.osd, rsn, false);
 			else if (l.hasOption('f'))
-				com.nukeFromFile(l.getOptionValue('f'), rsn);
+				Commons.nukeFromFile(wiki, l.getOptionValue('f'), rsn);
 		}
 		else if (l.hasOption("dr")) // DR processing
-			com.drDel(l.getOptionValue("dr"));
-		else if (l.hasOption('t')) // Empty Talk Page clear from DBR
-			talkPageClear();
+			Commons.drDel(wiki, l.getOptionValue("dr"));
 		else
 		// generic tasks. Should only run if 0 args specified, or something wasn't set right.
 		{
-			com.categoryNuke(CStrings.cv, CStrings.copyvio, false, "File");
-			com.emptyCatDel(admin.getCategoryMembers(CStrings.osd, "Category"));
-			com.emptyCatDel(admin.getCategoryMembers("Non-media deletion requests", "Category"));
-			// com.nukeEmptyFiles(admin.getCategoryMembers(CStrings.osd, "File"));
+			Commons.categoryNuke(wiki, CStrings.cv, CStrings.copyvio, false, "File");
+			Commons.emptyCatDel(wiki, wiki.getCategoryMembers(CStrings.osd, "Category"));
+			Commons.emptyCatDel(wiki, wiki.getCategoryMembers("Non-media deletion requests", "Category"));
+			Commons.nukeEmptyFiles(wiki, wiki.getCategoryMembers(CStrings.osd, "File"));
 
 			if (l.hasOption('d'))
 				unknownClear();
@@ -85,7 +85,7 @@ public class CCleaner
 
 	private static Options makeOptList()
 	{
-		Options ol = new Options();
+		Options ol = FCLI.makeDefaultOptions();
 
 		OptionGroup og = new OptionGroup();
 		og.addOption(FCLI.makeArgOption("dr", "Delete all files linked in a DR", "DR"));
@@ -111,25 +111,6 @@ public class CCleaner
 	}
 
 	/**
-	 * Deletes all pages on "Commons:Database reports/Orphaned talk pages".
-	 * 
-	 * @return A list of pages we failed to process
-	 */
-	private static ArrayList<String> talkPageClear()
-	{
-		ArrayList<String> l = new ArrayList<>();
-		Scanner m = new Scanner(admin.getPageText("Commons:Database reports/Orphaned talk pages"));
-
-		String ln;
-		while (m.hasNextLine())
-			if ((ln = m.nextLine()).contains("{{plnr"))
-				l.add(ln.substring(ln.indexOf("=") + 1, ln.indexOf("}}")));
-		m.close();
-
-		return CAction.delete(admin, "Orphaned talk page", l);
-	}
-
-	/**
 	 * Clears daily categories in Category:Unknown. List is grabbed from <a
 	 * href="https://commons.wikimedia.org/wiki/User:FSV/UC">User:FSV/UC</a>
 	 * 
@@ -137,6 +118,7 @@ public class CCleaner
 	 */
 	private static ArrayList<String> unknownClear()
 	{
+		/*
 		user.nullEdit("User:FastilyClone/UC");
 
 		ArrayList<Task> l = new ArrayList<>();
@@ -155,7 +137,9 @@ public class CCleaner
 
 		ArrayList<String> fails = Task.toString(admin.submit(l, 20));
 		com.emptyCatDel(cats);
-		return fails;
+		return fails;*/
+		
+		return null;
 
 	}
 
@@ -169,6 +153,7 @@ public class CCleaner
 	 */
 	private static ArrayList<Task> genUCDI(String cat, String front, String back)
 	{
+		/*
 		ArrayList<Task> l = new ArrayList<Task>();
 		String rsn = String.format("%s %s: %s", front, cat.substring(cat.indexOf("as of") + 6), back);
 
@@ -179,6 +164,8 @@ public class CCleaner
 					return admin.delete(title, summary);
 				}
 			});
-		return l;
+		return l;*/
+		
+		return null;
 	}
 }

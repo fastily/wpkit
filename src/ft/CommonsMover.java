@@ -1,6 +1,5 @@
 package ft;
 
-import static ft.Core.*;
 import static jwiki.core.MBot.Task;
 
 import java.io.File;
@@ -23,6 +22,7 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 
 import util.FCLI;
+import util.WikiGen;
 
 /**
  * Command line utility to transwiki items from enwp to Commons. Performs rudimentary checks for inappropriate files.
@@ -77,9 +77,8 @@ public class CommonsMover
 	 */
 	public static void main(String[] args)
 	{
-		CommandLine l = init(args, makeOptList(), hstring);
-		com = user;
-		enwp = user.getWiki("en.wikipedia.org");
+		CommandLine l = FCLI.gnuParse(makeOptList(), args, hstring);
+		enwp = (com = WikiGen.wg.get("FastilyClone")).getWiki("en.wikipedia.org");
 
 		if (l.hasOption('t'))
 			maxthreads = Integer.parseInt(l.getOptionValue('t'));
@@ -100,7 +99,7 @@ public class CommonsMover
 		ArrayList<TransferItem> tfl = new ArrayList<TransferItem>();
 		for (String s : tl)
 			tfl.add(new TransferItem(s));
-		user.submit(tfl, maxthreads);
+		com.submit(tfl, maxthreads);
 	}
 
 	/**
@@ -110,12 +109,10 @@ public class CommonsMover
 	 */
 	private static Options makeOptList()
 	{
-		Options ol = new Options();
-
+		Options ol = FCLI.makeDefaultOptions();
 		ol.addOptionGroup(FCLI.makeOptGroup(FCLI.makeArgOption("c", "Transfer all files in this category", "category"),
 				FCLI.makeArgOption("u", "Transfer al files uploaded by this user", "user")));
 		ol.addOption(FCLI.makeArgOption("t", "Set the maximum number of threads", "threads"));
-
 		return ol;
 	}
 

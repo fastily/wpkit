@@ -17,10 +17,10 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 
 import util.FCLI;
+import util.WikiGen;
 import jwiki.core.Wiki;
 import jwiki.util.FIO;
 import jwiki.util.FString;
-import static ft.Core.*;
 import static jwiki.core.MBot.Task;
 
 /**
@@ -64,14 +64,14 @@ public class Up
 	 */
 	public static void main(String[] args)
 	{
-		CommandLine l = init(args, makeOptList(), "Up [-t <threads>]");
+		CommandLine l = FCLI.gnuParse(makeOptList(), args, "Up [-t <threads>] <Directories/Files>");
 
 		try
 		{
-			ArrayList<String> fails = Task.toString(admin.submit(generateUploadItem(args),
+			ArrayList<String> fails = Task.toString(WikiGen.wg.get(1).submit(generateUploadItem(args),
 					Integer.parseInt(l.getOptionValue('t', "1"))));
 			if (fails.size() > 0)
-				FIO.dumpToFile("./Up fails.txt", true, fails);
+				FIO.dumpToFile("./UpFails.txt", true, fails);
 		}
 		catch (Throwable e)
 		{
@@ -79,11 +79,14 @@ public class Up
 		}
 	}
 
+	/**
+	 * Generates our CLI Options list
+	 * @return The list of options
+	 */
 	private static Options makeOptList()
 	{
-		Options ol = new Options();
+		Options ol = FCLI.makeDefaultOptions();
 		ol.addOption(FCLI.makeArgOption("t", "Sets the maximum number of concurrent threads uploading", "threads"));
-
 		return ol;
 	}
 

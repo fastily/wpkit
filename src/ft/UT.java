@@ -1,6 +1,5 @@
 package ft;
 
-import static ft.Core.*;
 import static jwiki.core.MBot.Task;
 
 import java.nio.file.Files;
@@ -12,8 +11,10 @@ import java.util.HashSet;
 import java.util.List;
 
 import commons.CStrings;
+import commons.Commons;
 import jwiki.core.ColorLog;
 import jwiki.core.Wiki;
+import jwiki.util.FError;
 import jwiki.util.FIO;
 import jwiki.util.FString;
 import jwiki.util.ReadFile;
@@ -23,6 +24,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
 import util.FCLI;
+import util.WikiGen;
 
 /**
  * Random file uploader. Use in conjunction with bash tools for diagnostics.
@@ -30,7 +32,7 @@ import util.FCLI;
  * @author Fastily
  * 
  */
-public class CC
+public class UT
 {
 	/**
 	 * Upload test text.
@@ -42,7 +44,7 @@ public class CC
 	/**
 	 * The help string for this method.
 	 */
-	private static final String hstring = "CC [-nr] [-help] [-h number] [-r retries] [-f] [-nd|-sd] [-t <textfile>|<files or directories>]";
+	private static final String hstring = "CC [-nr] [-help] [-h number] [-r retries] [-f] [-nd|-sd] <-t <textfile>>|<files or directories>";
 
 	/**
 	 * Flag indicating whether we should suppress deletions
@@ -52,8 +54,8 @@ public class CC
 	/**
 	 * The number of times we should repeat in event of failure
 	 */
-	private static int repeats;
-
+	private static int repeats;	
+	
 	/**
 	 * Main driver.
 	 * 
@@ -62,21 +64,19 @@ public class CC
 	 */
 	public static void main(String[] args) throws ParseException
 	{
-		CommandLine l = init(args, makeOptList(), hstring);
+		CommandLine l = FCLI.gnuParse(makeOptList(), args, hstring);
 
 		if (l.hasOption('f'))
-			com.nukeFastilyTest(true);
+			Commons.categoryNuke(WikiGen.wg.get("Fastily"), "Fastily Test", CStrings.ur, false);
 
 		nd = l.hasOption("nd") || l.hasOption("sd");
 		repeats = Integer.parseInt(l.getOptionValue('r', "1"));
 
-		ArrayList<CCW> ccwl;
-		if (l.hasOption('t'))
-			ccwl = generateCCW(new ReadFile(l.getOptionValue('t')).l);
-		else
-			ccwl = generateCCW(Arrays.asList(l.getArgs()));
+		ArrayList<CCW> ccwl = l.hasOption('t') ? generateCCW(new ReadFile(l.getOptionValue('t')).l) : generateCCW(Arrays
+				.asList(l.getArgs()));
 
-		ArrayList<String> ml = Task.toString(user.submit(ccwl, Integer.parseInt(l.getOptionValue('h', "1"))));
+		
+		ArrayList<String> ml = Task.toString(WikiGen.wg.get("FastilyClone").submit(ccwl, Integer.parseInt(l.getOptionValue('h', "1"))));
 		if (ml.size() > 0)
 			FIO.dumpToFile("./CCfails.txt", true, ml);
 	}
@@ -101,7 +101,7 @@ public class CC
 		}
 
 		if (sl.isEmpty())
-			sl.addAll(FIO.findFiles(Paths.get(".")));
+			FError.errAndExit("No paths provided, program exiting.");
 
 		ArrayList<CCW> x = new ArrayList<>();
 		for (Path p : sl)
@@ -116,7 +116,7 @@ public class CC
 	 */
 	private static Options makeOptList()
 	{
-		Options ol = new Options();
+		Options ol = FCLI.makeDefaultOptions();
 
 		ol.addOption("nd", false, "Surpress deletion after upload");
 		ol.addOption("sd", false, "Alias of '-nd'");
@@ -166,7 +166,7 @@ public class CC
 				if (wiki.upload(p, fn, text, " "))
 				{
 					if (!nd)
-						admin.delete(fn, CStrings.ur);
+						WikiGen.wg.get("Fastily").delete(fn, CStrings.ur);
 					return true;
 				}
 			}

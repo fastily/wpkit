@@ -124,7 +124,7 @@ public class UT
 
 		ol.addOption(FCLI.makeArgOption("h", "Sets the number of threads of execution", "#threads"));
 		ol.addOption(FCLI.makeArgOption("r", "Number of times to repeat in event of failure", "#retries"));
-		ol.addOption(FCLI.makeArgOption("t", "Select files to upload from a text file", "<textfile>"));
+		ol.addOption(FCLI.makeArgOption("t", "Select files to upload from a text file", "textfile"));
 
 		return ol;
 	}

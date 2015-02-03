@@ -77,7 +77,7 @@ public class Commons
 		for(Tuple<String, ImageInfo> ix : MQuery.getImageInfo(wiki, -1, -1, files))
 			if(ix.y.redirectsTo != null || ix.y.dimensions == null)
 				l.add(ix.x);
-		return CAction.delete(wiki, CStrings.nfu, files);
+		return CAction.delete(wiki, CStrings.nfu, l);
 	}
 
 	/**
@@ -90,7 +90,7 @@ public class Commons
 	{
 		ArrayList<String> l = new ArrayList<>();
 		for (Tuple<String, Integer> t : MQuery.getCategorySize(wiki, cats))
-			if (t.y.intValue() == 0)
+			if (t.y.intValue() <= 0) // Handle case when MediaWiki does not return categoryinfo
 				l.add(t.x);
 		return CAction.delete(wiki, CStrings.ec, l);
 	}

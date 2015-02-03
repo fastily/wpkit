@@ -93,7 +93,7 @@ public class CStrings
 	/**
 	 * Regex that matches DR templates on Commons.
 	 */
-	public static final String drregex = "(?si)\\s??\\{\\{(delete).*?\\}\\}\\s??";
+	public static final String drregex = "(?si)\\s??\\{\\{(db|delete).*?\\}\\}\\s??";
 	
 	/**
 	 * User requested in own userspace.

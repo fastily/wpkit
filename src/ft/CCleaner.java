@@ -1,10 +1,11 @@
 package ft;
 
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 import commons.CStrings;
 import commons.Commons;
-import jwiki.core.CAction;
 import jwiki.core.Wiki;
 
 import org.apache.commons.cli.CommandLine;
@@ -26,6 +27,11 @@ import static jwiki.core.MBot.Task;
 public class CCleaner
 {
 	/**
+	 * Matches the last characters of a daily deletion category.
+	 */
+	private static final String ddregex = ".+?\\d{2}? (January|February|March|April|May|June|July|August|September|October|Novemeber|December) \\d{4}?";
+
+	/**
 	 * The reason parameter we'll be using to delete with, if applicable.
 	 */
 	private static String rsn = "";
@@ -41,7 +47,7 @@ public class CCleaner
 				"CCleaner [-dr|-t|[-p <title>|-u <user>|-c <cat> -f <filepath>] -r <reason>|-oos|-ur|-fu] [-d]");
 
 		Wiki wiki = WikiGen.wg.get(1);
-		
+
 		// Set reason param if applicable.
 		if (l.hasOption('r'))
 			rsn = l.getOptionValue('r');
@@ -79,7 +85,7 @@ public class CCleaner
 			Commons.nukeEmptyFiles(wiki, wiki.getCategoryMembers(CStrings.osd, "File"));
 
 			if (l.hasOption('d'))
-				unknownClear();
+				unknownClear(wiki);
 		}
 	}
 
@@ -111,61 +117,64 @@ public class CCleaner
 	}
 
 	/**
-	 * Clears daily categories in Category:Unknown. List is grabbed from <a
-	 * href="https://commons.wikimedia.org/wiki/User:FSV/UC">User:FSV/UC</a>
+	 * Clears eligible daily categories in Category:Unknown
 	 * 
-	 * @return A list of pages we failed to process
+	 * @param wiki The wiki object to use
+	 * @return A list of titles we couldn't process.
 	 */
-	private static ArrayList<String> unknownClear()
+	private static ArrayList<String> unknownClear(Wiki wiki)
 	{
-		/*
-		user.nullEdit("User:FastilyClone/UC");
+		OffsetDateTime now = OffsetDateTime.now().plusDays(-8);
+		DateTimeFormatter dtf = DateTimeFormatter.ofPattern("d MMMM yyyy HH:mm:ss X");
 
-		ArrayList<Task> l = new ArrayList<>();
+		ArrayList<String> cats = new ArrayList<>();
+		for (String h : new String[] { "Media missing permission", "Media without a license", "Media without a source" })
+			for (String cat : wiki.getCategoryMembers(h, "Category"))
+				if (cat.matches(ddregex)
+						&& OffsetDateTime.parse(cat.substring(cat.indexOf("as of") + 6) + " 00:00:00 Z", dtf).isBefore(now))
+					cats.add(cat);
+
 		String baseLS = "you may [[Special:Upload|re-upload]] the file, but please %s";
-
-		ArrayList<String> cats = admin.getLinksOnPage(true, "User:FastilyClone/UC");
+		ArrayList<Task> l = new ArrayList<>();
 		for (String c : cats)
 		{
 			if (c.contains("permission"))
-				l.addAll(genUCDI(c, "[[COM:OTRS|No permission]] since", CStrings.baseP));
+				l.addAll(genUCDI(wiki, c, "[[COM:OTRS|No permission]] since", CStrings.baseP));
 			else if (c.contains("license"))
-				l.addAll(genUCDI(c, "No license since", String.format(baseLS, "include a [[COM:CT|license tag]]")));
+				l.addAll(genUCDI(wiki, c, "No license since", String.format(baseLS, "include a [[COM:CT|license tag]]")));
 			else
-				l.addAll(genUCDI(c, "No source since", String.format(baseLS, "cite the file's source")));
+				// no source
+				l.addAll(genUCDI(wiki, c, "No source since", String.format(baseLS, "cite the file's source")));
 		}
 
-		ArrayList<String> fails = Task.toString(admin.submit(l, 20));
-		com.emptyCatDel(cats);
-		return fails;*/
-		
-		return null;
-
+		ArrayList<String> fails = Task.toString(wiki.submit(l, 20));
+		Commons.emptyCatDel(wiki, cats);
+		return fails;
 	}
 
 	/**
 	 * Helper for unknownClear(). Parse out date from category and generate reason params for items to delete
 	 * 
+	 * @param wiki The wiki object to use
 	 * @param cat The category to process
 	 * @param front The front part of the reason, before the colon.
 	 * @param back The back part of the reason, after the colon.
-	 * @return A list of DeleteItems we created.
+	 * @return A list of Task objects we created.
 	 */
-	private static ArrayList<Task> genUCDI(String cat, String front, String back)
+	private static ArrayList<Task> genUCDI(Wiki wiki, String cat, String front, String back)
 	{
-		/*
+
 		ArrayList<Task> l = new ArrayList<Task>();
 		String rsn = String.format("%s %s: %s", front, cat.substring(cat.indexOf("as of") + 6), back);
 
-		for (String s : admin.getCategoryMembers(cat, "File"))
+		for (String s : wiki.getCategoryMembers(cat, "File"))
 			l.add(new Task(s, null, rsn) {
 				public boolean doJob(Wiki wiki)
 				{
-					return admin.delete(title, summary);
+					return wiki.delete(title, summary);
 				}
 			});
-		return l;*/
-		
-		return null;
+		return l;
 	}
+
 }

@@ -125,7 +125,7 @@ public class CCleaner
 	private static ArrayList<String> unknownClear(Wiki wiki)
 	{
 		OffsetDateTime now = OffsetDateTime.now().plusDays(-8);
-		DateTimeFormatter dtf = DateTimeFormatter.ofPattern("d MMMM yyyy HH:mm:ss X");
+		DateTimeFormatter dtf = DateTimeFormatter.ofPattern("d MMMM yyyy HH:mm:ss X"); //hacky workaround until this is patched
 
 		ArrayList<String> cats = new ArrayList<>();
 		for (String h : new String[] { "Media missing permission", "Media without a license", "Media without a source" })
@@ -176,5 +176,4 @@ public class CCleaner
 			});
 		return l;
 	}
-
 }

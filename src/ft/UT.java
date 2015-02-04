@@ -5,25 +5,27 @@ import static jwiki.core.MBot.Task;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 
 import commons.CStrings;
 import commons.Commons;
 import jwiki.core.ColorLog;
 import jwiki.core.Wiki;
 import jwiki.util.FError;
-import jwiki.util.FIO;
-import jwiki.util.FString;
-import jwiki.util.ReadFile;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
 import util.FCLI;
+import util.FIO;
+import util.ReadFile;
 import util.WikiGen;
 
 /**
@@ -54,8 +56,8 @@ public class UT
 	/**
 	 * The number of times we should repeat in event of failure
 	 */
-	private static int repeats;	
-	
+	private static int repeats;
+
 	/**
 	 * Main driver.
 	 * 
@@ -75,8 +77,8 @@ public class UT
 		ArrayList<CCW> ccwl = l.hasOption('t') ? generateCCW(new ReadFile(l.getOptionValue('t')).l) : generateCCW(Arrays
 				.asList(l.getArgs()));
 
-		
-		ArrayList<String> ml = Task.toString(WikiGen.wg.get("FastilyClone").submit(ccwl, Integer.parseInt(l.getOptionValue('h', "1"))));
+		ArrayList<String> ml = Task.toString(WikiGen.wg.get("FastilyClone").submit(ccwl,
+				Integer.parseInt(l.getOptionValue('h', "1"))));
 		if (ml.size() > 0)
 			FIO.dumpToFile("./CCfails.txt", true, ml);
 	}
@@ -138,6 +140,11 @@ public class UT
 	private static class CCW extends Task
 	{
 		/**
+		 * The resident random number generator
+		 */
+		private static final Random r = new Random();
+
+		/**
 		 * The path pointing to the file to upload
 		 */
 		private Path p;
@@ -160,7 +167,9 @@ public class UT
 		{
 			for (int i = 0; i < repeats; i++)
 			{
-				String fn = "File:" + FString.generateRandomFileName(p);
+				String fn = "File:"
+						+ String.format("%s x %#o.%s", LocalTime.now().format(DateTimeFormatter.ofPattern("HH.mm.ss")),
+								r.nextInt(0xFF), FIO.getExtension(p, false));
 				ColorLog.fyi(String.format("(%d/%d): Upload '%s' -> '%s'", i + 1, repeats, FIO.getFileName(p), fn));
 
 				if (wiki.upload(p, fn, text, " "))

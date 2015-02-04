@@ -17,10 +17,10 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 
 import util.FCLI;
+import util.FIO;
+import util.StringTools;
 import util.WikiGen;
 import jwiki.core.Wiki;
-import jwiki.util.FIO;
-import jwiki.util.FString;
 import static jwiki.core.MBot.Task;
 
 /**
@@ -116,7 +116,7 @@ public class Up
 		ArrayList<UploadItem> ul = new ArrayList<>();
 		for (Path p : l)
 		{
-			String titlebase = FString.capitalize(FIO.getFileName(p.getParent()));
+			String titlebase = StringTools.capitalize(FIO.getFileName(p.getParent()));
 
 			int i = 1;
 			if (tracker.containsKey(titlebase))

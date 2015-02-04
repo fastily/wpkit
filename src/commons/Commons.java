@@ -4,6 +4,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 
+import util.ReadFile;
 import jwiki.core.CAction;
 import jwiki.core.MBot;
 import jwiki.core.MQuery;
@@ -11,7 +12,6 @@ import jwiki.core.Namespace;
 import jwiki.core.Wiki;
 import jwiki.dwrap.Contrib;
 import jwiki.dwrap.ImageInfo;
-import jwiki.util.ReadFile;
 import jwiki.util.Tuple;
 
 /**

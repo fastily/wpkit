@@ -8,20 +8,20 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Random;
 
-import jwiki.core.CRequest;
-import jwiki.core.CTask;
+import jwiki.core.Req;
+import jwiki.core.WTask;
 import jwiki.core.ColorLog;
 import jwiki.core.MQuery;
 import jwiki.core.Namespace;
 import jwiki.core.Wiki;
 import jwiki.util.FError;
-import jwiki.util.FIO;
 import jwiki.util.FString;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 
 import util.FCLI;
+import util.StringTools;
 import util.WikiGen;
 
 /**
@@ -154,7 +154,7 @@ public class CommonsMover
 		 */
 		public boolean doJob(Wiki wiki)
 		{
-			if (FString.arraysIntersect(enwp.getCategoriesOnPage(title).toArray(new String[0]), blacklist)) // check
+			if (StringTools.arraysIntersect(enwp.getCategoriesOnPage(title).toArray(new String[0]), blacklist)) // check
 																																			// copyright
 				return FError.printErrAndRet(title + " is not eligible for transfer", false);
 			else if (!checkForDupes())
@@ -209,7 +209,7 @@ public class CommonsMover
 		private File downloadFile()
 		{
 			String tx = String.format("%d%s", Math.abs(titleNNS.hashCode()), titleNNS.substring(titleNNS.lastIndexOf(".")));
-			return CTask.downloadFile(title, tx, enwp) ? new File(tx) : null;
+			return WTask.downloadFile(title, tx, enwp) ? new File(tx) : null;
 		}
 
 		/**
@@ -223,7 +223,7 @@ public class CommonsMover
 			try
 			{
 				String tl = FString.enc(titleNNS);
-				String s = FIO.inputStreamToString(CRequest.genericPOST(new URL(url), null, CRequest.urlenc,
+				String s = FString.inputStreamToString(Req.genericPOST(new URL(url), null, Req.urlenc,
 						String.format(posttext, tl)));
 				return s.substring(s.indexOf("{{Info"), s.indexOf("</textarea>"));
 			}

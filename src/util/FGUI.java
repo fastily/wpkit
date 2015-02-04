@@ -186,4 +186,16 @@ public class FGUI
 		return p;
 	}
 
+	
+	/**
+	 * Shows error as Messagebox and exits.
+	 * 
+	 * @param s The error message
+	 * @param err Exit error code.
+	 */
+	public static void showErrorAndExit(String s, int err)
+	{
+		JOptionPane.showMessageDialog(null, s);
+		System.exit(err);
+	}
 }

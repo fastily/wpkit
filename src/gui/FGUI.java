@@ -1,5 +1,6 @@
-package util;
+package gui;
 
+import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -14,6 +15,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
+import javax.swing.text.JTextComponent;
 
 import jwiki.core.Wiki;
 
@@ -54,8 +56,7 @@ public class FGUI
 			throw new UnsupportedOperationException("Either cl is empty or has an odd number of elements!");
 
 		if (title != null)
-			pl.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createTitledBorder(title),
-					BorderFactory.createEmptyBorder(5, 5, 5, 5)));
+			borderTitleWrap(pl, title);
 
 		GridBagConstraints c = new GridBagConstraints();
 		c.fill = GridBagConstraints.HORIZONTAL;
@@ -84,13 +85,42 @@ public class FGUI
 	}
 
 	/**
-	 * Display a login dialog for the user. Allows for 3 bad logins before exiting program.
-	 * 
-	 * @param domain The domain (in shorthand) to use.
-	 * @return The resulting wiki object.
-	 * @throws LoginException If we failed to login
+	 * Wraps a text component in a border.
+	 * @param x The text component to wrap
+	 * @param title The title to use
+	 * @return A JPanel with a border containing the text component.
 	 */
-	public static Wiki login(String domain) throws LoginException
+	public static JPanel borderTitleWrap(JTextComponent x, String title)
+	{
+		JPanel p = new JPanel(new BorderLayout());
+		borderTitleWrap(p, title);
+		
+		p.add(x, BorderLayout.CENTER);
+		return p;
+	}
+	
+	/**
+	 * Wraps a component in a border. 
+	 * @param p The component to wrap 
+	 * @param title The title to assign to the border.
+	 * 
+	 * @return The same component, <code>p</code>, so you can stack statements.
+	 */
+	public static JComponent borderTitleWrap(JComponent p, String title)
+	{
+		p.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createTitledBorder(title),
+				BorderFactory.createEmptyBorder(5, 5, 5, 5)));
+		return p;
+	}
+	
+	
+	/**
+	 * Provides GUI login. Automatically terminates program after 3 failed logins.
+	 * 
+	 * @param domain The short style domain to use
+	 * @return A Wiki object created by logging in.
+	 */
+	public static Wiki login(String domain)
 	{
 
 		JTextField tf = new JTextField(12);
@@ -101,25 +131,25 @@ public class FGUI
 			if (JOptionPane.showConfirmDialog(null, buildForm("Login", new JLabel("User: "), tf, new JLabel("Password: "), pf),
 					"Login", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE) != JOptionPane.OK_OPTION)
 				System.exit(0);
-
-			Wiki wiki = new Wiki(tf.getText().trim(), new String(pf.getPassword()), domain);
-			if (wiki.isVerifiedFor(domain))
-				return wiki;
-
-			JOptionPane.showConfirmDialog(null, "User/Password not recognized. Try again?");
+			try
+			{
+				Wiki wiki = new Wiki(tf.getText().trim(), new String(pf.getPassword()), domain);
+				if (wiki.isVerifiedFor(domain))
+					return wiki;
+			}
+			catch (Throwable e)
+			{
+				JOptionPane.showConfirmDialog(null, "User/Password not recognized. Try again?");
+			}
 		}
-
-		JOptionPane.showConfirmDialog(null, "Failed login 3 times.  Program exiting");
-		System.exit(0);
-		return null; // dead code to shut up compiler
+		showErrorAndExit("Failed login 3 times.  Program exiting", 0);
+		return null; // never reaches here - shut up compiler
 	}
 
 	/**
-	 * Display a login dialog for the user. Allows for 3 bad logins before exiting program. Auto-set to log us into
-	 * Wikimedia Commons.
-	 * 
-	 * @return The resulting login object.
-	 * @throws LoginException If we failed to login
+	 * Provides GUI login to Wikimedia Commons. Automatically terminates program after 3 failed logins.
+	 *
+	 * @return A Wiki object created by logging in.
 	 */
 	public static Wiki login() throws LoginException
 	{
@@ -127,12 +157,12 @@ public class FGUI
 	}
 
 	/**
-	 * Creates a simple JFrame with the given settings.
+	 * Creates a simple JFrame with some default settings.
 	 * 
 	 * @param title The title of the JFrame.
 	 * @param exitmode The exit mode (e.g. JFrame.EXIT_ON_CLOSE)
-	 * @param resizable Should the window be resizable?
-	 * @return The specified JFrame
+	 * @param resizable Set to true if the window should be resizable by user.
+	 * @return A JFrame
 	 */
 	public static JFrame simpleJFrame(String title, int exitmode, boolean resizable)
 	{
@@ -185,7 +215,22 @@ public class FGUI
 			p.add(c);
 		return p;
 	}
-
+	
+	/**
+	 * Merges two components into a JPanel with BorderLayout.
+	 * @param top The component to go on top (NORTH)
+	 * @param bottom The component to go on bottom (SOUTH)
+	 * @return The new JPanel.
+	 */
+	public static JPanel topBottomBorderMerge(JComponent top, JComponent bottom)
+	{
+		JPanel p = new JPanel(new BorderLayout());
+		p.add(top, BorderLayout.NORTH);
+		p.add(bottom, BorderLayout.SOUTH);
+		
+		return p;
+	}
+	
 	
 	/**
 	 * Shows error as Messagebox and exits.
@@ -197,5 +242,26 @@ public class FGUI
 	{
 		JOptionPane.showMessageDialog(null, s);
 		System.exit(err);
+	}
+	
+	
+	/**
+	 * Checks if a text component is empty, ignoring whitespace
+	 * @param tc The text component to check
+	 * @return True if the text component is empty
+	 */
+	public static boolean tcIsEmpty(JTextComponent tc)
+	{
+		return getTCText(tc).isEmpty();
+	}
+	
+	/**
+	 * Gets the text of a text component. Removes leading and trailing whitespace.
+	 * @param tc The text component to fetch text from
+	 * @return The text of the text component.
+	 */
+	public static String getTCText(JTextComponent tc)
+	{
+		return tc.getText().trim();
 	}
 }

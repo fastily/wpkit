@@ -12,14 +12,17 @@ import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 import jwiki.core.Namespace;
 import jwiki.util.FString;
-import util.FGUI;
+import gui.FGUI;
 
 /**
  * GUI Wrapper for CommonsMover.
@@ -50,6 +53,11 @@ public class CommonsMoverGUI
 	 */
 	private static JButton go = new JButton("Go");
 
+	/**
+	 * Logs events for user.
+	 */
+	private static JTextArea cBox = null;
+	
 	/**
 	 * Main method
 	 * 
@@ -102,9 +110,16 @@ public class CommonsMoverGUI
 
 		// Generate the JFrame itself
 		JFrame f = FGUI.simpleJFrame("CommonsMover 0.1a", JFrame.EXIT_ON_CLOSE, true);
-		f.getContentPane().add(FGUI.boxLayout(BoxLayout.Y_AXIS, FGUI.simpleJPanel(go), pb), BorderLayout.SOUTH);
-		f.getContentPane().add(FGUI.buildForm("CommonsMover", user_b, user_t, cat_b, cat_t, single_b, single_t),
+		
+		JPanel mainbox = new JPanel(new BorderLayout());
+		mainbox.add(FGUI.boxLayout(BoxLayout.Y_AXIS, FGUI.simpleJPanel(go), pb), BorderLayout.SOUTH);
+		mainbox.add(FGUI.buildForm("CommonsMover", user_b, user_t, cat_b, cat_t, single_b, single_t),
 				BorderLayout.CENTER);
+		
+		f.getContentPane().add(mainbox, BorderLayout.NORTH);
+		f.getContentPane().add(FGUI.borderTitleWrap(new JScrollPane(cBox), "Logs"), BorderLayout.SOUTH);
+
+		cBox.setText("Welcome to CommonsMover!");
 		FGUI.setJFrameVisible(f);
 	}
 

@@ -3,7 +3,6 @@ package ft;
 import java.awt.BorderLayout;
 import java.util.ArrayList;
 
-import javax.security.auth.login.LoginException;
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -11,6 +10,7 @@ import javax.swing.JProgressBar;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
+import util.FNet;
 import util.WikiGen;
 import ft.GlobalReplace.RItem;
 import gui.ConsoleBox;
@@ -63,14 +63,16 @@ public class GlobalReplaceGUI
 	 * Main driver
 	 * 
 	 * @param args Prog args (none accepted)
-	 * @throws LoginException Bad credentials
+	 * @throws Throwable Bad credentials, idk.
 	 */
-	public static void main(String[] args) throws LoginException
+	public static void main(String[] args) throws Throwable
 	{
 		// wiki = FGUI.login();
 		wiki = WikiGen.wg.get(2);
 
 		Settings.useragent = String.format("%s on %s with %s", wiki.whoami(), id, Settings.useragent);
+		new Thread(() -> FNet.get("https://tools.wmflabs.org/commonstools/globalreplace/GR.php")).start(); //metrics
+		
 		SwingUtilities.invokeLater(() -> createAndShowGUI());
 	}
 
@@ -117,7 +119,6 @@ public class GlobalReplaceGUI
 		toggleFields();
 		cBox.fyi("Starting job!");
 		button.setStatus("Stop", true, true);
-
 
 		ArrayList<RItem> l = GlobalReplace.makeRItem(wiki, Namespace.nss(FGUI.getTCText(old_tf)),
 				Namespace.nss(FGUI.getTCText(new_tf)), FGUI.getTCText(r_tf));
@@ -168,6 +169,7 @@ public class GlobalReplaceGUI
 
 	/**
 	 * Logs an FYI event to user's console and sets gui back to near default.
+	 * 
 	 * @param logtext The text to log
 	 * @param pbtext The text to set the progress bar to.
 	 */
@@ -176,8 +178,8 @@ public class GlobalReplaceGUI
 		toggleFields();
 		cBox.fyi(logtext);
 		button.setStatus("Start", true, false);
-		if(pbtext != null)
+		if (pbtext != null)
 			bar.setString(pbtext);
 	}
-	
+
 }

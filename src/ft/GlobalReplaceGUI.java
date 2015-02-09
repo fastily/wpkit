@@ -11,7 +11,6 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 import util.FNet;
-import util.WikiGen;
 import ft.GlobalReplace.RItem;
 import gui.ConsoleBox;
 import gui.FGUI;
@@ -50,14 +49,14 @@ public class GlobalReplaceGUI
 	private static final ToggleButton button = new ToggleButton("Start");
 
 	/**
-	 * Our progress bar
-	 */
-	private static final JProgressBar bar = new JProgressBar(0, 100);
-
-	/**
 	 * Logs events for user.
 	 */
-	private static ConsoleBox cBox = new ConsoleBox(String.format("Welcome to %s!%n", id));
+	private static final ConsoleBox cBox = new ConsoleBox(String.format("Welcome to %s!%n", id));
+	
+	/**
+	 * Our progress bar
+	 */
+	private static JProgressBar bar;
 
 	/**
 	 * Main driver
@@ -67,8 +66,7 @@ public class GlobalReplaceGUI
 	 */
 	public static void main(String[] args) throws Throwable
 	{
-		// wiki = FGUI.login();
-		wiki = WikiGen.wg.get(2);
+		wiki = FGUI.login();
 
 		Settings.useragent = String.format("%s on %s with %s", wiki.whoami(), id, Settings.useragent);
 		new Thread(() -> FNet.get("https://tools.wmflabs.org/commonstools/globalreplace/GR.php")).start(); //metrics
@@ -85,8 +83,9 @@ public class GlobalReplaceGUI
 		old_tf.setToolTipText(cph);
 		new_tf.setToolTipText(cph);
 		r_tf.setToolTipText("Hint: Enter an optional edit summary");
-		bar.setStringPainted(true);
-		bar.setString(String.format("Hello, %s!", wiki.whoami()));
+
+		bar = FGUI.makePB(String.format("Hello, %s!", wiki.whoami()));
+
 		button.addActionListener(e -> {
 			if (!button.isLive())
 				new Thread(() -> startReplace()).start();

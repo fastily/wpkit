@@ -21,7 +21,6 @@ import jwiki.util.Tuple;
  */
 public class Commons
 {
-
 	/**
 	 * Deletes the titles in a category.
 	 * 
@@ -35,10 +34,9 @@ public class Commons
 	 */
 	public static ArrayList<String> categoryNuke(Wiki wiki, String cat, String reason, boolean delCat, String... ns)
 	{
-		//TODO: getCategorySize breaks if namespace not supplied - Does it really?
 		ArrayList<String> fails = CAction.delete(wiki, reason, wiki.getCategoryMembers(cat, ns));
 		if (delCat && wiki.getCategorySize(cat) == 0)
-			wiki.delete(cat, CStrings.ec);
+			wiki.delete(cat, CStrings.Reason.ec.rsn);
 		return fails;
 	}
 
@@ -77,7 +75,7 @@ public class Commons
 		for(Tuple<String, ImageInfo> ix : MQuery.getImageInfo(wiki, -1, -1, files))
 			if(ix.y.redirectsTo != null || ix.y.dimensions == null)
 				l.add(ix.x);
-		return CAction.delete(wiki, CStrings.nfu, l);
+		return CAction.delete(wiki, CStrings.Reason.nfu.rsn, l);
 	}
 
 	/**
@@ -92,7 +90,7 @@ public class Commons
 		for (Tuple<String, Integer> t : MQuery.getCategorySize(wiki, cats))
 			if (t.y.intValue() <= 0) // Handle case when MediaWiki does not return categoryinfo
 				l.add(t.x);
-		return CAction.delete(wiki, CStrings.ec, l);
+		return CAction.delete(wiki, CStrings.Reason.ec.rsn, l);
 	}
 
 	/**
@@ -170,7 +168,7 @@ public class Commons
 	 */
 	public static ArrayList<String> removeDelete(Wiki wiki, String reason, ArrayList<String> titles)
 	{
-		return CAction.replace(wiki, CStrings.drregex, "", reason, titles);
+		return CAction.replace(wiki, CStrings.Regex.drregex.rgx, "", reason, titles);
 	}
 
 	/**
@@ -182,7 +180,7 @@ public class Commons
 	 */
 	public static ArrayList<String> removeLSP(Wiki wiki, String reason, ArrayList<String> titles)
 	{
-		return CAction.replace(wiki, CStrings.delregex, "", reason, titles);
+		return CAction.replace(wiki, CStrings.Regex.delregex.rgx, "", reason, titles);
 	}
 
 	/**

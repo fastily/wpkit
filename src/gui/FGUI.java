@@ -14,6 +14,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
+import javax.swing.JProgressBar;
 import javax.swing.JTextField;
 import javax.swing.text.JTextComponent;
 
@@ -229,6 +230,22 @@ public class FGUI
 		p.add(bottom, BorderLayout.SOUTH);
 		
 		return p;
+	}
+	
+	/**
+	 * Makes a progress bar with a painted string.  Min set to 0, Max set to 100.
+	 * @param initial A string to display on the JProgressBar.  Set to null to disable.  
+	 * @return The JProgressBar
+	 */
+	public static JProgressBar makePB(String initial)
+	{
+		JProgressBar b = new JProgressBar(0, 100);
+		b.setStringPainted(true);
+		
+		if(initial != null)
+			b.setString(initial);
+		
+		return b;
 	}
 	
 	

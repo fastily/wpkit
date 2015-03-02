@@ -14,7 +14,7 @@ public class CStrings
 	 * @author Fastily
 	 *
 	 */
-	public static enum Reason
+	public enum Reason
 	{
 		/**
 		 * Uploader requested deletion of file
@@ -109,7 +109,7 @@ public class CStrings
 	 * @author Fastily
 	 *
 	 */
-	public static enum Category
+	public enum Category
 	{
 		/**
 		 * Other speedy deletions.
@@ -143,13 +143,13 @@ public class CStrings
 	 * @author Fastily
 	 *
 	 */
-	public static enum Regex
+	public enum Regex
 	{
 		/**
 		 * Regex that matches deletion templates on Commons.
 		 */
 		delregex(
-				"(?si)\\s??\\{\\{(speedy|fair use delete|speedydelete|no permission|no license|no source|copyvio).*?\\}\\}\\s??"),
+				"(?si)\\s??\\{\\{(speedy|fair use delete|speedydelete|no permission|no license|no source|copyvio|OTRS pending).*?\\}\\}\\s??"),
 
 		/**
 		 * Regex that matches DR templates on Commons.

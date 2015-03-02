@@ -8,11 +8,11 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Random;
 
+import jwiki.core.NS;
 import jwiki.core.Req;
 import jwiki.core.WTask;
 import jwiki.core.ColorLog;
 import jwiki.core.MQuery;
-import jwiki.core.Namespace;
 import jwiki.core.Wiki;
 import jwiki.util.FError;
 import jwiki.util.FString;
@@ -85,14 +85,14 @@ public class CommonsMover
 
 		ArrayList<String> tl = new ArrayList<String>();
 		if (l.hasOption('c'))
-			tl.addAll(enwp.getCategoryMembers(l.getOptionValue('c'), "File"));
+			tl.addAll(enwp.getCategoryMembers(l.getOptionValue('c'), NS.FILE));
 		else if (l.hasOption('u'))
 			tl.addAll(enwp.getUserUploads(l.getOptionValue('u')));
 		else if (l.getArgs().length > 0)
 		{
 			ArrayList<String> x = new ArrayList<String>();
 			for (String s : l.getArgs())
-				x.add(enwp.convertIfNotInNS(s, "File"));
+				x.add(enwp.convertIfNotInNS(s, NS.FILE));
 			tl.addAll(MQuery.exists(enwp, true, x));
 		}
 
@@ -142,7 +142,7 @@ public class CommonsMover
 		protected TransferItem(String title)
 		{
 			super(title, null, null);
-			titleNNS = Namespace.nss(title);
+			titleNNS = enwp.nss(title);
 			transferTo = title;
 		}
 
@@ -198,7 +198,7 @@ public class CommonsMover
 			return enwp.addText(
 					title,
 					String.format("%n{{subst:ncd%s|reviewer={{subst:REVISIONUSER}}}}", !transfer.equals(title) ? "|1="
-							+ Namespace.nss(transfer) : ""), "now on Commons ([[c:Commons:CommonsMover|CM]])", false);
+							+ enwp.nss(transfer) : ""), "now on Commons ([[c:Commons:CommonsMover|CM]])", false);
 		}
 
 		/**

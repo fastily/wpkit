@@ -8,11 +8,13 @@ import util.ReadFile;
 import jwiki.core.CAction;
 import jwiki.core.MBot;
 import jwiki.core.MQuery;
-import jwiki.core.Namespace;
+import jwiki.core.NS;
 import jwiki.core.Wiki;
 import jwiki.dwrap.Contrib;
 import jwiki.dwrap.ImageInfo;
 import jwiki.util.Tuple;
+
+//TODO: This documentation has seen better days.
 
 /**
  * Special multi-threaded commons.wikimedia.org exclusive methods which make life so much easier.
@@ -32,7 +34,7 @@ public class Commons
 	 *           select all namesapces
 	 * @return A list of titles we didn't delete.
 	 */
-	public static ArrayList<String> categoryNuke(Wiki wiki, String cat, String reason, boolean delCat, String... ns)
+	public static ArrayList<String> categoryNuke(Wiki wiki, String cat, String reason, boolean delCat, NS... ns)
 	{
 		ArrayList<String> fails = CAction.delete(wiki, reason, wiki.getCategoryMembers(cat, ns));
 		if (delCat && wiki.getCategorySize(cat) == 0)
@@ -48,7 +50,7 @@ public class Commons
 	 */
 	public static ArrayList<String> drDel(Wiki wiki, String dr)
 	{
-		return nukeLinksOnPage(wiki, dr, "[[" + dr + "]]", "File");
+		return nukeLinksOnPage(wiki, dr, "[[" + dr + "]]", NS.FILE);
 	}
 
 	/**
@@ -101,7 +103,7 @@ public class Commons
 	 * @param ns Namespace(s) of the items to delete.
 	 * @return A list of titles we didn't delete.
 	 */
-	public static ArrayList<String> nukeContribs(Wiki wiki, String user, String reason, String... ns)
+	public static ArrayList<String> nukeContribs(Wiki wiki, String user, String reason, NS... ns)
 	{
 		ArrayList<String> l = new ArrayList<>();
 		for (Contrib c : wiki.getContribs(user, ns))
@@ -112,13 +114,13 @@ public class Commons
 	/**
 	 * Delete uploads of a user.
 	 * 
-	 * @param user The user whose uploads we'll be deleting.
+	 * @param user The user whose uploads we'll be deleting. 
 	 * @param reason The reason to use
 	 * @return A list of titles we didn't delete
 	 */
 	public static ArrayList<String> nukeUploads(Wiki wiki, String user, String reason)
 	{
-		return CAction.delete(wiki, reason, wiki.getUserUploads(Namespace.nss(user)));
+		return CAction.delete(wiki, reason, wiki.getUserUploads(user));
 	}
 
 	/**
@@ -130,7 +132,7 @@ public class Commons
 	 * @return The links on the title in the requested namespace
 	 * 
 	 */
-	public static ArrayList<String> nukeLinksOnPage(Wiki wiki, String title, String reason, String... ns)
+	public static ArrayList<String> nukeLinksOnPage(Wiki wiki, String title, String reason, NS... ns)
 	{
 		return CAction.delete(wiki, reason, wiki.getLinksOnPage(true, title, ns));
 	}

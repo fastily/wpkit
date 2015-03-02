@@ -15,7 +15,6 @@ import ft.GlobalReplace.RItem;
 import gui.ConsoleBox;
 import gui.FGUI;
 import gui.ToggleButton;
-import jwiki.core.Namespace;
 import jwiki.core.Settings;
 import jwiki.core.Wiki;
 import jwiki.util.FSystem;
@@ -119,8 +118,8 @@ public class GlobalReplaceGUI
 		cBox.fyi("Starting job!");
 		button.setStatus("Stop", true, true);
 
-		ArrayList<RItem> l = GlobalReplace.makeRItem(wiki, Namespace.nss(FGUI.getTCText(old_tf)),
-				Namespace.nss(FGUI.getTCText(new_tf)), FGUI.getTCText(r_tf));
+		ArrayList<RItem> l = GlobalReplace.makeRItem(wiki, wiki.nss(FGUI.getTCText(old_tf)),
+				wiki.nss(FGUI.getTCText(new_tf)), FGUI.getTCText(r_tf));
 		if (l.isEmpty())
 		{
 			fyiAndReset("Found nothing to process for " + FGUI.getTCText(old_tf), "");

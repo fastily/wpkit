@@ -20,7 +20,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
-import jwiki.core.Namespace;
+import jwiki.core.NS;
 import jwiki.util.FString;
 import gui.FGUI;
 
@@ -147,12 +147,12 @@ public class CommonsMoverGUI
 		// Determine what we've been asked to transfer, and collect filenames.
 		ArrayList<String> tl;
 		if (cat_b.isSelected())
-			tl = enwp.getCategoryMembers(cat_t.getText().trim(), "File");
+			tl = enwp.getCategoryMembers(cat_t.getText().trim(), NS.FILE);
 		else if (user_b.isSelected())
-			tl = enwp.getUserUploads(Namespace.nss(user_t.getText().trim()));
+			tl = enwp.getUserUploads(enwp.nss(user_t.getText().trim()));
 		else
 		{
-			String temp = "File:" + Namespace.nss(single_t.getText().trim());
+			String temp = "File:" + enwp.nss(single_t.getText().trim());
 			if (!enwp.exists(temp) || temp.equals("File:"))
 			{
 				JOptionPane.showMessageDialog(null, String.format("'%s'does not exist on en.wp", temp));

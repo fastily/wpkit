@@ -155,7 +155,7 @@ public class WikiGen
 		cx.init(Cipher.ENCRYPT_MODE, sk);
 		writeFiles(px, cx.doFinal(jo.toString().getBytes("UTF-8")));
 
-		c.printf("Successfully written out to '%s', '%s', '%s%s' and '%s'%n", pf, px, homefmt, pf, homefmt, px);
+		c.printf("Successfully written out to '%s', '%s', '%s%s' and '%s%s'%n", pf, px, homefmt, pf, homefmt, px);
 	}
 
 	/**

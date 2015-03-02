@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import jwiki.core.ColorLog;
 import jwiki.core.MBot;
-import jwiki.core.Namespace;
+import jwiki.core.NS;
 import jwiki.core.Wiki;
 import jwiki.util.FError;
 import jwiki.util.Tuple;
@@ -67,10 +67,11 @@ public class GlobalReplace
 	protected static ArrayList<RItem> makeRItem(Wiki wiki, String old, String replacement, String optSum)
 	{
 		ArrayList<RItem> l = new ArrayList<>();
-		String regex = StringTools.makePageTitleRegex(Namespace.nss(old));
-		String sum = String.format("%s → %s using [[%%sCommons:GlobalReplace|GR 0.4]]%s", old, replacement, optSum != null && !optSum.isEmpty() ? ": " + optSum : "");
-		for (Tuple<String, String> t : wiki.globalUsage(wiki.convertIfNotInNS(old, "File")))
-			l.add(new RItem(t.x, regex, Namespace.nss(replacement), sum, t.y));
+		String regex = StringTools.makePageTitleRegex(wiki.nss(old));
+		String sum = String.format("%s → %s using [[%%sCommons:GlobalReplace|GR 0.4]]%s", old, replacement, optSum != null
+				&& !optSum.isEmpty() ? ": " + optSum : "");
+		for (Tuple<String, String> t : wiki.globalUsage(wiki.convertIfNotInNS(old, NS.FILE)))
+			l.add(new RItem(t.x, regex, wiki.nss(replacement), sum, t.y));
 		return l;
 	}
 
@@ -91,7 +92,7 @@ public class GlobalReplace
 		 * The short-style domain to edit at.
 		 */
 		protected String domain;
-		
+
 		/**
 		 * Constructor
 		 * 
@@ -114,27 +115,18 @@ public class GlobalReplace
 		 */
 		public boolean doJob(Wiki wiki)
 		{
-			try
+			switch (wiki.whichNS(title).v)
 			{
-				switch (wiki.whichNS(title))
-				{
-					case 0: // main
-					case 6: // file
-					case 10: // template
-					case 14: // category
-						System.out.println();
-						return wiki.getWiki(domain).replaceText(title, regex, replacement, summary);
-					default:
-						ColorLog.fyi(title + " is not in a whitelisted domain.  Skip.");
-						return true;
-				}
-			}
-			catch (Throwable e) // TODO: Hacky fix pending revision of Namespace handling
-			{
-				ColorLog.warn(String.format("Was not able to process %s @ %s: bad namespace. Skip.", title, domain));
-				return false;
+				case 0: // main
+				case 6: // file
+				case 10: // template
+				case 14: // category
+					System.out.println();
+					return wiki.getWiki(domain).replaceText(title, regex, replacement, summary);
+				default:
+					ColorLog.fyi(title + " is not in a whitelisted domain.  Skip.");
+					return true;
 			}
 		}
 	}
-
 }

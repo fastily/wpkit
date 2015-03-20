@@ -4,7 +4,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 
-import util.ReadFile;
+import util.FIO;
 import jwiki.core.CAction;
 import jwiki.core.MBot;
 import jwiki.core.MQuery;
@@ -16,22 +16,23 @@ import jwiki.util.Tuple;
 
 //TODO: This documentation has seen better days.
 
+
 /**
- * Special multi-threaded commons.wikimedia.org exclusive methods which make life so much easier.
- * 
+ * A collection of static Commons-specific methods I find myself using a lot.
  * @author Fastily
+ *
  */
 public class Commons
 {
 	/**
-	 * Deletes the titles in a category.
+	 * Delete titles in a category.
 	 * 
-	 * @param cat The category to nuke items from
-	 * @param reason Delete reason
+	 * @param wiki The wiki object to use
+	 * @param cat The category to delete items in
+	 * @param reason The reason to use
 	 * @param delCat Set to true if the category should be deleted after deleting everything in it. Category is only
 	 *           deleted if it is empty.
-	 * @param ns Namespace filter -- anything in these namespace(s) will be deleted. Optional param -- leave blank to
-	 *           select all namesapces
+	 * @param ns Namespace filter - select only items in these namespace(s).  Leave blank to select all namespaces.
 	 * @return A list of titles we didn't delete.
 	 */
 	public static ArrayList<String> categoryNuke(Wiki wiki, String cat, String reason, boolean delCat, NS... ns)
@@ -62,7 +63,7 @@ public class Commons
 	 */
 	public static ArrayList<String> restoreFromFile(Wiki wiki, String path, String reason)
 	{
-		return CAction.undelete(wiki, true, reason, new ReadFile(path).l);
+		return CAction.undelete(wiki, true, reason, FIO.readLinesFromFile(path));
 	}
 
 	/**
@@ -158,7 +159,7 @@ public class Commons
 	 */
 	public static ArrayList<String> nukeFromFile(Wiki wiki, String path, String reason)
 	{
-		return CAction.delete(wiki, reason, new ReadFile(path).l);
+		return CAction.delete(wiki, reason, FIO.readLinesFromFile(path));
 	}
 
 	/**

@@ -47,7 +47,7 @@ public class WikiGen
 	/**
 	 * The default WikiGen object created at run time.
 	 */
-	public static final WikiGen wg = new WikiGen();
+	public static final WikiGen wg = initWG();
 
 	/**
 	 * The master user/pass list.
@@ -66,26 +66,22 @@ public class WikiGen
 
 	/**
 	 * Constructor, decodes encrypted passwords and makes them available to the program.
+	 * 
+	 * @throws Throwable If something went very wrong.
 	 */
-	private WikiGen()
+	private WikiGen() throws Throwable
 	{
-		try
-		{
-			Cipher c = Cipher.getInstance("AES");
-			c.init(Cipher.DECRYPT_MODE, new SecretKeySpec(Files.readAllBytes(findConfig(pf)), "AES"));
-			JSONObject jo = new JSONObject(new String(c.doFinal(Files.readAllBytes(findConfig(px))), "UTF-8"));
 
-			for (String s : JSONObject.getNames(jo))
-			{
-				JSONObject entry = jo.getJSONObject(s);
-				master.put(s, entry.getString("pass"));
-				if (entry.has("rank"))
-					pwl.put(new Integer(entry.getInt("rank")), s);
-			}
-		}
-		catch (Throwable e)
+		Cipher c = Cipher.getInstance("AES");
+		c.init(Cipher.DECRYPT_MODE, new SecretKeySpec(Files.readAllBytes(findConfig(pf)), "AES"));
+		JSONObject jo = new JSONObject(new String(c.doFinal(Files.readAllBytes(findConfig(px))), "UTF-8"));
+
+		for (String s : JSONObject.getNames(jo))
 		{
-			FError.errAndExit(e, "Missing required config files, run WikiGen first before using!");
+			JSONObject entry = jo.getJSONObject(s);
+			master.put(s, entry.getString("pass"));
+			if (entry.has("rank"))
+				pwl.put(new Integer(entry.getInt("rank")), s);
 		}
 	}
 
@@ -224,6 +220,23 @@ public class WikiGen
 	}
 
 	/**
+	 * Try to create a WikiGen object.  If you have not run WikiGen yet, then <code>wg</code> will be set to null.
+	 * @return A default WikiGen object.
+	 */
+	private static WikiGen initWG()
+	{
+		try
+		{
+			return new WikiGen();
+		}
+		catch (Throwable e)
+		{
+			System.err.println("WARNING: WikiGen must be run before wg can be used.");
+			return null;
+		}
+	}
+
+	/**
 	 * Creates or returns a wiki object using our locally stored credentials. This method is cached.
 	 * 
 	 * @param user The username to use
@@ -274,7 +287,8 @@ public class WikiGen
 	}
 
 	/**
-	 * Creates or returns a wiki object pointed to by the specified rank. This method is cached. 
+	 * Creates or returns a wiki object pointed to by the specified rank. This method is cached.
+	 * 
 	 * @param rank The preferred wiki object at this rank
 	 * @param domain The domain (shorthand) to login at.
 	 * @return The requtested wiki obejct, or null if we have no such user-password combo

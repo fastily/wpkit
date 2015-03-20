@@ -1,19 +1,17 @@
 package util;
 
 import java.io.BufferedWriter;
-import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.FileSystems;
-import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
-import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardOpenOption;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import jwiki.util.FString;
 import jwiki.util.FSystem;
@@ -29,7 +27,7 @@ public class FIO
 	/**
 	 * A path matcher which will match files ok to upload to WMF wikis.
 	 */
-	private static final PathMatcher wmfuploadable = FileSystems.getDefault().getPathMatcher(
+	public static final PathMatcher wmfuploadable = FileSystems.getDefault().getPathMatcher(
 			"regex:(?i).+?\\.(png|gif|jpg|jpeg|xcf|mid|ogg|ogv|oga|svg|djvu|tiff|tif|pdf|webm|flac|wav)");
 
 	/**
@@ -38,6 +36,25 @@ public class FIO
 	private FIO()
 	{
 
+	}
+
+	/**
+	 * Reads the lines from a file
+	 * 
+	 * @param p The path to the file
+	 * @return The lines in the file, deliminated by newline character.
+	 */
+	public static ArrayList<String> readLinesFromFile(String p)
+	{
+		try
+		{
+			return new ArrayList<>(Files.readAllLines(Paths.get(p)));
+		}
+		catch (Throwable e)
+		{
+			e.printStackTrace();
+			return new ArrayList<>();
+		}
 	}
 
 	/**
@@ -63,22 +80,12 @@ public class FIO
 		if (Files.isDirectory(p))
 			return null;
 
-		String name = p.getFileName().toString();
+		String name = getFileName(p);
 		int i = name.lastIndexOf('.'); // special case, file has no extension.
 
 		return i == -1 ? "" : name.substring(i + (useDot ? 0 : 1));
 	}
-	
-	/**
-	 * Determines whether we can upload a given file to a WMF wiki.
-	 * @param p The path to check.
-	 * @return True if we can upload this to a WMF wiki.
-	 */
-	public static boolean canUploadToWMF(Path p)
-	{
-		return wmfuploadable.matches(p);
-	}
-	
+
 	/**
 	 * Dumps lines to a file.
 	 * 
@@ -103,101 +110,32 @@ public class FIO
 	}
 
 	/**
-	 * Recursively search a directory for files whose names match the specified regex.
+	 * Recursively search a directory for files that match a PathMatcher.
 	 * 
-	 * @param root The root directory to search
-	 * @param pattern The pattern to match files for. This MUST start with the <code>regex:</code> OR <code>glob:</code> prefix
-	 *           as described <a href=
-	 *           "http://docs.oracle.com/javase/7/docs/api/java/nio/file/FileSystem.html#getPathMatcher%28java.lang.String%29"
-	 *           >here</a>.
-	 * @return A list of files matching the specified pattern or null if something went wrong.
+	 * @param root The root directory to start traversing at
+	 * @param pm The PathMatcher to use
+	 * @return A list of files we found.
 	 */
-	public static ArrayList<Path> findFiles(Path root, String pattern)
+	public static ArrayList<Path> findFiles(Path root, PathMatcher pm)
 	{
-		return findFiles(root, FileSystems.getDefault().getPathMatcher(pattern));
+		try (Stream<Path> l = Files.walk(root))
+		{
+			return l.filter(pm::matches).collect(Collectors.toCollection(ArrayList::new));
+		}
+		catch (Throwable e)
+		{
+			return new ArrayList<>();
+		}
 	}
 
 	/**
 	 * Recursively search a directory for files which can be uploaded to WMF wikis.
 	 * 
 	 * @param root The root directory to search. PRECONDITION: This MUST be a directory.
-	 * @return A list of files that we can upload to Commons, or null if something went wrong.
+	 * @return A list of files that we can upload to Commons, or the empty list if we found nothing.
 	 */
 	public static ArrayList<Path> findFiles(Path root)
 	{
 		return findFiles(root, wmfuploadable);
-	}
-
-	/**
-	 * Supports public overloads of findFiles(). Abstracts nasty details of having to create a PathMatcher.
-	 * 
-	 * @param root The starting directory.
-	 * @param pm The PathMatcher to use to match files
-	 * @return A list of files we matched, or null if something went wrong.
-	 */
-	private static ArrayList<Path> findFiles(Path root, PathMatcher pm)
-	{
-		if (!Files.isDirectory(root))
-			return null;
-
-		UploadFinder uf = new UploadFinder(pm);
-		try
-		{
-			Files.walkFileTree(root, uf);
-		}
-		catch (Throwable e)
-		{
-			e.printStackTrace();
-			return null;
-		}
-
-		return uf.pl;
-	}
-
-	/**
-	 * Visits files and records files we're interested in
-	 * 
-	 * @author Fastily
-	 *
-	 */
-	private static class UploadFinder extends SimpleFileVisitor<Path>
-	{
-		/**
-		 * Matches files we're interested in
-		 */
-		private PathMatcher pm;
-
-		/**
-		 * Stores files we matched
-		 */
-		private ArrayList<Path> pl = new ArrayList<Path>();
-
-		/**
-		 * Constructor, takes a regex representing files to match
-		 * 
-		 * @param regex Files to match.
-		 */
-		private UploadFinder(PathMatcher pm)
-		{
-			this.pm = pm;
-		}
-
-		/**
-		 * Overrides SimpleFileVisitor's crap implementation of exiting upon failure.
-		 */
-		public FileVisitResult visitFileFailed(Path file, IOException exc)
-		{
-			return FileVisitResult.CONTINUE;
-		}
-
-		/**
-		 * Will visit and record the names of files matching our regex.
-		 */
-		public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
-		{
-			if (pm.matches(file))
-				pl.add(file);
-			return FileVisitResult.CONTINUE;
-		}
 	}
 }

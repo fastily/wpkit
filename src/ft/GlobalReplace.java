@@ -115,14 +115,15 @@ public class GlobalReplace
 		 */
 		public boolean doJob(Wiki wiki)
 		{
-			switch (wiki.whichNS(title).v)
+			Wiki wx = wiki.getWiki(domain);
+			switch (wx.whichNS(title).v)
+			// acceptable namespaces
 			{
 				case 0: // main
 				case 6: // file
 				case 10: // template
 				case 14: // category
-					System.out.println();
-					return wiki.getWiki(domain).replaceText(title, regex, replacement, summary);
+					return wx.replaceText(title, regex, replacement, summary);
 				default:
 					ColorLog.fyi(title + " is not in a whitelisted domain.  Skip.");
 					return true;

@@ -16,7 +16,6 @@ import jwiki.util.Tuple;
 
 //TODO: This documentation has seen better days.
 
-
 /**
  * A collection of static Commons-specific methods I find myself using a lot.
  * @author Fastily
@@ -186,6 +185,17 @@ public class Commons
 		return CAction.replace(wiki, CStrings.Regex.delregex.rgx, "", reason, titles);
 	}
 
+	/**
+	 * Replace all no perm, no lic, no src, copyvio, etc templates with a fresh (dated to today) npd template
+	 * @param wiki The wiki to use
+	 * @param titles The titles to process
+	 * @return A list of titles we didn't process.
+	 */
+	public static ArrayList<String> resetNPD(Wiki wiki, ArrayList<String> titles)
+	{
+		return CAction.replace(wiki, CStrings.Regex.delregex.rgx, "{{Subst:Npd}}", "reset", titles);
+	}
+	
 	/**
 	 * Sends a file to DR and lists it on today's log.
 	 * 

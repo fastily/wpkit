@@ -2,6 +2,6 @@ ctools
 ======
 
 ####About
-These are Wikimedia Commons tools and scripts based on <a href="https://github.com/fastily/jwiki">jwiki</a>.  
+These are my experimental Wikimedia Commons tools and frameworks extending [jwiki](https://github.com/fastily/jwiki).  
 
-This project contains experimental tools and frameworks.  I make no guarantee anything in here will work or behave as expected.  Use at your own discretion.  Enjoy! :P
+I have written these for my own use, and won't guarantee that everything in here is 100% functional.  Use at your own risk I guess.

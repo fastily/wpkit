@@ -12,6 +12,7 @@ import jwiki.core.NS;
 import jwiki.core.Wiki;
 import jwiki.dwrap.Contrib;
 import jwiki.dwrap.ImageInfo;
+import jwiki.util.FL;
 import jwiki.util.Tuple;
 
 //TODO: This documentation has seen better days.
@@ -74,7 +75,7 @@ public class Commons
 	public static ArrayList<String> nukeEmptyFiles(Wiki wiki, ArrayList<String> files)
 	{
 		ArrayList<String> l = new ArrayList<>();
-		for(Tuple<String, ImageInfo> ix : MQuery.getImageInfo(wiki, -1, -1, files))
+		for(Tuple<String, ImageInfo> ix : FL.mapToList(MQuery.getImageInfo(wiki, -1, -1, files)))
 			if(ix.y.redirectsTo != null || ix.y.dimensions == null)
 				l.add(ix.x);
 		return CAction.delete(wiki, CStrings.Reason.nfu.rsn, l);
@@ -89,7 +90,7 @@ public class Commons
 	public static ArrayList<String> emptyCatDel(Wiki wiki, ArrayList<String> cats)
 	{
 		ArrayList<String> l = new ArrayList<>();
-		for (Tuple<String, Integer> t : MQuery.getCategorySize(wiki, cats))
+		for (Tuple<String, Integer> t : FL.mapToList(MQuery.getCategorySize(wiki, cats)))
 			if (t.y.intValue() <= 0) // Handle case when MediaWiki does not return categoryinfo
 				l.add(t.x);
 		return CAction.delete(wiki, CStrings.Reason.ec.rsn, l);

@@ -22,7 +22,7 @@ import org.apache.commons.cli.Options;
 
 import util.FCLI;
 import util.StringTools;
-import util.WikiGen;
+import jwiki.extras.WikiGen;
 
 /**
  * Command line utility to transwiki items from enwp to Commons. Performs rudimentary checks for inappropriate files.

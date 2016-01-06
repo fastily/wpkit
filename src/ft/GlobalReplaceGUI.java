@@ -67,7 +67,7 @@ public class GlobalReplaceGUI
 	{
 		wiki = FGUI.login();
 
-		Settings.useragent = String.format("%s on %s with %s", wiki.whoami(), id, Settings.useragent);
+		Settings.userAgent = String.format("%s on %s with %s", wiki.whoami(), id, Settings.userAgent);
 		new Thread(() -> FNet.get("https://tools.wmflabs.org/commonstools/globalreplace/GR.php")).start(); //metrics
 		
 		SwingUtilities.invokeLater(() -> createAndShowGUI());

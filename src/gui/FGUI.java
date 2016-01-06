@@ -134,9 +134,7 @@ public class FGUI
 				System.exit(0);
 			try
 			{
-				Wiki wiki = new Wiki(tf.getText().trim(), new String(pf.getPassword()), domain);
-				if (wiki.isVerifiedFor(domain))
-					return wiki;
+				return new Wiki(tf.getText().trim(), new String(pf.getPassword()), domain);
 			}
 			catch (Throwable e)
 			{

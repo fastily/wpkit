@@ -14,7 +14,7 @@ import org.apache.commons.cli.Options;
 
 import util.FCLI;
 import util.StringTools;
-import util.WikiGen;
+import jwiki.extras.WikiGen;
 
 /**
  * Command line program which globally replaces a file with a specified string. You MUST have a Unified Account if you

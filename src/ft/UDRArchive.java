@@ -5,7 +5,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import util.WikiGen;
+import jwiki.extras.WikiGen;
 import jwiki.core.Wiki;
 
 /**

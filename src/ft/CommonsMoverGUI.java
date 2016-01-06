@@ -4,7 +4,6 @@ import static ft.CommonsMover.*;
 
 import java.awt.BorderLayout;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import javax.security.auth.login.LoginException;
 import javax.swing.BoxLayout;
@@ -21,6 +20,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 import jwiki.core.NS;
+import jwiki.util.FL;
 import jwiki.util.FString;
 import gui.FGUI;
 
@@ -159,7 +159,7 @@ public class CommonsMoverGUI
 				go.setEnabled(true);
 				return;
 			}
-			tl = new ArrayList<String>(Arrays.asList(new String[] { temp }));
+			tl = FL.toSAL(temp);
 		}
 
 		// Do the transfer, with hooks to progress bar.
@@ -179,6 +179,6 @@ public class CommonsMoverGUI
 		pb.setString("Done!");
 		go.setEnabled(true);
 		if (fails.size() > 0)
-			JOptionPane.showMessageDialog(null, "Did not upload:\n" + FString.fenceMaker("\n", fails.toArray(new String[0])));
+			JOptionPane.showMessageDialog(null, "Did not upload:\n" + FString.fenceMaker("\n", fails));
 	}
 }

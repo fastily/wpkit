@@ -1,4 +1,4 @@
-package ft;
+package commons;
 
 import static jwiki.core.MBot.Task;
 
@@ -15,13 +15,14 @@ import jwiki.core.ColorLog;
 import jwiki.core.MQuery;
 import jwiki.core.Wiki;
 import jwiki.util.FError;
+import jwiki.util.FL;
 import jwiki.util.FString;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 
 import util.FCLI;
-import util.StringTools;
+import util.StrTool;
 import jwiki.extras.WikiGen;
 
 /**
@@ -51,14 +52,14 @@ public class CommonsMover
 	/**
 	 * Files with these categories should not be transferred.
 	 */
-	private static final String[] blacklist = {
+	private static final ArrayList<String> blacklist = FL.toSAL(
 			"Category:Wikipedia files on Wikimedia Commons for which a local copy has been requested to be kept",
 			"Category:Media not suitable for Commons", "Category:Wikipedia files of no use beyond Wikipedia",
 			"Category:All non-free media", "Category:All Wikipedia files with unknown source",
 			"Category:All Wikipedia files with unknown copyright status", "Category:Candidates for speedy deletion",
 			"Category:All free in US media", "Category:Files deleted on Wikimedia Commons",
 			"Category:All Wikipedia files with the same name on Wikimedia Commons",
-			"Category:All Wikipedia files with a different name on Wikimedia Commons" };
+			"Category:All Wikipedia files with a different name on Wikimedia Commons");
 
 	/**
 	 * Our wiki object for commons & enwp.
@@ -154,8 +155,7 @@ public class CommonsMover
 		 */
 		public boolean doJob(Wiki wiki)
 		{
-			if (StringTools.arraysIntersect(enwp.getCategoriesOnPage(title).toArray(new String[0]), blacklist)) // check
-																																			// copyright
+			if (StrTool.arraysIntersect(enwp.getCategoriesOnPage(title), blacklist)) // check copyright
 				return FError.printErrAndRet(title + " is not eligible for transfer", false);
 			else if (!checkForDupes())
 				return true;
@@ -167,8 +167,7 @@ public class CommonsMover
 			File f;
 			if ((desc = getDesc()) != null && (f = downloadFile()) != null)
 				return wiki.upload(Paths.get(f.getAbsolutePath()), transferTo, desc,
-						String.format("from [[w:%s]] ([[Commons:CommonsMover|CM]])", title))
-						&& flagF8(transferTo);
+						String.format("from [[w:%s]] ([[Commons:CommonsMover|CM]])", title)) && flagF8(transferTo);
 			return false;
 		}
 
@@ -195,10 +194,10 @@ public class CommonsMover
 		 */
 		private boolean flagF8(String transfer)
 		{
-			return enwp.addText(
-					title,
-					String.format("%n{{subst:ncd%s|reviewer={{subst:REVISIONUSER}}}}", !transfer.equals(title) ? "|1="
-							+ enwp.nss(transfer) : ""), "now on Commons ([[c:Commons:CommonsMover|CM]])", false);
+			return enwp.addText(title,
+					String.format("%n{{subst:ncd%s|reviewer={{subst:REVISIONUSER}}}}",
+							!transfer.equals(title) ? "|1=" + enwp.nss(transfer) : ""),
+					"now on Commons ([[c:Commons:CommonsMover|CM]])", false);
 		}
 
 		/**
@@ -223,8 +222,8 @@ public class CommonsMover
 			try
 			{
 				String tl = FString.enc(titleNNS);
-				String s = FString.inputStreamToString(Req.genericPOST(new URL(url), null, Req.urlenc,
-						String.format(posttext, tl)));
+				String s = FString
+						.inputStreamToString(Req.genericPOST(new URL(url), null, Req.urlenc, String.format(posttext, tl)));
 				return s.substring(s.indexOf("{{Info"), s.indexOf("</textarea>"));
 			}
 			catch (Throwable e)

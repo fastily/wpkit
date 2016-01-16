@@ -1,6 +1,6 @@
-package ft;
+package commons;
 
-import static ft.CommonsMover.*;
+import static commons.CommonsMover.*;
 
 import java.awt.BorderLayout;
 import java.util.ArrayList;
@@ -27,7 +27,7 @@ import gui.FGUI;
 /**
  * GUI Wrapper for CommonsMover.
  * 
- * @see ft.CommonsMover
+ * @see commons.CommonsMover
  * @author Fastily
  */
 public class CommonsMoverGUI

@@ -1,4 +1,4 @@
-package ft;
+package commons;
 
 import java.util.ArrayList;
 
@@ -7,13 +7,14 @@ import jwiki.core.MBot;
 import jwiki.core.NS;
 import jwiki.core.Wiki;
 import jwiki.util.FError;
+import jwiki.util.FL;
 import jwiki.util.Tuple;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 
 import util.FCLI;
-import util.StringTools;
+import util.StrTool;
 import jwiki.extras.WikiGen;
 
 /**
@@ -67,10 +68,10 @@ public class GlobalReplace
 	protected static ArrayList<RItem> makeRItem(Wiki wiki, String old, String replacement, String optSum)
 	{
 		ArrayList<RItem> l = new ArrayList<>();
-		String regex = StringTools.makePageTitleRegex(wiki.nss(old));
+		String regex = StrTool.makePageTitleRegex(wiki.nss(old));
 		String sum = String.format("%s → %s using [[%%sCommons:GlobalReplace|GR 0.4]]%s", old, replacement, optSum != null
 				&& !optSum.isEmpty() ? ": " + optSum : "");
-		for (Tuple<String, String> t : wiki.globalUsage(wiki.convertIfNotInNS(old, NS.FILE)))
+		for (Tuple<String, String> t : FL.mapToList(wiki.globalUsage(wiki.convertIfNotInNS(old, NS.FILE))))
 			l.add(new RItem(t.x, regex, wiki.nss(replacement), sum, t.y));
 		return l;
 	}

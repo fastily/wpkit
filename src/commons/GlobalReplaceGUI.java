@@ -1,4 +1,4 @@
-package ft;
+package commons;
 
 import java.awt.BorderLayout;
 import java.util.ArrayList;
@@ -10,8 +10,8 @@ import javax.swing.JProgressBar;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
+import commons.GlobalReplace.RItem;
 import util.FNet;
-import ft.GlobalReplace.RItem;
 import gui.ConsoleBox;
 import gui.FGUI;
 import gui.ToggleButton;

@@ -101,7 +101,6 @@ public class FIO
 			if (timestamp)
 				bw.write(String.format("=== %s ===%n", LocalDateTime.now().toString()));
 			bw.write(FString.fenceMaker(FSystem.lsep, lines) + "\n\n");
-			bw.close();
 		}
 		catch (Throwable e)
 		{
@@ -109,6 +108,25 @@ public class FIO
 		}
 	}
 
+	/**
+	 * Performs a simple line dump to file
+	 * 
+	 * @param path The local file path to write to
+	 * @param lines The lines to dump to the file; each line will be separated by the default OS line separator.
+	 */
+	public static void simpleFileDump(String path, ArrayList<String> lines)
+	{
+		try (BufferedWriter bw = Files.newBufferedWriter(Paths.get(path), Charset.defaultCharset(), StandardOpenOption.CREATE,
+				StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING))
+		{
+			bw.write(FString.fenceMaker(FSystem.lsep, lines));
+		}
+		catch(Throwable e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
 	/**
 	 * Recursively search a directory for files that match a PathMatcher.
 	 * 

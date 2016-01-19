@@ -2,6 +2,7 @@ package util;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import jwiki.core.Wiki;
@@ -9,7 +10,7 @@ import jwiki.util.FL;
 import jwiki.util.FString;
 
 /**
- * Miscellaneous String methods.
+ * Miscellaneous Wiki-related String processing/parsing methods.
  * 
  * @author Fastily
  *
@@ -94,4 +95,17 @@ public class StrTool
 	{
 		return FL.toAL(l.stream().map(wiki::nss));
 	}
+	
+	/**
+	 * Gets the first substring of a String matching a regex.
+	 * @param p The regex to match
+	 * @param s The String to find the regex-matching substring in
+ 	 * @return The substring, or the empty string if no matches were found.
+	 */
+	public static String substringFromRegex(Pattern p, String s)
+	{
+		Matcher m = p.matcher(s);
+		return m.find() ? m.group() : "";
+	}
+	
 }

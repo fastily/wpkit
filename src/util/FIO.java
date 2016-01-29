@@ -8,7 +8,6 @@ import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -27,8 +26,8 @@ public class FIO
 	/**
 	 * A path matcher which will match files ok to upload to WMF wikis.
 	 */
-	public static final PathMatcher wmfuploadable = FileSystems.getDefault().getPathMatcher(
-			"regex:(?i).+?\\.(png|gif|jpg|jpeg|xcf|mid|ogg|ogv|oga|svg|djvu|tiff|tif|pdf|webm|flac|wav)");
+	public static final PathMatcher wmfuploadable = FileSystems.getDefault()
+			.getPathMatcher("regex:(?i).+?\\.(png|gif|jpg|jpeg|xcf|mid|ogg|ogv|oga|svg|djvu|tiff|tif|pdf|webm|flac|wav)");
 
 	/**
 	 * Constructors disallowed.
@@ -87,28 +86,6 @@ public class FIO
 	}
 
 	/**
-	 * Dumps lines to a file.
-	 * 
-	 * @param path The path to dump to
-	 * @param timestamp If true, include a timestamp header boundary for each set of lines dumped.
-	 * @param lines The lines to write out to. These will be separated by the system default line separator.
-	 */
-	public static void dumpToFile(String path, boolean timestamp, ArrayList<String> lines)
-	{
-		try (BufferedWriter bw = Files.newBufferedWriter(Paths.get(path), Charset.defaultCharset(), StandardOpenOption.CREATE,
-				StandardOpenOption.WRITE, StandardOpenOption.APPEND))
-		{
-			if (timestamp)
-				bw.write(String.format("=== %s ===%n", LocalDateTime.now().toString()));
-			bw.write(FString.fenceMaker(FSystem.lsep, lines) + "\n\n");
-		}
-		catch (Throwable e)
-		{
-			e.printStackTrace();
-		}
-	}
-
-	/**
 	 * Performs a simple line dump to file
 	 * 
 	 * @param path The local file path to write to
@@ -121,12 +98,12 @@ public class FIO
 		{
 			bw.write(FString.fenceMaker(FSystem.lsep, lines));
 		}
-		catch(Throwable e)
+		catch (Throwable e)
 		{
 			e.printStackTrace();
 		}
 	}
-	
+
 	/**
 	 * Recursively search a directory for files that match a PathMatcher.
 	 * 

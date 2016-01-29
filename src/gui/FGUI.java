@@ -154,7 +154,7 @@ public class FGUI
 	{
 		return login("commons.wikimedia.org");
 	}
-
+	
 	/**
 	 * Creates a simple JFrame with some default settings.
 	 * 

@@ -41,21 +41,18 @@ public final class ManageMTC
 	private static final String mtc = "Template:Copy to Wikimedia Commons";
 
 	/**
-	 * Today's date, used to fill in the date parameter for the Now Commons template
-	 */
-	private static final String today = DateTimeFormatter.ISO_LOCAL_DATE.format(LocalDate.now(ZoneId.of("UTC")));
-
-	/**
 	 * Main driver
 	 * 
 	 * @param args No arguments used
 	 */
 	public static void main(String[] args)
 	{
+		String ncd = String.format("{{Now Commons|%%s|date=%s|bot=%s}}",
+				DateTimeFormatter.ISO_LOCAL_DATE.format(LocalDate.now(ZoneId.of("UTC"))), botName);
+
 		int i = 0;
 
-		for (Map.Entry<String, ArrayList<String>> e : MQuery.getSharedDuplicatesOf(wiki, wiki.whatTranscludesHere(mtc))
-				.entrySet())
+		for (Map.Entry<String, ArrayList<String>> e : MQuery.getSharedDuplicatesOf(wiki, wiki.whatTranscludesHere(mtc)).entrySet())
 			if (!e.getValue().isEmpty())
 				try
 				{
@@ -67,13 +64,10 @@ public final class ManageMTC
 					if (wiki.getTemplatesOnPage(title).contains("Template:Now Commons"))
 						wiki.replaceText(title, tRegex, "BOT: Remove redundant {{Copy to Wikimedia Commons}} tag");
 					else
-					{
-						String ncd = String.format("{{Now Commons|%s|date=%s|bot=%s}}", e.getValue().get(0), today, botName);
-						String text = wiki.getPageText(title).replaceAll(tRegex, "");
-
-						wiki.edit(title, String.format("%s%n%s", ncd, text),
+						wiki.edit(title,
+								String.format("%s%n%s", String.format(ncd, e.getValue().get(0)),
+										wiki.getPageText(title).replaceAll(tRegex, "")),
 								"BOT: Add {{Now Commons}} to request human review because file is available at Commons");
-					}
 				}
 				catch (Throwable t)
 				{

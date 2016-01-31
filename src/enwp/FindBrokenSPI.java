@@ -6,9 +6,10 @@ import jwiki.core.NS;
 import jwiki.core.Wiki;
 import jwiki.extras.WikiGen;
 import jwiki.util.FL;
+import util.WTool;
 
 /**
- * Finds broken SPI pages
+ * Finds broken SPI pages on enwp.
  * 
  * @author Fastily
  *
@@ -18,7 +19,7 @@ public class FindBrokenSPI
 	/**
 	 * The Wiki object to use
 	 */
-	private static final Wiki wiki = WikiGen.wg.get("FastilyClone", "en.wikipedia.org");
+	private static final Wiki wiki = WikiGen.wg.get("FastilyBot", "en.wikipedia.org");
 
 	/**
 	 * The list of archived SPI cases
@@ -31,28 +32,21 @@ public class FindBrokenSPI
 	private static final ArrayList<String> inProg = wiki.whatTranscludesHere("Template:SPI case status");
 
 	/**
+	 * A list of pages to omit from the report
+	 */
+	private static final ArrayList<String> ignoreList = wiki.getLinksOnPage("Wikipedia:Sockpuppet investigations/SPI/Malformed Cases Report/Ignore");
+	
+	/**
 	 * Main driver
 	 * 
 	 * @param args No args, not used.
 	 */
 	public static void main(String[] args)
 	{
-		dump(FL.toAL(wiki.prefixIndex(NS.PROJECT, "Sockpuppet investigations/").parallelStream()
+		ArrayList<String> l = FL.toAL(wiki.prefixIndex(NS.PROJECT, "Sockpuppet investigations/").parallelStream()
 				.filter(s -> !s.endsWith("/Archive") && !s.startsWith("Wikipedia:Sockpuppet investigations/SPI/"))
-				.filter(s -> !archived.contains(s) && !inProg.contains(s)).filter(s -> wiki.resolveRedirect(s).equals(s))));
-	}
-
-	/**
-	 * Dumps a list of potentially problematic pages to my Sandbox
-	 * 
-	 * @param l The list of titles to dump and link
-	 */
-	private static void dump(ArrayList<String> l)
-	{
-		String x = "";
-		for (String s : l)
-			x += String.format("* [[%s]]%n", s);
-
-		wiki.edit("User:Fastily/Sandbox1", x, "Update list");
+				.filter(s -> !archived.contains(s) && !inProg.contains(s) && !ignoreList.contains(s)).filter(s -> wiki.resolveRedirect(s).equals(s)));
+		
+		wiki.edit("Wikipedia:Sockpuppet investigations/SPI/Malformed Cases Report", WTool.listify(l, false), "Update list");
 	}
 }

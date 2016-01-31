@@ -1,13 +1,8 @@
 package util;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import jwiki.core.Wiki;
-import jwiki.util.FL;
-import jwiki.util.FString;
 
 /**
  * Miscellaneous Wiki-related String processing/parsing methods.
@@ -57,23 +52,6 @@ public class StrTool
 	}
 
 	/**
-	 * Makes a regex which will match templates of the specified titles. The entire template will be matched, including
-	 * internal whitespace and nested parameters. WARNING: Method does not strip namespaces.
-	 * 
-	 * @param titles The titles of templates to match
-	 * @return The regex
-	 */
-	public static String makeTemplateRegex(ArrayList<String> titles)
-	{
-		ArrayList<String> l = new ArrayList<>();
-		for (String s : titles)
-			l.add(escapeRegexChars(s).replaceAll("( |_)", "( |_)"));
-
-		return String.format("(?si)\\{\\{\\s*?(%s)\\s*?((\\p{Alnum}*?\\s*?\\=)??(\\s|\\||\\p{Alnum}|\\{\\{.+?\\}\\}))*?\\}\\}",
-				FString.fenceMaker("|", l));
-	}
-
-	/**
 	 * Escapes reserved regex characters of the Java Pattern API in a String.
 	 * 
 	 * @param s The String to escape regex chars from
@@ -84,18 +62,6 @@ public class StrTool
 		return s.replaceAll(rrc, "\\\\" + "$1");
 	}
 
-	/**
-	 * Strips namespaces from a list of titles for a given Wiki.
-	 * 
-	 * @param wiki The wiki object to use
-	 * @param l The titles which will have their namespace prefixes removed by <code>wiki</code>.
-	 * @return A new list of titles, with their namespace prefixes removed.
-	 */
-	public static ArrayList<String> stripNamespaces(Wiki wiki, ArrayList<String> l)
-	{
-		return FL.toAL(l.stream().map(wiki::nss));
-	}
-	
 	/**
 	 * Gets the first substring of a String matching a regex.
 	 * @param p The regex to match

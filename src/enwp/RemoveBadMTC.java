@@ -45,7 +45,7 @@ public class RemoveBadMTC
 		ArrayList<String> fails = new ArrayList<>();
 		
 		for(String blt : wiki.getLinksOnPage("User:FastilyBot/Task2Blacklist"))
-			 for(String x : FL.toAL(wiki.whatTranscludesHere(blt).parallelStream().filter(s -> mtcFiles.contains(s))))
+			 for(String x : FL.toAL(wiki.whatTranscludesHere(blt).parallelStream().filter(mtcFiles::contains)))
 			 {
 				 String oText = wiki.getPageText(x);
 				 String newText = oText.replaceAll(tRegex, "");
@@ -56,6 +56,6 @@ public class RemoveBadMTC
 					 wiki.edit(x, newText, "BOT: Remove {{Copy to Wikimedia Commons}}; the file may not be eligible for Commons");
 			 }
 		
-		wiki.edit("User:FastilyBot/Task2Borked", WTool.listify(fails, true), "Update list");
+		wiki.edit("User:FastilyBot/Task2Borked", "This report updated at ~~~~~\n" + WTool.listify(fails, true), "Update list");
 	}
 }

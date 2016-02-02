@@ -53,7 +53,7 @@ public class WTool
 		ArrayList<String> l = wiki.whatLinksHere(tplate, true);
 		l.add(wiki.nss(tplate));
 
-		return makeTemplateRegex(WTool.stripNamespaces(wiki, l));
+		return makeTemplateRegex(stripNamespaces(wiki, l));
 	}
 
 	/**

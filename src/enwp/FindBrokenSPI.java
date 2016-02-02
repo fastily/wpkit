@@ -34,8 +34,9 @@ public class FindBrokenSPI
 	/**
 	 * A list of pages to omit from the report
 	 */
-	private static final ArrayList<String> ignoreList = wiki.getLinksOnPage("Wikipedia:Sockpuppet investigations/SPI/Malformed Cases Report/Ignore");
-	
+	private static final ArrayList<String> ignoreList = wiki
+			.getLinksOnPage("Wikipedia:Sockpuppet investigations/SPI/Malformed Cases Report/Ignore");
+
 	/**
 	 * Main driver
 	 * 
@@ -45,8 +46,10 @@ public class FindBrokenSPI
 	{
 		ArrayList<String> l = FL.toAL(wiki.prefixIndex(NS.PROJECT, "Sockpuppet investigations/").parallelStream()
 				.filter(s -> !s.endsWith("/Archive") && !s.startsWith("Wikipedia:Sockpuppet investigations/SPI/"))
-				.filter(s -> !archived.contains(s) && !inProg.contains(s) && !ignoreList.contains(s)).filter(s -> wiki.resolveRedirect(s).equals(s)));
-		
-		wiki.edit("Wikipedia:Sockpuppet investigations/SPI/Malformed Cases Report", WTool.listify(l, false), "Update list");
+				.filter(s -> !archived.contains(s) && !inProg.contains(s) && !ignoreList.contains(s))
+				.filter(s -> wiki.resolveRedirect(s).equals(s)));
+
+		wiki.edit("Wikipedia:Sockpuppet investigations/SPI/Malformed Cases Report",
+				"{{SPI navigation}}\nThis report updated at ~~~~~\n" + WTool.listify(l, false), "Update list");
 	}
 }

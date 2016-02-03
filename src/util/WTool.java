@@ -25,22 +25,23 @@ public class WTool
 	/**
 	 * Generates a Wiki-text ready, wiki-linked, unordered list from a list of titles.
 	 * 
+	 * @param header A header/lead string to apply at the beginning of the returned String.
 	 * @param titles The titles to use
 	 * @param doEscape Set as true to escape titles. i.e. adds a <code>:</code> before each link so that files and
 	 *           categories are properly escaped and appear as links.
 	 * @return A String with the titles as a linked, unordered list, in Wiki-text.
 	 */
-	public static String listify(ArrayList<String> titles, boolean doEscape)
+	public static String listify(String header, ArrayList<String> titles, boolean doEscape)
 	{
 		String fmtStr = "* [[" + (doEscape ? ":" : "") + "%s]]\n";
 
-		String x = "";
+		String x = "" + header;
 		for (String s : titles)
 			x += String.format(fmtStr, s);
 
 		return x;
 	}
-
+	
 	/**
 	 * Constructs a regular expression which will match the specified template and its parameters.
 	 * 

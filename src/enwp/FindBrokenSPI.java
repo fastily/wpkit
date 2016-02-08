@@ -50,6 +50,6 @@ public class FindBrokenSPI
 				.filter(s -> wiki.resolveRedirect(s).equals(s)));
 
 		wiki.edit("Wikipedia:Sockpuppet investigations/SPI/Malformed Cases Report",
-				WTool.listify("{{SPI navigation}}\n" + WPStrings.updatedAt, l, false), "Update list");
+				WTool.listify("{{/Header}}\n" + WPStrings.updatedAt, l, false), "Update list");
 	}
 }

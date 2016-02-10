@@ -8,7 +8,7 @@ import java.util.Map;
 import jwiki.core.MQuery;
 import jwiki.core.NS;
 import jwiki.core.Wiki;
-import jwiki.extras.WikiGen;
+import jwiki.util.WikiGen;
 import jwiki.util.FL;
 import util.MapList;
 import util.WTool;
@@ -19,7 +19,7 @@ import util.WTool;
  * @author Fastily
  *
  */
-public class NLDReport
+public final class NLDReport
 {
 	/**
 	 * The Wiki object to use

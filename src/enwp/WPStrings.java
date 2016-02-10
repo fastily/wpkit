@@ -6,7 +6,7 @@ package enwp;
  * @author Fastily
  *
  */
-public class WPStrings
+public final class WPStrings
 {
 	/**
 	 * Constructors disallowed

@@ -8,7 +8,7 @@ import java.util.Map;
 
 import jwiki.core.MQuery;
 import jwiki.core.Wiki;
-import jwiki.extras.WikiGen;
+import jwiki.util.WikiGen;
 import util.WTool;
 
 /**

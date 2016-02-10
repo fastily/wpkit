@@ -23,9 +23,9 @@ public class FCLI
 	 */
 	private FCLI()
 	{
-		
+
 	}
-	
+
 	/**
 	 * Make an option which takes a single arg.
 	 * 
@@ -35,12 +35,12 @@ public class FCLI
 	 * @return The resulting option.
 	 */
 	public static Option makeArgOption(String title, String desc, String argname)
-	{		
+	{
 		Option o = new Option(title, true, desc);
 		o.setArgName(argname);
 		return o;
 	}
-	
+
 	/**
 	 * Create a set of mutually exclusive options.
 	 * 
@@ -52,13 +52,13 @@ public class FCLI
 		OptionGroup og = new OptionGroup();
 		for (Option o : ol)
 			og.addOption(o);
-		
+
 		return og;
 	}
-	
+
 	/**
 	 * Use the GNU parser to parse a list of args with the given option set. Auto-prints specified help message if
-	 * <tt>-help</tt> option is detected.  Exits program if an error is detected.
+	 * <tt>-help</tt> option is detected. Exits program if an error is detected.
 	 * 
 	 * @param ol The option group to use
 	 * @param args The argument list to parse
@@ -76,26 +76,26 @@ public class FCLI
 				hf.setWidth(120);
 				hf.printHelp(help, ol);
 				System.exit(0);
-				
+
 			}
 			return l;
 		}
 		catch (Throwable e)
 		{
 			FError.errAndExit(e, null);
-			return null; //dead code to shut up compiler.
+			return null; // dead code to shut up compiler.
 		}
 	}
-	
+
 	/**
 	 * Creates some default options for us.
+	 * 
 	 * @return The list of options we made.
 	 */
 	public static Options makeDefaultOptions()
 	{
 		Options ol = new Options();
 		ol.addOption("help", false, "Print this help message and exit");
-		ol.addOption(makeArgOption("user", "Set the the user to login as", "username"));		
 		return ol;
 	}
 }

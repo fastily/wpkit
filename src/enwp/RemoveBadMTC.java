@@ -3,8 +3,8 @@ package enwp;
 import java.util.ArrayList;
 
 import jwiki.core.Wiki;
-import jwiki.extras.WikiGen;
 import jwiki.util.FL;
+import jwiki.util.WikiGen;
 import util.WTool;
 
 /**
@@ -13,7 +13,7 @@ import util.WTool;
  * @author Fastily
  *
  */
-public class RemoveBadMTC
+public final class RemoveBadMTC
 {
 	/**
 	 * The Wiki object to use

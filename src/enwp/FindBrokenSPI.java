@@ -4,8 +4,8 @@ import java.util.ArrayList;
 
 import jwiki.core.NS;
 import jwiki.core.Wiki;
-import jwiki.extras.WikiGen;
 import jwiki.util.FL;
+import jwiki.util.WikiGen;
 import util.WTool;
 
 /**
@@ -14,7 +14,7 @@ import util.WTool;
  * @author Fastily
  *
  */
-public class FindBrokenSPI
+public final class FindBrokenSPI
 {
 	/**
 	 * The Wiki object to use

@@ -10,7 +10,7 @@ import jwiki.core.NS;
 import jwiki.core.Wiki;
 import jwiki.util.WikiGen;
 import jwiki.util.FL;
-import util.MapList;
+import jwiki.util.MapList;
 import util.WTool;
 
 /**

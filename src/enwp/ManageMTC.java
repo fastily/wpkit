@@ -62,6 +62,8 @@ public final class ManageMTC
 								String.format("%s%n%s", String.format(ncd, e.getValue().get(0)),
 										wiki.getPageText(title).replaceAll(tRegex, "")),
 								"BOT: Add {{Now Commons}} to request human review because file is available at Commons");
+
+					Thread.sleep(3000);
 				}
 				catch (Throwable t)
 				{

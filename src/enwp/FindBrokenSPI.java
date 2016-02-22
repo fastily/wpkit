@@ -1,7 +1,9 @@
 package enwp;
 
 import java.util.ArrayList;
+import java.util.Map;
 
+import jwiki.core.MQuery;
 import jwiki.core.NS;
 import jwiki.core.Wiki;
 import jwiki.util.FL;
@@ -32,10 +34,14 @@ public final class FindBrokenSPI
 	private static final ArrayList<String> inProg = wiki.whatTranscludesHere("Template:SPI case status");
 
 	/**
+	 * The title to post reports on
+	 */
+	private static final String report = "Wikipedia:Sockpuppet investigations/SPI/Malformed Cases Report";
+
+	/**
 	 * A list of pages to omit from the report
 	 */
-	private static final ArrayList<String> ignoreList = wiki
-			.getLinksOnPage("Wikipedia:Sockpuppet investigations/SPI/Malformed Cases Report/Ignore");
+	private static final ArrayList<String> ignoreList = wiki.getLinksOnPage(report + "/Ignore");
 
 	/**
 	 * Main driver
@@ -44,12 +50,13 @@ public final class FindBrokenSPI
 	 */
 	public static void main(String[] args)
 	{
-		ArrayList<String> l = FL.toAL(wiki.prefixIndex(NS.PROJECT, "Sockpuppet investigations/").parallelStream()
-				.filter(s -> !s.endsWith("/Archive") && !s.startsWith("Wikipedia:Sockpuppet investigations/SPI/"))
-				.filter(s -> !archived.contains(s) && !inProg.contains(s) && !ignoreList.contains(s))
-				.filter(s -> wiki.resolveRedirect(s).equals(s)));
+		ArrayList<String> l = FL.toAL(MQuery
+				.resolveRedirects(wiki,
+						FL.toAL(wiki.prefixIndex(NS.PROJECT, "Sockpuppet investigations/").parallelStream()
+								.filter(s -> !s.endsWith("/Archive") && !s.startsWith("Wikipedia:Sockpuppet investigations/SPI/"))
+								.filter(s -> !archived.contains(s) && !inProg.contains(s) && !ignoreList.contains(s))))
+				.entrySet().stream().filter(e -> e.getKey().equals(e.getValue())).map(Map.Entry::getValue));
 
-		wiki.edit("Wikipedia:Sockpuppet investigations/SPI/Malformed Cases Report",
-				WTool.listify("{{/Header}}\n" + WPStrings.updatedAt, l, false), "Update list");
+		wiki.edit(report, WTool.listify("{{/Header}}\n" + WPStrings.updatedAt, l, false), "Update list");
 	}
 }

@@ -24,7 +24,7 @@ public final class RemoveBadMTC
 	 * The Copy to Wikimedia Commons template title
 	 */
 	private static final String mtc = "Template:Copy to Wikimedia Commons";
-
+	
 	/**
 	 * Creates the regular expression matching Copy to Wikimedia Commons
 	 */
@@ -42,6 +42,9 @@ public final class RemoveBadMTC
 	 */
 	public static void main(String[] args)
 	{
+		// ignore files flagged by humans
+		mtcFiles.removeAll(WTool.getCategoryMembersR(wiki, "Category:Copy to Wikimedia Commons reviewed by a human").y);
+		
 		ArrayList<String> fails = new ArrayList<>();
 
 		for (String blt : wiki.getLinksOnPage("User:FastilyBot/Task2Blacklist"))

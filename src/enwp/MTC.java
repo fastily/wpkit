@@ -5,6 +5,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -12,6 +13,7 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 
 import jwiki.core.ColorLog;
+import jwiki.core.NS;
 import jwiki.core.Req;
 import jwiki.core.WTask;
 import jwiki.core.Wiki;
@@ -51,7 +53,8 @@ public final class MTC
 			"Category:All Wikipedia files with unknown copyright status", "Category:Candidates for speedy deletion",
 			"Category:All possibly unfree Wikipedia files", "Category:Wikipedia files for discussion", "Category:All free in US media",
 			"Category:Files deleted on Wikimedia Commons", "Category:All Wikipedia files with the same name on Wikimedia Commons",
-			"Category:All Wikipedia files with a different name on Wikimedia Commons", "Category:Wikipedia files with disputed copyright information");
+			"Category:All Wikipedia files with a different name on Wikimedia Commons",
+			"Category:Wikipedia files with disputed copyright information");
 
 	/**
 	 * Matches GFDL-disclaimers templates
@@ -82,13 +85,15 @@ public final class MTC
 	 */
 	public static void main(String[] args) throws Throwable
 	{
-		CommandLine l = FCLI.gnuParse(makeOptList(), args, "MTC [-help] [-u <user>|-f <file>] [<titles>]");
+		CommandLine l = FCLI.gnuParse(makeOptList(), args, "MTC [-help] [-u <user>|-f <file>|-c <cat>] [<titles>]");
 
 		init();
 		if (l.hasOption('u'))
 			procList(enwp.getUserUploads(l.getOptionValue('u')));
 		else if (l.hasOption('f'))
-			procList(new ArrayList<>(Files.readAllLines(Paths.get(l.getOptionValue('f')))));
+			procList(Files.readAllLines(Paths.get(l.getOptionValue('f'))));
+		else if (l.hasOption('c'))
+			procList(enwp.getCategoryMembers(l.getOptionValue('c'), NS.FILE));
 		else
 			procList(FL.toSAL(l.getArgs()));
 	}
@@ -98,7 +103,7 @@ public final class MTC
 	 * 
 	 * @param titles The titles to try and move.
 	 */
-	private static void procList(ArrayList<String> titles)
+	private static void procList(List<String> titles)
 	{
 		int i = 0, total = titles.size();
 		for (String s : titles)
@@ -148,7 +153,7 @@ public final class MTC
 	private static String cleanupText(String text)
 	{
 		String t = text.replaceAll(
-				"(?si)\\{\\{(Green|Red|Yesno|Center|Own|Section link|Trademark|PD\\-logo|Bad JPEG|OTRS permission|Spoken article entry)\\}\\}\n?",
+				"(?si)\\{\\{(Green|Red|Yesno|Center|Own|Section link|Trademark|PD\\-logo|Bad JPEG|OTRS permission|Spoken article entry|PD\\-BritishGov)\\}\\}\n?",
 				"");
 		t = t.replaceAll("(?si)\\{\\{(\\QCc-by-sa-3.0-migrated\\E|Copy to Commons).*?\\}\\}\n?", "");
 		t = t.replaceAll("\\Q<!--\\E.*?\\Q-->\\E\n?", "");
@@ -216,7 +221,8 @@ public final class MTC
 	{
 		Options ol = FCLI.makeDefaultOptions();
 		ol.addOptionGroup(FCLI.makeOptGroup(FCLI.makeArgOption("u", "Transfer eligible files uploaded by a user", "user"),
-				FCLI.makeArgOption("f", "Transfer titles listed in a text file", "file")));
+				FCLI.makeArgOption("f", "Transfer titles listed in a text file", "file"),
+				FCLI.makeArgOption("c", "Transfer files in category", "cat")));
 		return ol;
 	}
 

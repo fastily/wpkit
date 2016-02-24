@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import jwiki.core.Wiki;
 import jwiki.util.WikiGen;
-import util.WTool;
+import jwiki.util.WTool;
 
 /**
  * Looks for GFDL-tagged files which may be missing source information.

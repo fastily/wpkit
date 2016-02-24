@@ -11,7 +11,7 @@ import jwiki.core.Wiki;
 import jwiki.util.WikiGen;
 import jwiki.util.FL;
 import jwiki.util.MapList;
-import util.WTool;
+import jwiki.util.WTool;
 
 /**
  * Finds files flagged as missing license which seem to have a license template.

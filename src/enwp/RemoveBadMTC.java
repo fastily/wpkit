@@ -2,10 +2,11 @@ package enwp;
 
 import java.util.ArrayList;
 
+import jwiki.core.NS;
 import jwiki.core.Wiki;
 import jwiki.util.FL;
 import jwiki.util.WikiGen;
-import util.WTool;
+import jwiki.util.WTool;
 
 /**
  * Removes Copy to Wikimedia Commons on enwp files that may be ineligible for transfer to Commons.
@@ -33,14 +34,14 @@ public final class RemoveBadMTC
 	/**
 	 * The list of files transcluding Copy to Wikimedia Commons.
 	 */
-	private static final ArrayList<String> mtcFiles = wiki.whatTranscludesHere(mtc);
+	private static final ArrayList<String> mtcFiles = wiki.filterByNS(wiki.whatTranscludesHere(mtc), NS.FILE);
 
 	/**
 	 * Main driver
 	 * 
 	 * @param args No args, not used.
 	 */
-	public static void main(String[] args)
+	public static void main(String[] args) throws Throwable
 	{
 		// ignore files flagged by humans
 		mtcFiles.removeAll(WTool.getCategoryMembersR(wiki, "Category:Copy to Wikimedia Commons reviewed by a human").y);
@@ -57,6 +58,8 @@ public final class RemoveBadMTC
 					fails.add(x);
 				else
 					wiki.edit(x, newText, "BOT: Remove {{Copy to Wikimedia Commons}}; the file may not be eligible for Commons");
+				
+				Thread.sleep(3000);
 			}
 
 		wiki.edit("User:FastilyBot/Task2Borked", WTool.listify(WPStrings.updatedAt, fails, true), "Update list");

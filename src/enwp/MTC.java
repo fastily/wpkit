@@ -21,8 +21,8 @@ import jwiki.util.FError;
 import jwiki.util.FL;
 import jwiki.util.FString;
 import jwiki.util.WikiGen;
-import util.FCLI;
-import util.WTool;
+import jwiki.util.FCLI;
+import jwiki.util.WTool;
 
 /**
  * CLI utility to assist with transfer of files from enwp to Commons.

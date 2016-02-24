@@ -7,8 +7,8 @@ import jwiki.core.MQuery;
 import jwiki.core.NS;
 import jwiki.core.Wiki;
 import jwiki.util.FL;
+import jwiki.util.WTool;
 import jwiki.util.WikiGen;
-import util.WTool;
 
 /**
  * Finds broken SPI pages on enwp.

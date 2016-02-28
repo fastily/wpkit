@@ -21,6 +21,7 @@ import jwiki.core.Wiki;
 import jwiki.util.FError;
 import jwiki.util.FL;
 import jwiki.util.FString;
+import jwiki.util.StrTool;
 import jwiki.util.WikiGen;
 import jwiki.util.FCLI;
 import jwiki.util.WTool;
@@ -44,7 +45,8 @@ public final class MTC
 			"Category:All possibly unfree Wikipedia files", "Category:Wikipedia files for discussion", "Category:All free in US media",
 			"Category:Files deleted on Wikimedia Commons", "Category:All Wikipedia files with the same name on Wikimedia Commons",
 			"Category:All Wikipedia files with a different name on Wikimedia Commons",
-			"Category:Wikipedia files with disputed copyright information");
+			"Category:Wikipedia files with disputed copyright information", "Category:Items pending OTRS confirmation of permission",
+			"Category:Wikipedia files with unconfirmed permission received by OTRS by date");
 	/**
 	 * The Wiki objects
 	 */
@@ -69,7 +71,12 @@ public final class MTC
 	 * The total number of objects to process, and the number of objects processed
 	 */
 	private static int total = 0, cnt = 0;
-	
+
+	/**
+	 * Flag indicating whether this is a dry run (do not perform transfers)
+	 */
+	private static boolean dryRun;
+
 	/**
 	 * Main driver
 	 * 
@@ -88,6 +95,8 @@ public final class MTC
 		enwp = com.getWiki("en.wikipedia.org");
 		tRegex = WTool.makeTRegex(enwp, "Template:Copy to Wikimedia Commons");
 
+		dryRun = l.hasOption('d');
+
 		if (l.hasOption('u'))
 			procList(enwp.getUserUploads(l.getOptionValue('u')));
 		else if (l.hasOption('f'))
@@ -104,9 +113,9 @@ public final class MTC
 	 * @param titles The titles to try and move.
 	 */
 	private static void procList(List<String> titles)
-	{		
+	{
 		total = titles.size();
-		
+
 		ArrayList<String> fails = FL
 				.toAL(titles.stream().filter(MTC::canTransfer).map(TransferObject::new).filter(t -> !t.doTransfer()).map(t -> t.wpFN));
 		System.out.printf("Task complete, with %d failures: %s%n", fails.size(), fails);
@@ -120,14 +129,7 @@ public final class MTC
 	 */
 	private static boolean canTransfer(String title)
 	{
-		if (enwp.getSharedDuplicatesOf(title).size() > 0)
-			return false;
-
-		for (String s : enwp.getCategoriesOnPage(title))
-			if (blacklist.contains(s))
-				return false;
-
-		return true;
+		return enwp.getSharedDuplicatesOf(title).size() == 0 && !StrTool.arraysIntersect(enwp.getCategoriesOnPage(title), blacklist);
 	}
 
 	/**
@@ -141,6 +143,7 @@ public final class MTC
 		ol.addOptionGroup(FCLI.makeOptGroup(FCLI.makeArgOption("u", "Transfer eligible files uploaded by a user", "user"),
 				FCLI.makeArgOption("f", "Transfer titles listed in a text file", "file"),
 				FCLI.makeArgOption("c", "Transfer files in category", "cat")));
+		ol.addOption("d", "Activate dry run/debug mode (does not transfer files)");
 		return ol;
 	}
 
@@ -163,11 +166,36 @@ public final class MTC
 		private static final String posttext = "language=en&project=wikipedia&image=%s&newname=&ignorewarnings=1&doit=Get+text&test=%%2F";
 
 		/**
+		 * Matches vomit that CommonsHelper doesn't strip.
+		 */
+		private static final String uselessT = String.format("(?si)\\{\\{(%s)\\}\\}\n?",
+				FString.pipeFence("Green", "Red", "Yesno", "Center", "Own", "Section link", "Trademark", "PD\\-logo", "Bad JPEG",
+						"OTRS permission", "Spoken article entry", "PD\\-BritishGov", "Convert", "Cc\\-by\\-sa", "Infosplit"));
+
+		/**
 		 * Matches GFDL-disclaimers templates
-		 * 
-		 * @see #selfAttribCheck(String, String)
 		 */
 		private static final Pattern gfdlDiscl = Pattern.compile("(?i)\\{\\{GFDL\\-user\\-(w|en)\\-(with|no)\\-disclaimers");
+
+		/**
+		 * String which is a regex tht matches caption sections
+		 */
+		private static final String captionRegexStr = "(?si)\n?\\=\\=\\s*?(Caption).+?\\|\\}";
+
+		/**
+		 * Matches caption sections
+		 */
+		private static final Pattern captionRegex = Pattern.compile(captionRegexStr);
+
+		/**
+		 * The of enwp usages of InfoSplit
+		 */
+		private static final ArrayList<String> infoSplitUses = enwp.whatTranscludesHere("Template:Infosplit");
+
+		/**
+		 * Matches infosplit templates
+		 */
+		private static final Pattern infoSplitT = Pattern.compile("(?si)\\{\\{(infosplit).+?\\}\\}");
 
 		/**
 		 * The enwp, commons, basefilename (just basename), and local path to the file.
@@ -199,11 +227,17 @@ public final class MTC
 		private boolean doTransfer()
 		{
 			ColorLog.fyi(String.format("Processing %d of %d", ++cnt, total));
-			
+
 			try
 			{
 				generateText();
 				resolveCommonsFN();
+
+				if (dryRun)
+				{
+					System.out.println(t);
+					return true;
+				}
 
 				if (WTask.downloadFile(wpFN, localFN, enwp)
 						&& com.upload(Paths.get(localFN), comFN, t, String.format("Transferred from [[w:%s|enwp]]", wpFN)))
@@ -256,9 +290,7 @@ public final class MTC
 			t = rawhtml.substring(rawhtml.indexOf("{{Info"), rawhtml.indexOf("</textarea>"));
 
 			// cleanup text
-			t = t.replaceAll(
-					"(?si)\\{\\{(Green|Red|Yesno|Center|Own|Section link|Trademark|PD\\-logo|Bad JPEG|OTRS permission|Spoken article entry|PD\\-BritishGov|Convert|Cc\\-by\\-sa)\\}\\}\n?",
-					"");
+			t = t.replaceAll(uselessT, "");
 			t = t.replaceAll("(?si)\\{\\{(\\QCc-by-sa-3.0-migrated\\E|Copy to Commons).*?\\}\\}\n?", "");
 			t = t.replaceAll("\\Q<!--\\E.*?\\Q-->\\E\n?", "");
 			t = t.replaceAll("(?i)\\|(Permission)\\=.*?\n", "|Permission=\n");
@@ -272,7 +304,6 @@ public final class MTC
 
 			// fix malformed GFDL-disclaimers templates
 			Matcher m = gfdlDiscl.matcher(t);
-
 			if (m.find())
 				try
 				{
@@ -283,6 +314,22 @@ public final class MTC
 				{
 					e.printStackTrace();
 				}
+
+			// fix malformed caption headers
+			m = captionRegex.matcher(t);
+			if (m.find())
+			{
+				String capt = m.group(); // copy caption section
+				t = t.replaceAll(captionRegexStr, ""); // strip
+				t += capt; // dump it at the end
+			}
+
+			// Fixing missing {{Infosplit}}
+			if (infoSplitUses.contains(wpFN) && (m = infoSplitT.matcher(enwp.getPageText(wpFN))).find())
+			{
+				String isplit = m.group();
+				t = StrTool.insertAt(t, "\n" + isplit, t.indexOf("== {{int:license-header}} ==") - 2);
+			}
 		}
 	}
 }

@@ -38,7 +38,7 @@ public final class ManageMTC
 	/**
 	 * Creates the regular expression matching Copy to Wikimedia Commons
 	 */
-	private static final String tRegex = WTool.makeTRegex(wiki, mtc);
+	private static final String tRegex = WTool.makeTemplateRegex(wiki, mtc);
 
 	/**
 	 * Transclusions of mtc

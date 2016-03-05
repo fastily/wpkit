@@ -46,7 +46,8 @@ public final class MTC
 			"Category:Files deleted on Wikimedia Commons", "Category:All Wikipedia files with the same name on Wikimedia Commons",
 			"Category:All Wikipedia files with a different name on Wikimedia Commons",
 			"Category:Wikipedia files with disputed copyright information", "Category:Items pending OTRS confirmation of permission",
-			"Category:Wikipedia files with unconfirmed permission received by OTRS by date");
+			"Category:Wikipedia files with unconfirmed permission received by OTRS by date", "Category:Images in non-image formats",
+			"Category:All media requiring a US status confirmation");
 	/**
 	 * The Wiki objects
 	 */
@@ -93,7 +94,7 @@ public final class MTC
 
 		com = WikiGen.wg.get("FastilyClone", "commons.wikimedia.org");
 		enwp = com.getWiki("en.wikipedia.org");
-		tRegex = WTool.makeTRegex(enwp, "Template:Copy to Wikimedia Commons");
+		tRegex = WTool.makeTemplateRegex(enwp, "Template:Copy to Wikimedia Commons");
 
 		dryRun = l.hasOption('d');
 
@@ -316,8 +317,7 @@ public final class MTC
 				}
 
 			// fix malformed caption headers
-			m = captionRegex.matcher(t);
-			if (m.find())
+			if ((m = captionRegex.matcher(t)).find())
 			{
 				String capt = m.group(); // copy caption section
 				t = t.replaceAll(captionRegexStr, ""); // strip

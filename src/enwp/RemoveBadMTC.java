@@ -29,7 +29,7 @@ public final class RemoveBadMTC
 	/**
 	 * Creates the regular expression matching Copy to Wikimedia Commons
 	 */
-	private static final String tRegex = WTool.makeTRegex(wiki, mtc);
+	private static final String tRegex = WTool.makeTemplateRegex(wiki, mtc);
 
 	/**
 	 * The list of files transcluding Copy to Wikimedia Commons.

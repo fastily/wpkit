@@ -32,36 +32,17 @@ public final class RemoveBadMTC
 	private static final String tRegex = WTool.makeTemplateRegex(wiki, mtc);
 
 	/**
-	 * The list of files transcluding Copy to Wikimedia Commons.
-	 */
-	private static final ArrayList<String> mtcFiles = wiki.filterByNS(wiki.whatTranscludesHere(mtc), NS.FILE);
-
-	/**
 	 * Main driver
 	 * 
 	 * @param args No args, not used.
 	 */
 	public static void main(String[] args) throws Throwable
 	{
-		// ignore files flagged by humans
-		mtcFiles.removeAll(WTool.getCategoryMembersR(wiki, "Category:Copy to Wikimedia Commons reviewed by a human").y);
+		ArrayList<String> mtcFiles = wiki.filterByNS(wiki.whatTranscludesHere(mtc), NS.FILE);
+		mtcFiles.removeAll(WTool.getCategoryMembersR(wiki, "Category:Copy to Wikimedia Commons reviewed by a human").y); //ignore reviewed files
 		
-		ArrayList<String> fails = new ArrayList<>();
-
 		for (String blt : wiki.getLinksOnPage("User:FastilyBot/Task2Blacklist"))
-			for (String x : FL.toAL(wiki.whatTranscludesHere(blt).parallelStream().filter(mtcFiles::contains)))
-			{
-				String oText = wiki.getPageText(x);
-				String newText = oText.replaceAll(tRegex, "");
-
-				if (oText.equals(newText))
-					fails.add(x);
-				else
-					wiki.edit(x, newText, "BOT: Remove {{Copy to Wikimedia Commons}}; the file may not be eligible for Commons");
-				
-				Thread.sleep(3000);
-			}
-
-		wiki.edit("User:FastilyBot/Task2Borked", WTool.listify(WPStrings.updatedAt, fails, true), "Update list");
+			for (String x : FL.toAL(wiki.getCategoryMembers(blt, NS.FILE).parallelStream().filter(mtcFiles::contains)))
+				wiki.replaceText(x, tRegex, "", "BOT: Remove {{Copy to Wikimedia Commons}}; the file may not be eligible for Commons");
 	}
 }

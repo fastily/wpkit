@@ -41,11 +41,6 @@ public final class ManageMTC
 	private static final String tRegex = WTool.makeTemplateRegex(wiki, mtc);
 
 	/**
-	 * Transclusions of mtc
-	 */
-	private static final GroupQueue<String> l = new GroupQueue<>(wiki.whatTranscludesHere(mtc), 50);
-
-	/**
 	 * The ncd template to fill out
 	 */
 	private static final String ncd = String.format("{{Now Commons|%%s|date=%s|bot=%s}}",
@@ -58,24 +53,22 @@ public final class ManageMTC
 	 */
 	public static void main(String[] args)
 	{
+		GroupQueue<String> l = new GroupQueue<>(wiki.whatTranscludesHere(mtc), 50);
+
 		while (l.has())
 			for (Map.Entry<String, ArrayList<String>> e : MQuery.getSharedDuplicatesOf(wiki, l.poll()).entrySet())
-				if (!e.getValue().isEmpty())
-					try
-					{
-						String title = e.getKey();
+			{
+				if (e.getValue().isEmpty())
+					continue;
 
-						if (wiki.getTemplatesOnPage(title).contains("Template:Now Commons"))
-							wiki.replaceText(title, tRegex, "BOT: Remove redundant {{Copy to Wikimedia Commons}} tag");
-						else
-							wiki.edit(title,
-									String.format("%s%n%s", String.format(ncd, e.getValue().get(0)),
-											wiki.getPageText(title).replaceAll(tRegex, "")),
-									"BOT: Add {{Now Commons}} to request human review because file is available at Commons");
-					}
-					catch (Throwable t)
-					{
-						t.printStackTrace();
-					}
+				String title = e.getKey();
+
+				if (wiki.getTemplatesOnPage(title).contains("Template:Now Commons"))
+					wiki.replaceText(title, tRegex, "BOT: Remove redundant {{Copy to Wikimedia Commons}} tag");
+				else
+					wiki.edit(title,
+							String.format("%s%n%s", String.format(ncd, e.getValue().get(0)), wiki.getPageText(title).replaceAll(tRegex, "")),
+							"BOT: Add {{Now Commons}} to request human review because file is available on Commons");
+			}
 	}
 }

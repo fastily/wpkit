@@ -40,17 +40,11 @@ public final class UnflagOI
 	 */
 	public static void main(String[] args)
 	{
-		int i = 0;
-
 		GroupQueue<String> gq = new GroupQueue<>(wiki.whatTranscludesHere(oiTempl), 50);
 		while (gq.has())
 			for (String s : FL.toAL(MQuery.fileUsage(wiki, gq.poll()).entrySet().stream()
 					.filter(e -> !wiki.filterByNS(e.getValue(), NS.MAIN).isEmpty()).map(Map.Entry::getKey)))
-			{
-				if (i++ == 40) // trial
-					System.exit(0);
-
 				wiki.replaceText(s, oiRegex, "BOT: Removing {{Orphan Image}} from a non-orphaned file");
-			}
+
 	}
 }

@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -14,6 +15,7 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 
 import jwiki.core.ColorLog;
+import jwiki.core.MQuery;
 import jwiki.core.NS;
 import jwiki.core.Req;
 import jwiki.core.WTask;
@@ -47,7 +49,8 @@ public final class MTC
 			"Category:All Wikipedia files with a different name on Wikimedia Commons",
 			"Category:Wikipedia files with disputed copyright information", "Category:Items pending OTRS confirmation of permission",
 			"Category:Wikipedia files with unconfirmed permission received by OTRS by date", "Category:Images in non-image formats",
-			"Category:All media requiring a US status confirmation");
+			"Category:All media requiring a US status confirmation", "Category:Files nominated for deletion on Wikimedia Commons",
+			"Category:Wikipedia files moved to Wikimedia Commons which could not be deleted");
 	/**
 	 * The Wiki objects
 	 */
@@ -67,11 +70,6 @@ public final class MTC
 	 * Creates the regular expression matching Copy to Wikimedia Commons
 	 */
 	private static String tRegex;
-
-	/**
-	 * The total number of objects to process, and the number of objects processed
-	 */
-	private static int total = 0, cnt = 0;
 
 	/**
 	 * Flag indicating whether this is a dry run (do not perform transfers)
@@ -115,10 +113,17 @@ public final class MTC
 	 */
 	private static void procList(List<String> titles)
 	{
-		total = titles.size();
+		ArrayList<String> fails = new ArrayList<>(), l = canTransfer(new ArrayList<>(titles));
 
-		ArrayList<String> fails = FL
-				.toAL(titles.stream().filter(MTC::canTransfer).map(TransferObject::new).filter(t -> !t.doTransfer()).map(t -> t.wpFN));
+		int cnt = 0, total = l.size();
+		TransferObject to;
+		for (String s : l)
+		{
+			ColorLog.fyi(String.format("Processing item %d of %d", ++cnt, total));
+			if (!(to = new TransferObject(s)).doTransfer())
+				fails.add(to.wpFN);
+		}
+
 		System.out.printf("Task complete, with %d failures: %s%n", fails.size(), fails);
 	}
 
@@ -128,9 +133,13 @@ public final class MTC
 	 * @param title The title to check
 	 * @return True if the file can <ins>probably</ins> be transfered to Commons.
 	 */
-	private static boolean canTransfer(String title)
+	private static ArrayList<String> canTransfer(ArrayList<String> titles)
 	{
-		return enwp.getSharedDuplicatesOf(title).size() == 0 && !StrTool.arraysIntersect(enwp.getCategoriesOnPage(title), blacklist);
+		ArrayList<String> l = FL.toAL(MQuery.getSharedDuplicatesOf(enwp, titles).entrySet().stream()
+				.filter(e -> e.getValue().size() == 0).map(Map.Entry::getKey));
+		return l.isEmpty() ? l
+				: FL.toAL(MQuery.getCategoriesOnPage(enwp, l).entrySet().stream()
+						.filter(e -> !StrTool.arraysIntersect(e.getValue(), blacklist)).map(Map.Entry::getKey));
 	}
 
 	/**
@@ -171,7 +180,7 @@ public final class MTC
 		 */
 		private static final String uselessT = String.format("(?si)\\{\\{(%s)\\}\\}\n?",
 				FString.pipeFence("Green", "Red", "Yesno", "Center", "Own", "Section link", "Trademark", "PD\\-logo", "Bad JPEG",
-						"OTRS permission", "Spoken article entry", "PD\\-BritishGov", "Convert", "Cc\\-by\\-sa", "Infosplit"));
+						"OTRS permission", "Spoken article entry", "PD\\-BritishGov", "Convert", "Cc\\-by\\-sa", "Infosplit", "Cite book"));
 
 		/**
 		 * Matches GFDL-disclaimers templates
@@ -227,8 +236,6 @@ public final class MTC
 		 */
 		private boolean doTransfer()
 		{
-			ColorLog.fyi(String.format("Processing %d of %d", ++cnt, total));
-
 			try
 			{
 				generateText();
@@ -292,7 +299,7 @@ public final class MTC
 
 			// cleanup text
 			t = t.replaceAll(uselessT, "");
-			t = t.replaceAll("(?si)\\{\\{(\\QCc-by-sa-3.0-migrated\\E|Copy to Commons).*?\\}\\}\n?", "");
+			t = t.replaceAll("(?si)\\{\\{(\\QCc-by-sa-3.0-migrated\\E|Copy to Commons|Do not move to Commons).*?\\}\\}\n?", "");
 			t = t.replaceAll("\\Q<!--\\E.*?\\Q-->\\E\n?", "");
 			t = t.replaceAll("(?i)\\|(Permission)\\=.*?\n", "|Permission=\n");
 			t = t.replaceAll("(?i)\\|(Source)\\=(Transferred from).*?\n", "|Source={{Transferred from|en.wikipedia}}\n");

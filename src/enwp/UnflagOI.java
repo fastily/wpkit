@@ -7,8 +7,8 @@ import jwiki.core.NS;
 import jwiki.core.Wiki;
 import jwiki.util.FL;
 import jwiki.util.GroupQueue;
-import jwiki.util.WTool;
-import jwiki.util.WikiGen;
+import jwikix.util.WTool;
+import jwikix.util.WikiGen;
 
 /**
  * Reomves {{Orphan image}} from freely licensed files which contain file links in the main space.

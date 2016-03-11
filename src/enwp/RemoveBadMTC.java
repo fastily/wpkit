@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import jwiki.core.NS;
 import jwiki.core.Wiki;
 import jwiki.util.FL;
-import jwiki.util.WikiGen;
-import jwiki.util.WTool;
+import jwikix.util.WTool;
+import jwikix.util.WikiGen;
 
 /**
  * Removes Copy to Wikimedia Commons on enwp files that may be ineligible for transfer to Commons.

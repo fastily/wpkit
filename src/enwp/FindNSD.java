@@ -3,8 +3,8 @@ package enwp;
 import java.util.ArrayList;
 
 import jwiki.core.Wiki;
-import jwiki.util.WikiGen;
-import jwiki.util.WTool;
+import jwikix.util.WTool;
+import jwikix.util.WikiGen;
 
 /**
  * Looks for GFDL-tagged files which may be missing source information.

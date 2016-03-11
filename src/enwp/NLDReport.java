@@ -8,10 +8,10 @@ import java.util.Map;
 import jwiki.core.MQuery;
 import jwiki.core.NS;
 import jwiki.core.Wiki;
-import jwiki.util.WikiGen;
 import jwiki.util.FL;
 import jwiki.util.MapList;
-import jwiki.util.WTool;
+import jwikix.util.WTool;
+import jwikix.util.WikiGen;
 
 /**
  * Finds files flagged as missing license which seem to have a license template.

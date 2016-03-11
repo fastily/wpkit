@@ -8,9 +8,9 @@ import java.util.Map;
 
 import jwiki.core.MQuery;
 import jwiki.core.Wiki;
-import jwiki.util.WikiGen;
 import jwiki.util.GroupQueue;
-import jwiki.util.WTool;
+import jwikix.util.WTool;
+import jwikix.util.WikiGen;
 
 /**
  * Bot which finds files on enwp which have been copied to Commons and tags them for human review.

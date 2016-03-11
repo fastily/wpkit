@@ -23,10 +23,10 @@ import jwiki.core.Wiki;
 import jwiki.util.FError;
 import jwiki.util.FL;
 import jwiki.util.FString;
-import jwiki.util.StrTool;
-import jwiki.util.WikiGen;
-import jwiki.util.FCLI;
-import jwiki.util.WTool;
+import jwikix.util.FCLI;
+import jwikix.util.StrTool;
+import jwikix.util.WTool;
+import jwikix.util.WikiGen;
 
 /**
  * CLI utility to assist with transfer of files from enwp to Commons.
@@ -50,7 +50,8 @@ public final class MTC
 			"Category:Wikipedia files with disputed copyright information", "Category:Items pending OTRS confirmation of permission",
 			"Category:Wikipedia files with unconfirmed permission received by OTRS by date", "Category:Images in non-image formats",
 			"Category:All media requiring a US status confirmation", "Category:Files nominated for deletion on Wikimedia Commons",
-			"Category:Wikipedia files moved to Wikimedia Commons which could not be deleted");
+			"Category:Wikipedia files moved to Wikimedia Commons which could not be deleted",
+			"Category:Images published abroad that are in the public domain in the United States");
 	/**
 	 * The Wiki objects
 	 */

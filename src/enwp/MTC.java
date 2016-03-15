@@ -51,7 +51,7 @@ public final class MTC
 			"Category:Wikipedia files with unconfirmed permission received by OTRS by date", "Category:Images in non-image formats",
 			"Category:All media requiring a US status confirmation", "Category:Files nominated for deletion on Wikimedia Commons",
 			"Category:Wikipedia files moved to Wikimedia Commons which could not be deleted",
-			"Category:Images published abroad that are in the public domain in the United States");
+			"Category:Images published abroad that are in the public domain in the United States", "Category:Duplicate Wikipedia files");
 	/**
 	 * The Wiki objects
 	 */
@@ -316,7 +316,7 @@ public final class MTC
 			if (m.find())
 				try
 				{
-					t = String.format("%s|1=%s%s", t.substring(0, m.end()), enwp.getRevisions(wpFN, 1, true).get(0).user,
+					t = String.format("%s|1=%s%s", t.substring(0, m.end()), enwp.getRevisions(wpFN, 1, true, null, null).get(0).user,
 							t.substring(m.end()));
 				}
 				catch (Throwable e)

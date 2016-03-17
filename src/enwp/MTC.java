@@ -5,9 +5,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -115,17 +115,49 @@ public final class MTC
 	private static void procList(List<String> titles)
 	{
 		ArrayList<String> fails = new ArrayList<>(), l = canTransfer(new ArrayList<>(titles));
+		HashMap<String, String> fileNames = resolveFileNames(l);
 
 		int cnt = 0, total = l.size();
 		TransferObject to;
 		for (String s : l)
 		{
 			ColorLog.fyi(String.format("Processing item %d of %d", ++cnt, total));
-			if (!(to = new TransferObject(s)).doTransfer())
+			if (!(to = new TransferObject(s, fileNames.get(s))).doTransfer())
 				fails.add(to.wpFN);
 		}
 
 		System.out.printf("Task complete, with %d failures: %s%n", fails.size(), fails);
+	}
+
+	/**
+	 * Find available file names on Commons for each enwp file. The enwp filename will be returned if it is free on
+	 * Commons, otherwise it will be permuted.
+	 * 
+	 * @param l The list of enwp files to find a Commons filename for
+	 * @return The Map such that [ enwp_filename : commons_filename ]
+	 */
+	private static HashMap<String, String> resolveFileNames(ArrayList<String> l)
+	{
+		HashMap<String, String> m = new HashMap<>();
+		for (Map.Entry<String, Boolean> e : MQuery.exists(com, l).entrySet())
+		{
+			String title = e.getKey();
+
+			if (!e.getValue())
+				m.put(title, title);
+			else
+			{
+				String comFN;
+				do
+				{
+					comFN = StrTool.permuteFileName(enwp.nss(title));
+				} while (com.exists(comFN)); // loop until available filename is found
+
+				m.put(title, comFN);
+			}
+		}
+
+		return m;
 	}
 
 	/**
@@ -140,7 +172,8 @@ public final class MTC
 				.filter(e -> e.getValue().size() == 0).map(Map.Entry::getKey));
 		return l.isEmpty() ? l
 				: FL.toAL(MQuery.getCategoriesOnPage(enwp, l).entrySet().stream()
-						.filter(e -> !StrTool.arraysIntersect(e.getValue(), blacklist)).map(Map.Entry::getKey));
+						.filter(e -> !StrTool.arraysIntersect(e.getValue(), blacklist) && e.getValue().contains("Category:All free media"))
+						.map(Map.Entry::getKey));
 	}
 
 	/**
@@ -221,12 +254,14 @@ public final class MTC
 		/**
 		 * Constructor, creates a TransferObject
 		 * 
-		 * @param title The enwp title to transfer
+		 * @param wpFN The enwp title to transfer
+		 * @param comFN The commons title to transfer to
 		 */
-		private TransferObject(String title)
+		private TransferObject(String wpFN, String comFN)
 		{
-			comFN = wpFN = title;
-			baseFN = enwp.nss(title);
+			this.comFN = comFN;
+			this.wpFN = wpFN;
+			baseFN = enwp.nss(wpFN);
 			localFN = fdump + baseFN;
 		}
 
@@ -240,7 +275,6 @@ public final class MTC
 			try
 			{
 				generateText();
-				resolveCommonsFN();
 
 				if (dryRun)
 				{
@@ -260,28 +294,6 @@ public final class MTC
 			}
 
 			return false;
-		}
-
-		/**
-		 * Automatically resolve file name conflicts between enwp and existing Commons files
-		 */
-		private void resolveCommonsFN()
-		{
-			if (!com.exists(comFN))
-				return;
-
-			Random r = new Random();
-
-			int dotIndex = comFN.lastIndexOf('.');
-			String front = comFN.substring(0, dotIndex), back = comFN.substring(dotIndex);
-
-			String temp;
-			do
-			{
-				temp = String.format("%s %d%s", front, r.nextInt(), back);
-			} while (com.exists(temp));
-
-			comFN = temp;
 		}
 
 		/**

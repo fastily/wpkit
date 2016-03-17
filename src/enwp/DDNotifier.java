@@ -98,17 +98,11 @@ public class DDNotifier
 			if (blacklist.contains(talkpage))
 				continue;
 
-			ArrayList<String> notifyList = testNotifiedFor(e.getKey(), e.getValue());
+			ArrayList<String> notifyList = testNotifiedFor(talkpage, e.getValue());
 			if (notifyList.isEmpty())
-			{
-				System.out.println("ALL NOTIFIED FOR: " + e.getKey());
 				continue;
-			}
 
-			System.out.println("!!!!!!!!!NOT NOTIFIED FOR: " + e.getKey());
 			wiki.addText(talkpage, generateMessage(notifyList, templ), "BOT: Notify user of possible file issue(s)", false);
-
-			//System.out.println(generateMessage(notifyList, templ));
 		}
 	}
 
@@ -133,20 +127,20 @@ public class DDNotifier
 		}
 
 		return x + "\n<span style=\"color:red;font-weight:bold;\">ATTENTION</span>: This is an automated, [[Wikipedia:Bots|BOT]]-generated message.  "
-				+ "This bot DID NOT tag your file(s) for deletion, so if you would like to know who tagged the file(s), please refer "
-				+ "to the [[Help:Page history|page history]] for each individual file. Thanks, ~~~~";
+				+ "This bot DID NOT nominate your file(s) for deletion; please refer to the [[Help:Page history|page history]] of each individual file "
+				+ "for details. Thanks, ~~~~";
 	}
 
 	/**
 	 * Test if a user has been notified about a File in the past calendar day.
 	 * 
-	 * @param user The user, whose talk page will be checked for links to the specified files in <code>l</code>
-	 * @param l The list of files to check for on <code>user</code>'s talk page.
+	 * @param userTalk The user's talk page, to be checked for links to the specified files in <code>l</code>
+	 * @param l The list of files to check for on <code>userTakl</code>.
 	 * @return A list of files that the user should be notified about.
 	 */
-	private static ArrayList<String> testNotifiedFor(String user, ArrayList<String> l)
+	private static ArrayList<String> testNotifiedFor(String userTalk, ArrayList<String> l)
 	{
-		ArrayList<String> texts = FL.toAL(wiki.getRevisions("User talk:" + user, -1, false, start, end).stream().map(r -> r.text));
+		ArrayList<String> texts = FL.toAL(wiki.getRevisions(userTalk, -1, false, start, end).stream().map(r -> r.text));
 		return FL.toAL(l.stream().filter(s -> texts.stream().noneMatch(t -> t.matches("(?si).*?\\[\\[:(\\Q" + s + "\\E)\\]\\].*?"))));
 	}
 

@@ -51,7 +51,14 @@ public final class MTC
 			"Category:Wikipedia files with unconfirmed permission received by OTRS by date", "Category:Images in non-image formats",
 			"Category:All media requiring a US status confirmation", "Category:Files nominated for deletion on Wikimedia Commons",
 			"Category:Wikipedia files moved to Wikimedia Commons which could not be deleted",
-			"Category:Images published abroad that are in the public domain in the United States", "Category:Duplicate Wikipedia files");
+			"Category:Images published abroad that are in the public domain in the United States", "Category:Duplicate Wikipedia files",
+			"Category:Pre-1996 PD in home country US public domain images");
+
+	/**
+	 * Files must be members of at least one of the following categories to be eligible for transfer.
+	 */
+	private static final ArrayList<String> whitelist = FL.toSAL("Category:All free media", "Category:Self-published work",
+			"Category:GFDL files with disclaimers");
 	/**
 	 * The Wiki objects
 	 */
@@ -172,7 +179,7 @@ public final class MTC
 				.filter(e -> e.getValue().size() == 0).map(Map.Entry::getKey));
 		return l.isEmpty() ? l
 				: FL.toAL(MQuery.getCategoriesOnPage(enwp, l).entrySet().stream()
-						.filter(e -> !StrTool.arraysIntersect(e.getValue(), blacklist) && e.getValue().contains("Category:All free media"))
+						.filter(e -> !StrTool.arraysIntersect(e.getValue(), blacklist) && StrTool.arraysIntersect(e.getValue(), whitelist))
 						.map(Map.Entry::getKey));
 	}
 
@@ -213,8 +220,9 @@ public final class MTC
 		 * Matches vomit that CommonsHelper doesn't strip.
 		 */
 		private static final String uselessT = String.format("(?si)\\{\\{(%s)\\}\\}\n?",
-				FString.pipeFence("Green", "Red", "Yesno", "Center", "Own", "Section link", "Trademark", "PD\\-logo", "Bad JPEG",
-						"OTRS permission", "Spoken article entry", "PD\\-BritishGov", "Convert", "Cc\\-by\\-sa", "Infosplit", "Cite book"));
+				FString.pipeFence("Green", "Red", "Yesno", "Center", "Own", "Section link", "Trademark", "Bad JPEG", "OTRS permission",
+						"Spoken article entry", "PD\\-BritishGov", "Convert", "Cc\\-by\\-sa", "Infosplit", "Cite book", "Trim", "Legend",
+						"Hidden begin", "Hidden end"));
 
 		/**
 		 * Matches GFDL-disclaimers templates

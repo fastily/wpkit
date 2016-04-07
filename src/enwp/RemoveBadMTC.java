@@ -1,6 +1,6 @@
 package enwp;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 
 import jwiki.core.NS;
 import jwiki.core.Wiki;
@@ -38,7 +38,7 @@ public final class RemoveBadMTC
 	 */
 	public static void main(String[] args) throws Throwable
 	{
-		ArrayList<String> mtcFiles = wiki.filterByNS(wiki.whatTranscludesHere(mtc), NS.FILE);
+		HashSet<String> mtcFiles = new HashSet<>(wiki.filterByNS(wiki.whatTranscludesHere(mtc), NS.FILE));
 		mtcFiles.removeAll(WTool.getCategoryMembersR(wiki, "Category:Copy to Wikimedia Commons reviewed by a human").y); //ignore reviewed files
 		
 		for (String blt : wiki.getLinksOnPage("User:FastilyBot/Task2Blacklist"))

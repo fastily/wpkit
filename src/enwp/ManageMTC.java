@@ -3,16 +3,13 @@ package enwp;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.HashSet;
 
-import jwiki.core.MQuery;
 import jwiki.core.Wiki;
 import jwiki.util.FL;
 import jwiki.util.GroupQueue;
 import jwiki.util.Tuple;
+import jwikix.core.MQueryX;
 import jwikix.util.WTool;
 import jwikix.util.WikiGen;
 
@@ -45,6 +42,11 @@ public final class ManageMTC
 	private static final String tRegex = WTool.makeTemplateRegex(wiki, mtc);
 
 	/**
+	 * The list of pages transcluding {{Now Commons}}
+	 */
+	private static final HashSet<String> nowCommons = new HashSet<>(wiki.whatTranscludesHere("Template:Now Commons"));
+
+	/**
 	 * The ncd template to fill out
 	 */
 	private static final String ncd = String.format("{{Now Commons|%%s|date=%s|bot=%s}}%n",
@@ -60,18 +62,11 @@ public final class ManageMTC
 		GroupQueue<String> l = new GroupQueue<>(wiki.whatTranscludesHere(mtc), 50);
 
 		while (l.has())
-		{
-			HashMap<String, String> dupes = new HashMap<>(MQuery.getSharedDuplicatesOf(wiki, l.poll()).entrySet().stream()
-					.filter(e -> !e.getValue().isEmpty()).collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().get(0))));
-			ArrayList<String> tempL = FL.toAL(MQuery.getTemplatesOnPage(wiki, new ArrayList<>(dupes.keySet())).entrySet().stream()
-					.filter(e -> e.getValue().contains("Template:Now Commons")).map(Map.Entry::getKey));
-
-			for (Tuple<String, String> e : FL.mapToList(dupes))
-				if (tempL.contains(e.x))
-					wiki.replaceText(e.x, tRegex, "BOT: Remove redundant {{Copy to Wikimedia Commons}} tag");
+			for (Tuple<String, String> e : FL.mapToList(MQueryX.getOnlySharedDuplicates(wiki, l.poll())))
+				if (nowCommons.contains(e.x))
+					wiki.replaceText(e.x, tRegex, "BOT: Remove redundant {{Copy to Wikimedia Commons}}");
 				else
 					wiki.edit(e.x, String.format(ncd, e.y) + wiki.getPageText(e.x).replaceAll(tRegex, ""),
-							"BOT: Add {{Now Commons}} to request human review because file is available on Commons");
-		}
+							"BOT: Add {{Now Commons}} because the file is available on Commons");
 	}
 }

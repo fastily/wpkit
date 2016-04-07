@@ -6,6 +6,7 @@ import java.time.ZonedDateTime;
 import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 
@@ -33,8 +34,8 @@ public class DDNotifier
 	 * A list of categories to check if users have been notified.
 	 */
 	private static final ArrayList<Tuple<String, String>> rules = FL
-			.toAL(Arrays.asList(wiki.getPageText("User:FastilyBot/Task6Rules").split("\n")).stream().filter(s -> !s.startsWith("<"))
-					.map(s -> s.split(";")).map(a -> new Tuple<>(a[0], a[1])));
+			.toAL(Arrays.asList(wiki.getPageText("User:FastilyBot/Task6Rules").split("\n")).stream()
+					.filter(s -> !s.startsWith("<") && !s.isEmpty()).map(s -> s.split(";")).map(a -> new Tuple<>(a[0], a[1])));
 
 	/**
 	 * The start of today, and the start of yesterday (target date)
@@ -56,7 +57,12 @@ public class DDNotifier
 	/**
 	 * The title blacklist; the bot will not edit any page transcluding {{bots}}
 	 */
-	private static final ArrayList<String> blacklist = wiki.filterByNS(wiki.whatTranscludesHere("Template:Bots"), NS.USER_TALK);
+	private static final HashSet<String> talkPageBL = new HashSet<>(wiki.whatTranscludesHere("Template:Bots"));
+
+	/**
+	 * The Set of files transcluding Template:Don't know. This template triggers the bot unnecessarily.
+	 */
+	private static final HashSet<String> idkTempL = new HashSet<>(wiki.whatTranscludesHere("Template:Don't know"));
 
 	/**
 	 * Main driver
@@ -83,19 +89,20 @@ public class DDNotifier
 
 		MapList<String, String> ml = new MapList<>();
 		for (String s : wiki.getCategoryMembers(cat, NS.FILE))
-			try
-			{
-				ml.put(wiki.getRevisions(s, 1, true, null, null).get(0).user, s);
-			}
-			catch (Throwable e)
-			{
-				e.printStackTrace();
-			}
+			if (!idkTempL.contains(s))
+				try
+				{
+					ml.put(wiki.getRevisions(s, 1, true, null, null).get(0).user, s);
+				}
+				catch (Throwable e)
+				{
+					e.printStackTrace();
+				}
 
 		for (Map.Entry<String, ArrayList<String>> e : ml.l.entrySet())
 		{
 			String talkpage = "User talk:" + e.getKey();
-			if (blacklist.contains(talkpage))
+			if (talkPageBL.contains(talkpage))
 				continue;
 
 			ArrayList<String> notifyList = testNotifiedFor(talkpage, e.getValue());
@@ -122,11 +129,10 @@ public class DDNotifier
 			x += "\nAlso:\n";
 			for (int i = 1; i < l.size(); i++)
 				x += String.format("* [[:%s]]%n", l.get(i));
-
-			x += "\n";
 		}
 
-		return x + "\n<span style=\"color:red;font-weight:bold;\">ATTENTION</span>: This is an automated, [[Wikipedia:Bots|BOT]]-generated message.  "
+		return x
+				+ "\n<span style=\"color:red;font-weight:bold;\">ATTENTION</span>: This is an automated, [[Wikipedia:Bots|BOT]]-generated message.  "
 				+ "This bot DID NOT nominate your file(s) for deletion; please refer to the [[Help:Page history|page history]] of each individual file "
 				+ "for details. Thanks, ~~~~";
 	}

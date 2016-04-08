@@ -1,4 +1,4 @@
-package enwp;
+package enwp.bots;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -9,6 +9,7 @@ import jwiki.core.Wiki;
 import jwiki.util.FL;
 import jwikix.util.WTool;
 import jwikix.util.WikiGen;
+import util.WPStrings;
 
 /**
  * Finds broken SPI pages on enwp.

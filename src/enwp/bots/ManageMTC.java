@@ -1,4 +1,4 @@
-package enwp;
+package enwp.bots;
 
 import java.time.LocalDate;
 import java.time.ZoneId;

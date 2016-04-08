@@ -1,4 +1,4 @@
-package enwp;
+package enwp.bots;
 
 import java.util.Map;
 

@@ -1,4 +1,4 @@
-package enwp;
+package enwp.tools;
 
 import java.util.ArrayList;
 import java.util.Collections;

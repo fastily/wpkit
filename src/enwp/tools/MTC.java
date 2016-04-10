@@ -23,10 +23,10 @@ import jwiki.core.Wiki;
 import jwiki.util.FError;
 import jwiki.util.FL;
 import jwiki.util.FString;
-import jwikix.util.FCLI;
 import jwikix.util.StrTool;
 import jwikix.util.WTool;
 import jwikix.util.WikiGen;
+import util.FCLI;
 
 /**
  * CLI utility to assist with transfer of files from enwp to Commons.
@@ -93,25 +93,35 @@ public final class MTC
 	{
 		CommandLine l = FCLI.gnuParse(makeOptList(), args, "MTC [-help] [-u <user>|-f <file>|-c <cat>] [<titles>]");
 
+		// Generate download directory
 		if (Files.isRegularFile(fdPath))
 			FError.errAndExit(fdump + " is file, please remove it so MTC can continue");
 		else if (!Files.isDirectory(fdPath))
 			Files.createDirectory(fdPath);
 
+		// Do initial logins, and generate MTC regexes
 		com = WikiGen.wg.get("FastilyClone", "commons.wikimedia.org");
 		enwp = com.getWiki("en.wikipedia.org");
 		tRegex = WTool.makeTemplateRegex(enwp, "Template:Copy to Wikimedia Commons");
 
 		dryRun = l.hasOption('d');
 
-		if (l.hasOption('u'))
-			procList(enwp.getUserUploads(l.getOptionValue('u')));
-		else if (l.hasOption('f'))
+		if (l.hasOption('f'))
 			procList(Files.readAllLines(Paths.get(l.getOptionValue('f'))));
-		else if (l.hasOption('c'))
-			procList(enwp.getCategoryMembers(l.getOptionValue('c'), NS.FILE));
-		else
-			procList(FL.toSAL(l.getArgs()));
+		
+		ArrayList<String> fl = new ArrayList<>();
+		for(String s : l.getArgs())
+		{
+			NS ns = enwp.whichNS(s);
+			if(ns.equals(NS.FILE))
+				fl.add(s);
+			else if(ns.equals(NS.CATEGORY))
+				fl.addAll(enwp.getCategoryMembers(s, NS.FILE));
+			else
+				fl.addAll(enwp.getUserUploads(s));
+		}
+		
+		procList(fl);
 	}
 
 	/**
@@ -191,9 +201,7 @@ public final class MTC
 	private static Options makeOptList()
 	{
 		Options ol = FCLI.makeDefaultOptions();
-		ol.addOptionGroup(FCLI.makeOptGroup(FCLI.makeArgOption("u", "Transfer eligible files uploaded by a user", "user"),
-				FCLI.makeArgOption("f", "Transfer titles listed in a text file", "file"),
-				FCLI.makeArgOption("c", "Transfer files in category", "cat")));
+		ol.addOption(FCLI.makeArgOption("f", "Transfer titles listed in a text file", "file"));
 		ol.addOption("d", "Activate dry run/debug mode (does not transfer files)");
 		return ol;
 	}
@@ -222,7 +230,7 @@ public final class MTC
 		private static final String uselessT = String.format("(?si)\\{\\{(%s)\\}\\}\n?",
 				FString.pipeFence("Green", "Red", "Yesno", "Center", "Own", "Section link", "Trademark", "Bad JPEG", "OTRS permission",
 						"Spoken article entry", "PD\\-BritishGov", "Convert", "Cc\\-by\\-sa", "Infosplit", "Cite book", "Trim", "Legend",
-						"Hidden begin", "Hidden end"));
+						"Hidden begin", "Hidden end", "Createdwith"));
 
 		/**
 		 * Matches GFDL-disclaimers templates
@@ -294,7 +302,6 @@ public final class MTC
 						&& com.upload(Paths.get(localFN), comFN, t, String.format("Transferred from [[w:%s|enwp]]", wpFN)))
 					return enwp.edit(wpFN, String.format("{{subst:ncd|%s}}%n", comFN) + enwp.getPageText(wpFN).replaceAll(tRegex, ""),
 							"ncd");
-
 			}
 			catch (Throwable e)
 			{

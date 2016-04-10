@@ -47,6 +47,11 @@ public final class ManageMTC
 	private static final HashSet<String> nowCommons = new HashSet<>(wiki.whatTranscludesHere("Template:Now Commons"));
 
 	/**
+	 * The list of pages for bots to avoid
+	 */
+	private static final HashSet<String> nobots = new HashSet<>(wiki.whatTranscludesHere("Template:Bots"));
+	
+	/**
 	 * The ncd template to fill out
 	 */
 	private static final String ncd = String.format("{{Now Commons|%%s|date=%s|bot=%s}}%n",
@@ -62,11 +67,13 @@ public final class ManageMTC
 		GroupQueue<String> l = new GroupQueue<>(wiki.whatTranscludesHere(mtc), 50);
 
 		while (l.has())
-			for (Tuple<String, String> e : FL.mapToList(MQueryX.getOnlySharedDuplicates(wiki, l.poll())))
-				if (nowCommons.contains(e.x))
+			for (Tuple<String, String> e : FL.mapToList(MQueryX.getFirstOnlySharedDuplicate(wiki, l.poll())))
+				if (nobots.contains(e.x))
+					continue;
+				else if (nowCommons.contains(e.x))
 					wiki.replaceText(e.x, tRegex, "BOT: Remove redundant {{Copy to Wikimedia Commons}}");
 				else
 					wiki.edit(e.x, String.format(ncd, e.y) + wiki.getPageText(e.x).replaceAll(tRegex, ""),
-							"BOT: Add {{Now Commons}} because the file is available on Commons");
+							"BOT: Add {{Now Commons}}, file is available on Commons");
 	}
 }

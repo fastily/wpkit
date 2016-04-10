@@ -51,7 +51,7 @@ public class FindCommonsFFD
 
 	private static void procCat(String cat)
 	{
-		MQueryX.getOnlySharedDuplicates(enwp, enwp.getCategoryMembers(cat, NS.FILE)).entrySet().stream()
+		MQueryX.getFirstOnlySharedDuplicate(enwp, enwp.getCategoryMembers(cat, NS.FILE)).entrySet().stream()
 				.filter(e -> ffdCom.contains(e.getValue())).forEach(e -> enwp.replaceText(e.getKey(), ncRegex,
 						String.format(nfdc, enwp.nss(e.getValue())), "BOT: Flag transfered file that is up for deletion on Commons"));
 	}

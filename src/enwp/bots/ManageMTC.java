@@ -10,7 +10,7 @@ import jwiki.util.FL;
 import jwiki.util.GroupQueue;
 import jwiki.util.Tuple;
 import jwikix.core.MQueryX;
-import jwikix.util.WTool;
+import jwikix.util.TParse;
 import jwikix.util.WikiGen;
 
 /**
@@ -39,7 +39,7 @@ public final class ManageMTC
 	/**
 	 * Creates the regular expression matching Copy to Wikimedia Commons
 	 */
-	private static final String tRegex = WTool.makeTemplateRegex(wiki, mtc);
+	private static final String tRegex = TParse.makeTemplateRegex(wiki, mtc);
 
 	/**
 	 * The list of pages transcluding {{Now Commons}}

@@ -5,6 +5,7 @@ import java.util.HashSet;
 import jwiki.core.NS;
 import jwiki.core.Wiki;
 import jwiki.util.FL;
+import jwikix.util.TParse;
 import jwikix.util.WTool;
 import jwikix.util.WikiGen;
 
@@ -29,7 +30,7 @@ public final class RemoveBadMTC
 	/**
 	 * Creates the regular expression matching Copy to Wikimedia Commons
 	 */
-	private static final String tRegex = WTool.makeTemplateRegex(wiki, mtc);
+	private static final String tRegex = TParse.makeTemplateRegex(wiki, mtc);
 
 	/**
 	 * Main driver

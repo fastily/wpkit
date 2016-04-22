@@ -7,7 +7,7 @@ import jwiki.core.NS;
 import jwiki.core.Wiki;
 import jwiki.util.FL;
 import jwiki.util.GroupQueue;
-import jwikix.util.WTool;
+import jwikix.util.TParse;
 import jwikix.util.WikiGen;
 
 /**
@@ -31,7 +31,7 @@ public final class UnflagOI
 	/**
 	 * A regex matching the Orphan image template
 	 */
-	private static final String oiRegex = WTool.makeTemplateRegex(wiki, oiTempl);
+	private static final String oiRegex = TParse.makeTemplateRegex(wiki, oiTempl);
 
 	/**
 	 * Main driver

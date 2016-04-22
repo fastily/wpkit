@@ -60,9 +60,9 @@ public class DDNotifier
 	private static final HashSet<String> talkPageBL = new HashSet<>(wiki.whatTranscludesHere("Template:Bots"));
 
 	/**
-	 * The Set of files transcluding Template:Don't know. This template triggers the bot unnecessarily.
+	 * The list of files with templates that trigger the bot unnecessarily.
 	 */
-	private static final HashSet<String> idkTempL = new HashSet<>(wiki.whatTranscludesHere("Template:Don't know"));
+	private static final HashSet<String> idkL = initIdk();
 
 	/**
 	 * Main driver
@@ -89,7 +89,7 @@ public class DDNotifier
 
 		MapList<String, String> ml = new MapList<>();
 		for (String s : wiki.getCategoryMembers(cat, NS.FILE))
-			if (!idkTempL.contains(s))
+			if (!idkL.contains(s))
 				try
 				{
 					ml.put(wiki.getRevisions(s, 1, true, null, null).get(0).user, s);
@@ -163,5 +163,19 @@ public class DDNotifier
 				return s;
 
 		return null;
+	}
+
+	/**
+	 * Initializes the list of files which transclude templates that trigger the bot unnecessarily.
+	 * 
+	 * @return The list of files with templates that trigger the bot unnecessarily.
+	 */
+	private static HashSet<String> initIdk()
+	{
+		HashSet<String> l = new HashSet<>();
+		l.addAll(wiki.whatTranscludesHere("Template:Don't know"));
+		l.addAll(wiki.whatTranscludesHere("Template:Somewebsite"));
+	
+		return l;
 	}
 }

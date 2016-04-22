@@ -24,7 +24,7 @@ import jwiki.util.FError;
 import jwiki.util.FL;
 import jwiki.util.FString;
 import jwikix.util.StrTool;
-import jwikix.util.WTool;
+import jwikix.util.TParse;
 import jwikix.util.WikiGen;
 import util.FCLI;
 
@@ -91,7 +91,7 @@ public final class MTC
 	 */
 	public static void main(String[] args) throws Throwable
 	{
-		CommandLine l = FCLI.gnuParse(makeOptList(), args, "MTC [-help] [-u <user>|-f <file>|-c <cat>] [<titles>]");
+		CommandLine l = FCLI.gnuParse(makeOptList(), args, "MTC [-help] [-f <file>] [<titles|user|cat>]");
 
 		// Generate download directory
 		if (Files.isRegularFile(fdPath))
@@ -102,7 +102,7 @@ public final class MTC
 		// Do initial logins, and generate MTC regexes
 		com = WikiGen.wg.get("FastilyClone", "commons.wikimedia.org");
 		enwp = com.getWiki("en.wikipedia.org");
-		tRegex = WTool.makeTemplateRegex(enwp, "Template:Copy to Wikimedia Commons");
+		tRegex = TParse.makeTemplateRegex(enwp, "Template:Copy to Wikimedia Commons");
 
 		dryRun = l.hasOption('d');
 
@@ -227,8 +227,8 @@ public final class MTC
 		/**
 		 * Matches vomit that CommonsHelper doesn't strip.
 		 */
-		private static final String uselessT = String.format("(?si)\\{\\{(%s)\\}\\}\n?",
-				FString.pipeFence("Green", "Red", "Yesno", "Center", "Own", "Section link", "Trademark", "Bad JPEG", "OTRS permission",
+		private static final String uselessT = String.format("(?i)\\{\\{(%s)\\}\\}\n?",
+				FString.pipeFence("Green", "Red", "Yesno", "Center", "Own", "Section link", "Trademark", "Bad JPEG", 
 						"Spoken article entry", "PD\\-BritishGov", "Convert", "Cc\\-by\\-sa", "Infosplit", "Cite book", "Trim", "Legend",
 						"Hidden begin", "Hidden end", "Createdwith"));
 
@@ -238,7 +238,7 @@ public final class MTC
 		private static final Pattern gfdlDiscl = Pattern.compile("(?i)\\{\\{GFDL\\-user\\-(w|en)\\-(with|no)\\-disclaimers");
 
 		/**
-		 * String which is a regex tht matches caption sections
+		 * String which is a regex that matches caption sections
 		 */
 		private static final String captionRegexStr = "(?si)\n?\\=\\=\\s*?(Caption).+?\\|\\}";
 

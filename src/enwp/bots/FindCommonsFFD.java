@@ -7,7 +7,7 @@ import jwiki.core.NS;
 import jwiki.core.Wiki;
 import jwiki.util.FL;
 import jwikix.core.MQueryX;
-import jwikix.util.WTool;
+import jwikix.util.TParse;
 import jwikix.util.WikiGen;
 
 /**
@@ -31,7 +31,7 @@ public class FindCommonsFFD
 	/**
 	 * Matches wikitext usages of Template:Now Commons
 	 */
-	private static final String ncRegex = WTool.makeTemplateRegex(enwp, "Template:Now Commons");
+	private static final String ncRegex = TParse.makeTemplateRegex(enwp, "Template:Now Commons");
 
 	/**
 	 * The template String for Template:Nominated for deletion on Commons

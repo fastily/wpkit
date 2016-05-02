@@ -43,7 +43,7 @@ public final class RemoveBadMTC
 		mtcFiles.removeAll(WTool.getCategoryMembersR(wiki, "Category:Copy to Wikimedia Commons reviewed by a human").y); //ignore reviewed files
 		
 		for (String blt : wiki.getLinksOnPage("User:FastilyBot/Task2Blacklist"))
-			for (String x : FL.toAL(wiki.getCategoryMembers(blt, NS.FILE).parallelStream().filter(mtcFiles::contains)))
+			for (String x : FL.toAL(wiki.getCategoryMembers(blt, NS.FILE).stream().filter(mtcFiles::contains)))
 				wiki.replaceText(x, tRegex, "", "BOT: Remove {{Copy to Wikimedia Commons}}; the file may not be eligible for Commons");
 	}
 }

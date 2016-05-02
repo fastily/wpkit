@@ -173,9 +173,9 @@ public class DDNotifier
 	private static HashSet<String> initIdk()
 	{
 		HashSet<String> l = new HashSet<>();
-		l.addAll(wiki.whatTranscludesHere("Template:Don't know"));
-		l.addAll(wiki.whatTranscludesHere("Template:Somewebsite"));
-	
+		for(String s : FL.toSAL("Template:Don't know", "Template:Somewebsite"))
+			l.addAll(wiki.whatTranscludesHere(s));
+		
 		return l;
 	}
 }

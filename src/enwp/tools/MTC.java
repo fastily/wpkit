@@ -331,7 +331,7 @@ public final class MTC
 			t = t.replaceAll("\\Q<!--\\E.*?\\Q-->\\E\n?", "");
 			t = t.replaceAll("(?i)\\|(Permission)\\=.*?\n", "|Permission=\n");
 			t = t.replaceAll("(?i)\\|(Source)\\=(Transferred from).*?\n", "|Source={{Transferred from|en.wikipedia}}\n");
-			t = t.replace("{{subst:Unc}}", "").replaceAll("__NOTOC__\n?", "");
+			t = t.replaceAll("__NOTOC__\n?", "");
 			t = t.replace("&times;", "×");
 			t = t.replace("Original uploader was {{user at project", "{{Original uploader");
 

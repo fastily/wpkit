@@ -1,4 +1,4 @@
-package enwp.tools;
+package enwp.reports;
 
 import java.util.ArrayList;
 import java.util.Collections;

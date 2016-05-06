@@ -1,4 +1,4 @@
-package enwp.bots;
+package enwp.reports;
 
 import java.util.ArrayList;
 import java.util.Map;

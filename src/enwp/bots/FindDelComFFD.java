@@ -59,19 +59,6 @@ public final class FindDelComFFD
 	 */
 	public static void main(String[] args)
 	{
-		for (Tuple<String, String> t : FL.mapToList(findDeletedPairs()))
-			enwp.edit(t.x, pageTexts.get(t.x).replaceAll(nomDelTemplRegex, String.format(delOnCom, enwp.nss(t.y))),
-					"BOT: Adding note that file has been deleted on Commons");
-	}
-
-	/**
-	 * Finds files which have been transferred from enwp but are now deleted on Commons. Map is [ local enwp filename :
-	 * Commons filename ].
-	 * 
-	 * @return A list of files which are deleted on Commons
-	 */
-	private static HashMap<String, String> findDeletedPairs()
-	{
 		HashMap<String, String> comPairs = new HashMap<>();
 
 		String comFile;
@@ -83,7 +70,9 @@ public final class FindDelComFFD
 		for (String s : MQuery.exists(com, false, new ArrayList<>(comPairs.keySet())))
 			if (!com.getLogs(s, null, "delete", 1).isEmpty())
 				comDeletedPairs.put(s, comPairs.get(s));
-
-		return comDeletedPairs;
+		
+		for (Tuple<String, String> t : FL.mapToList(comDeletedPairs))
+			enwp.edit(t.x, pageTexts.get(t.x).replaceAll(nomDelTemplRegex, String.format(delOnCom, enwp.nss(t.y))),
+					"BOT: Adding note that file has been deleted on Commons");
 	}
 }

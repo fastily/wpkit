@@ -34,8 +34,7 @@ public final class FindUntaggedDD
 	 */
 	private static final ArrayList<String> ddCat = FL.toSAL("Category:Wikipedia files with unknown source",
 			"Category:Wikipedia files with unknown copyright status", "Category:Wikipedia files missing permission",
-			"Category:Wikipedia files with no non-free use rationale", "Category:Disputed non-free Wikipedia files",
-			"Category:Replaceable non-free use Wikipedia files");
+			"Category:Disputed non-free Wikipedia files", "Category:Replaceable non-free use Wikipedia files");
 
 	/**
 	 * The regex matching eligible daily deletion categories for review

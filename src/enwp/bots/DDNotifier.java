@@ -122,7 +122,7 @@ public class DDNotifier
 	 */
 	private static String generateMessage(ArrayList<String> l, String templ)
 	{
-		String x = String.format("%n{{subst:%s|%s}}%n", templ, l.get(0));
+		String x = String.format("%n{{subst:%s|1=%s}}%n", templ, l.get(0));
 
 		if (l.size() > 1)
 		{

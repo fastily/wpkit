@@ -68,7 +68,7 @@ public final class FindDelComFFD
 
 		HashMap<String, String> comDeletedPairs = new HashMap<>();
 		for (String s : MQuery.exists(com, false, new ArrayList<>(comPairs.keySet())))
-			if (!com.getLogs(s, null, "delete", 1).isEmpty())
+			if (!com.getLogs(comPairs.get(s), null, "delete", 1).isEmpty())
 				comDeletedPairs.put(s, comPairs.get(s));
 		
 		for (Tuple<String, String> t : FL.mapToList(comDeletedPairs))

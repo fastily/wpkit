@@ -63,8 +63,7 @@ public final class FindUntaggedDD
 		HashSet<String> cacheList = FL.toSet(Files.lines(wpddfiles));
 		cacheList.removeAll(l);
 
-		if (!cacheList.isEmpty())
-			wiki.addText("User:FastilyBot/UntaggedDDFiles",
+		wiki.addText("User:FastilyBot/UntaggedDDFiles",
 					WTool.listify("\n== ~~~~~ ==\n", MQuery.exists(wiki, true, new ArrayList<>(cacheList)), true), "Updating report", true);
 
 		dump(l, false);

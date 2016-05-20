@@ -5,6 +5,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import jwiki.core.MQuery;
 import jwiki.core.NS;
@@ -28,6 +31,11 @@ public final class FindUntaggedDD
 	 * The Wiki object to use
 	 */
 	private static final Wiki wiki = WikiGen.wg.get("FastilyBot", "en.wikipedia.org");
+
+	/**
+	 * The title of the report page
+	 */
+	private static final String reportPage = "User:FastilyBot/UntaggedDDFiles";
 
 	/**
 	 * The list of root categories to inspect
@@ -63,8 +71,10 @@ public final class FindUntaggedDD
 		HashSet<String> cacheList = FL.toSet(Files.lines(wpddfiles));
 		cacheList.removeAll(l);
 
-		wiki.addText("User:FastilyBot/UntaggedDDFiles",
-					WTool.listify("\n== ~~~~~ ==\n", MQuery.exists(wiki, true, new ArrayList<>(cacheList)), true), "Updating report", true);
+		String text = sectionSplit(wiki.getPageText(reportPage)).subList(0, 14).stream().collect(Collectors.joining());
+
+		wiki.edit(reportPage, text + WTool.listify("\n== ~~~~~ ==\n", MQuery.exists(wiki, true, new ArrayList<>(cacheList)), true),
+				"Updating report");
 
 		dump(l, false);
 	}
@@ -81,5 +91,30 @@ public final class FindUntaggedDD
 		Files.write(wpddfiles, l, CREATE, WRITE, TRUNCATE_EXISTING);
 		if (exit)
 			System.exit(0);
+	}
+
+	/**
+	 * A dumb page section splitting method. PRECONDITION: The text being parsed contains level 2 headers
+	 * 
+	 * @param text The text to split into sections
+	 * @return An ArrayList with the sections of the page.
+	 */
+	private static ArrayList<String> sectionSplit(String text)
+	{
+		ArrayList<Integer> indexList = new ArrayList<>();
+		Matcher m = Pattern.compile("(?m)^\\=\\=").matcher(text);
+		while (m.find())
+			indexList.add(m.start());
+
+		if (indexList.size() <= 1)
+			return FL.toSAL(text);
+
+		ArrayList<String> l = new ArrayList<>();
+		for (int i = 0; i < indexList.size() - 1; i++)
+			l.add(text.substring(indexList.get(i), indexList.get(i + 1)));
+
+		l.add(text.substring(indexList.get(indexList.size() - 1)));
+
+		return l;
 	}
 }

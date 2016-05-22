@@ -35,7 +35,7 @@ public final class FindUntaggedDD
 	/**
 	 * The title of the report page
 	 */
-	private static final String reportPage = "User:FastilyBot/UntaggedDDFiles";
+	private static final String reportPage = "User:FastilyBot/Recently Untagged Dated Deletion Files";
 
 	/**
 	 * The list of root categories to inspect
@@ -55,6 +55,11 @@ public final class FindUntaggedDD
 	private static final Path wpddfiles = Paths.get("WPDDFiles.txt");
 
 	/**
+	 * The maximum number of old reports to keep on the <code>reportPage</code>.
+	 */
+	private static final int maxOldReports = 13;
+	
+	/**
 	 * Main driver
 	 * 
 	 * @param args Program arguments, not used
@@ -70,10 +75,14 @@ public final class FindUntaggedDD
 
 		HashSet<String> cacheList = FL.toSet(Files.lines(wpddfiles));
 		cacheList.removeAll(l);
-
-		String text = sectionSplit(wiki.getPageText(reportPage)).subList(0, 14).stream().collect(Collectors.joining());
-
-		wiki.edit(reportPage, text + WTool.listify("\n== ~~~~~ ==\n", MQuery.exists(wiki, true, new ArrayList<>(cacheList)), true),
+		
+		ArrayList<String> sections = sectionSplit(wiki.getPageText(reportPage));
+		if(sections.size() > maxOldReports)
+			sections = new ArrayList<>(sections.subList(0, maxOldReports));
+			
+		wiki.edit(reportPage,
+				WTool.listify("\n== ~~~~~ ==\n", MQuery.exists(wiki, true, new ArrayList<>(cacheList)), true)
+						+ sections.stream().collect(Collectors.joining()),
 				"Updating report");
 
 		dump(l, false);

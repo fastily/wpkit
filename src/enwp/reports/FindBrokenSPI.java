@@ -26,11 +26,6 @@ public final class FindBrokenSPI
 	private static final Wiki wiki = WikiGen.wg.get("FastilyBot", "en.wikipedia.org");
 
 	/**
-	 * The set of non-malformed SPI pages.
-	 */
-	private static final HashSet<String> properPages = fetchProperPages();
-
-	/**
 	 * The title to post reports on
 	 */
 	private static final String report = "Wikipedia:Sockpuppet investigations/SPI/Malformed Cases Report";
@@ -42,29 +37,16 @@ public final class FindBrokenSPI
 	 */
 	public static void main(String[] args)
 	{
-		ArrayList<String> l = FL.toAL(MQuery
-				.resolveRedirects(wiki,
-						FL.toAL(wiki.prefixIndex(NS.PROJECT, "Sockpuppet investigations/").stream()
-								.filter(s -> !(s.endsWith("/Archive") || s.startsWith("Wikipedia:Sockpuppet investigations/SPI/")
-										|| properPages.contains(s)))))
-				.entrySet().stream().filter(e -> e.getKey().equals(e.getValue())).map(Map.Entry::getValue));
+		HashSet<String> spiCases = FL.toSet(wiki.prefixIndex(NS.PROJECT, "Sockpuppet investigations/").stream()
+				.filter(s -> !(s.endsWith("/Archive") || s.startsWith("Wikipedia:Sockpuppet investigations/SPI/"))));
 
-		wiki.edit(report, WTool.listify("{{/Header}}\n" + WPStrings.updatedAt, l, false), "Update list");
-	}
+		spiCases.removeAll(wiki.whatTranscludesHere("Template:SPI case status", NS.PROJECT));
+		spiCases.removeAll(wiki.whatTranscludesHere("Template:SPI archive notice", NS.PROJECT));
+		spiCases.removeAll(wiki.getLinksOnPage(report + "/Ignore"));
 
-	/**
-	 * Fetches pages which have the appropriate templates and ignore list pages.
-	 * 
-	 * @return The Set of non-malformed SPI pages.
-	 */
-	private static HashSet<String> fetchProperPages()
-	{
-		HashSet<String> l = new HashSet<>();
-		for (String s : new String[] { "Template:SPI archive notice", "Template:SPI case status" })
-			l.addAll(wiki.whatTranscludesHere(s, NS.PROJECT));
-
-		l.addAll(wiki.getLinksOnPage(report + "/Ignore"));
-
-		return l;
+		wiki.edit(report,
+				WTool.listify("{{/Header}}\n" + WPStrings.updatedAt, FL.toAL(MQuery.resolveRedirects(wiki, new ArrayList<>(spiCases))
+						.entrySet().stream().filter(e -> e.getKey().equals(e.getValue())).map(Map.Entry::getValue)), false),
+				"Update list");
 	}
 }

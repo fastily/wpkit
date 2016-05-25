@@ -26,7 +26,7 @@ public class FindCommonsFFD
 	/**
 	 * A Set of files nominated for deletion on Commons
 	 */
-	private static final HashSet<String> ffdCom = initComFFD();
+	protected static final HashSet<String> ffdCom = initComFFD();
 
 	/**
 	 * Matches wikitext usages of Template:Now Commons
@@ -49,6 +49,11 @@ public class FindCommonsFFD
 		procCat("Category:All Wikipedia files with a different name on Wikimedia Commons");
 	}
 
+	/**
+	 * Inspect elements a specified category for files which are nominated for deletion on Commons
+	 * 
+	 * @param cat The Category to check.
+	 */
 	private static void procCat(String cat)
 	{
 		MQueryX.getFirstOnlySharedDuplicate(enwp, enwp.getCategoryMembers(cat, NS.FILE)).entrySet().stream()

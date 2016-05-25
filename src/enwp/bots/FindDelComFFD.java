@@ -63,8 +63,13 @@ public final class FindDelComFFD
 
 		String comFile;
 		for (Map.Entry<String, String> e : pageTexts.entrySet())
-			if ((comFile = WTask.parseTemplate(enwp, TParse.extractTemplate(nomDelTemplPattern, e.getValue())).y.get("1")) != null)
-				comPairs.put(e.getKey(), enwp.convertIfNotInNS(comFile, NS.FILE));
+		{
+			comFile = WTask.parseTemplate(enwp, TParse.extractTemplate(nomDelTemplPattern, e.getValue())).y.get("1");
+			if(comFile == null)
+				comFile = e.getKey();
+			
+			comPairs.put(e.getKey(), enwp.convertIfNotInNS(comFile, NS.FILE));
+		}
 
 		HashMap<String, String> comDeletedPairs = new HashMap<>();
 		for (String s : MQuery.exists(com, false, new ArrayList<>(comPairs.keySet())))

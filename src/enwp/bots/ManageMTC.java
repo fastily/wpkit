@@ -54,7 +54,7 @@ public final class ManageMTC
 	/**
 	 * The ncd template to fill out
 	 */
-	private static final String ncd = String.format("{{Now Commons|%%s|date=%s|bot=%s}}%n",
+	protected static final String ncd = String.format("{{Now Commons|%%s|date=%s|bot=%s}}%n",
 			DateTimeFormatter.ISO_LOCAL_DATE.format(LocalDate.now(ZoneId.of("UTC"))), botName);
 
 	/**

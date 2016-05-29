@@ -1,4 +1,4 @@
-package enwp.tools;
+package tools;
 
 import java.net.URL;
 import java.nio.file.Files;
@@ -230,7 +230,7 @@ public final class MTC
 		private static final String uselessT = String.format("(?i)\\{\\{(%s)\\}\\}\n?",
 				FString.pipeFence("Green", "Red", "Yesno", "Center", "Own", "Section link", "Trademark", "Bad JPEG", 
 						"Spoken article entry", "PD\\-BritishGov", "Convert", "Cc\\-by\\-sa", "Infosplit", "Cite book", "Trim", "Legend",
-						"Hidden begin", "Hidden end", "Createdwith"));
+						"Hidden begin", "Hidden end", "Createdwith", "Main other"));
 
 		/**
 		 * Matches GFDL-disclaimers templates

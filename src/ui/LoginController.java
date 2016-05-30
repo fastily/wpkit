@@ -28,14 +28,14 @@ public class LoginController
 	private Wiki wiki;
 
 	/**
-	 * The method to run on a successful login.
-	 */
-	private Runnable callback;
-
-	/**
 	 * The root node of this LoginController.
 	 */
 	private Parent root;
+
+	/**
+	 * The method to run on a successful login.
+	 */
+	private Runnable callback;
 
 	/**
 	 * The username text field
@@ -78,44 +78,14 @@ public class LoginController
 	}
 
 	/**
-	 * Runs a Runnable after a successful login
-	 * 
-	 * @param r The Runnable to run
-	 */
-	public void setOnLoginSuccess(Runnable r)
-	{
-		callback = r;
-	}
-
-	/**
-	 * Gets the Wiki object associated with this controller.
-	 * 
-	 * @return The Wiki object associated with this controller.
-	 */
-	public Wiki getWiki()
-	{
-		return wiki;
-	}
-
-	/**
-	 * Gets the root node of this LoginController.
-	 * 
-	 * @return The root node of this LoginController.
-	 */
-	public Parent getRoot()
-	{
-		return root;
-	}
-
-	/**
 	 * Generates a LoginController. PRECONDITION: Login.fxml is in the same directory as this class.
 	 * 
-	 * @param c The class calling this method
+	 * @param r The action to perform on a successful user login
 	 * @return A new LoginController
 	 */
-	public static LoginController load(Class<?> c)
+	public static LoginController load(Runnable r)
 	{
-		FXMLLoader fl = new FXMLLoader(c.getResource("Login.fxml"));
+		FXMLLoader fl = new FXMLLoader(LoginController.class.getResource("Login.fxml"));
 
 		LoginController lc = null;
 
@@ -127,9 +97,30 @@ public class LoginController
 		}
 		catch (Throwable e)
 		{
-			FError.errAndExit(e, "Login.fxml is missing?");
+			FError.errAndExit(e, "Should never reach this point; Login.fxml is missing?");
 		}
 
+		lc.callback = r;
 		return lc;
+	}
+
+	/**
+	 * Gets this object's Wiki
+	 * 
+	 * @return The Wiki object to get
+	 */
+	public Wiki getWiki()
+	{
+		return wiki;
+	}
+
+	/**
+	 * Gets the root Node of the FXML map
+	 * 
+	 * @return The root Node.
+	 */
+	public Parent getRoot()
+	{
+		return root;
 	}
 }

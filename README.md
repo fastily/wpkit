@@ -6,4 +6,4 @@ Just some tools/scripts (and frameworks) extending [jwiki](https://github.com/fa
 * [jwiki-extras](https://github.com/fastily/jwiki-extras)
 
 ### Minimum System Requirements
-* JRE <= 8
+* JRE >= 8

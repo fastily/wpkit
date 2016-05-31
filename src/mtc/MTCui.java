@@ -15,9 +15,19 @@ import ui.LoginController;
 public class MTCui extends Application
 {
 	/**
+	 * Version number
+	 */
+	protected static final String version = "0.1";
+	
+	/**
 	 * The LoginController for this Application
 	 */
-	private LoginController lc;
+	private static LoginController lc;
+
+	/**
+	 * The MTCController for this Application
+	 */
+	private static MTCController mc;
 	
 	/**
 	 * Main Driver
@@ -34,19 +44,25 @@ public class MTCui extends Application
 	 */
 	public void start(Stage primaryStage) throws Exception
 	{
-		lc = LoginController.load(() -> createAndShowMTC(lc.getWiki()));
+		FXTool.setupAndShowStage(primaryStage, "MTC!",
+				new Scene((lc = LoginController.load(() -> createAndShowMTC(lc.getWiki()))).getRoot()));
+	}
 
-		primaryStage.setTitle("MTC!");
-		primaryStage.setScene(new Scene(lc.getRoot()));
-		primaryStage.show();
+	/**
+	 * Dumps a log of transferred items to the user's userspace.
+	 */
+	public void stop()
+	{
+		mc.dumpLog();
 	}
 	
 	/**
 	 * Creates and shows the main MTC UI
-	 * @param wiki The Wiki object to use with the UI 
+	 * 
+	 * @param wiki The Wiki object to use with the UI
 	 */
 	private void createAndShowMTC(Wiki wiki)
 	{
-		FXTool.setupAndShowStage(new Stage(), "MTC!", new Scene(MTCController.load(wiki).getRoot()));
+		FXTool.setupAndShowStage(new Stage(), "MTC!", new Scene((mc = MTCController.load(wiki)).getRoot()));
 	}
 }

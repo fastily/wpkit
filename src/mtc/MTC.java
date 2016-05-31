@@ -6,8 +6,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -85,6 +85,11 @@ public final class MTC
 	private static boolean dryRun;
 
 	/**
+	 * Flag indicating whether the non-free content filter is to be ignored.
+	 */
+	protected static boolean ignoreFilter = false;
+	
+	/**
 	 * Main driver
 	 * 
 	 * @param args Program args
@@ -92,57 +97,76 @@ public final class MTC
 	public static void main(String[] args) throws Throwable
 	{
 		CommandLine l = FCLI.gnuParse(makeOptList(), args, "MTC [-help] [-f <file>] [<titles|user|cat>]");
+		
+		// Do initial logins, and generate MTC regexes
+		init(WikiGen.wg.get("FastilyClone", "commons.wikimedia.org"));
 
+		dryRun = l.hasOption('d');
+
+		if (l.hasOption('f'))
+			procList(new ArrayList<>(Files.readAllLines(Paths.get(l.getOptionValue('f')))));
+
+		ArrayList<String> fl = new ArrayList<>();
+		for (String s : l.getArgs())
+		{
+			NS ns = enwp.whichNS(s);
+			if (ns.equals(NS.FILE))
+				fl.add(s);
+			else if (ns.equals(NS.CATEGORY))
+				fl.addAll(enwp.getCategoryMembers(s, NS.FILE));
+			else
+				fl.addAll(enwp.getUserUploads(s));
+		}
+
+		procList(fl);
+	}
+
+	/**
+	 * Initializes the Wiki objects and download folders for MTC. CAVEAT: This method MUST be called before you can run MTC.
+	 * 
+	 * @param wiki A logged-in Wiki object
+	 */
+	protected static void init(Wiki wiki) throws Throwable
+	{
 		// Generate download directory
 		if (Files.isRegularFile(fdPath))
 			FError.errAndExit(fdump + " is file, please remove it so MTC can continue");
 		else if (!Files.isDirectory(fdPath))
 			Files.createDirectory(fdPath);
 
-		// Do initial logins, and generate MTC regexes
-		com = WikiGen.wg.get("FastilyClone", "commons.wikimedia.org");
-		enwp = com.getWiki("en.wikipedia.org");
+		// Initialize Wiki objects
+		com = wiki.getWiki("commons.wikimedia.org");
+		enwp = wiki.getWiki("en.wikipedia.org");
+
 		tRegex = TParse.makeTemplateRegex(enwp, "Template:Copy to Wikimedia Commons");
-
-		dryRun = l.hasOption('d');
-
-		if (l.hasOption('f'))
-			procList(Files.readAllLines(Paths.get(l.getOptionValue('f'))));
-		
-		ArrayList<String> fl = new ArrayList<>();
-		for(String s : l.getArgs())
-		{
-			NS ns = enwp.whichNS(s);
-			if(ns.equals(NS.FILE))
-				fl.add(s);
-			else if(ns.equals(NS.CATEGORY))
-				fl.addAll(enwp.getCategoryMembers(s, NS.FILE));
-			else
-				fl.addAll(enwp.getUserUploads(s));
-		}
-		
-		procList(fl);
 	}
 
+	/**
+	 * Filters (if enabled) and resolves Commons filenames for transfer candinates 
+	 * @param titles The local files to transfer
+	 * @return An ArrayList of TransferObject objects.
+	 */
+	protected static ArrayList<TransferObject> filterAndResolve(ArrayList<String> titles)
+	{
+		return FL.toAL(resolveFileNames(!ignoreFilter ? canTransfer(titles) : titles).entrySet().stream().map(e -> new TransferObject(e.getKey(), e.getValue())));
+	}
+	
 	/**
 	 * Attempts to move files to Commons
 	 * 
 	 * @param titles The titles to try and move.
 	 */
-	private static void procList(List<String> titles)
+	private static void procList(ArrayList<String> titles)
 	{
-		ArrayList<String> fails = new ArrayList<>(), l = canTransfer(new ArrayList<>(titles));
-		HashMap<String, String> fileNames = resolveFileNames(l);
-
-		int cnt = 0, total = l.size();
-		TransferObject to;
-		for (String s : l)
-		{
-			ColorLog.fyi(String.format("Processing item %d of %d", ++cnt, total));
-			if (!(to = new TransferObject(s, fileNames.get(s))).doTransfer())
-				fails.add(to.wpFN);
-		}
-
+		ArrayList<TransferObject> tl = filterAndResolve(titles);
+		AtomicInteger i = new AtomicInteger();
+		int total = tl.size();
+		
+		ArrayList<String> fails = FL.toAL(tl.stream().filter(to -> { 
+			ColorLog.fyi(String.format("Processing item %d of %d", i.incrementAndGet(), total));
+			return !to.doTransfer(); 
+			}).map(to -> to.wpFN));
+		
 		System.out.printf("Task complete, with %d failures: %s%n", fails.size(), fails);
 	}
 
@@ -212,7 +236,7 @@ public final class MTC
 	 * @author Fastily
 	 *
 	 */
-	private static class TransferObject
+	protected static class TransferObject
 	{
 		/**
 		 * The URL to post to.
@@ -228,9 +252,9 @@ public final class MTC
 		 * Matches vomit that CommonsHelper doesn't strip.
 		 */
 		private static final String uselessT = String.format("(?i)\\{\\{(%s)\\}\\}\n?",
-				FString.pipeFence("Green", "Red", "Yesno", "Center", "Own", "Section link", "Trademark", "Bad JPEG", 
+				FString.pipeFence("Green", "Red", "Yesno", "Center", "Own", "Section link", "Trademark", "Bad JPEG",
 						"Spoken article entry", "PD\\-BritishGov", "Convert", "Cc\\-by\\-sa", "Infosplit", "Cite book", "Trim", "Legend",
-						"Hidden begin", "Hidden end", "Createdwith", "Main other"));
+						"Hidden begin", "Hidden end", "Createdwith", "Main other", "OTRS permission"));
 
 		/**
 		 * Matches GFDL-disclaimers templates
@@ -260,7 +284,7 @@ public final class MTC
 		/**
 		 * The enwp, commons, basefilename (just basename), and local path to the file.
 		 */
-		private String wpFN, comFN, baseFN, localFN;
+		protected final String wpFN, comFN, baseFN, localFN;
 
 		/**
 		 * The text which goes on the file description page of the Commons copy
@@ -286,7 +310,7 @@ public final class MTC
 		 * 
 		 * @return True on success.
 		 */
-		private boolean doTransfer()
+		protected boolean doTransfer()
 		{
 			try
 			{

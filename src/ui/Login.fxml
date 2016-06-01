@@ -45,7 +45,7 @@
       <PasswordField fx:id="pxF" GridPane.columnIndex="1" GridPane.rowIndex="2" />
       <HBox alignment="BOTTOM_RIGHT" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
          <children>
-            <Button defaultButton="true" mnemonicParsing="false" onAction="#tryLogin" prefWidth="80.0" text="Login">
+            <Button fx:id="loginButton" defaultButton="true" mnemonicParsing="false" onAction="#tryLogin" prefWidth="80.0" text="Login">
                <HBox.margin>
                   <Insets bottom="15.0" right="15.0" />
                </HBox.margin>

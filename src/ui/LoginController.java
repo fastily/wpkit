@@ -7,6 +7,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
@@ -47,6 +48,12 @@ public class LoginController
 	 */
 	@FXML
 	protected PasswordField pxF;
+	
+	/**
+	 * The login Button
+	 */
+	@FXML
+	protected Button loginButton;
 
 	/**
 	 * Attempts login, instantiates this object's Wiki object on success. Shows error message on failure.
@@ -62,7 +69,8 @@ public class LoginController
 		FXTool.runAsyncTask(() -> {
 			try
 			{
-				wiki = new Wiki(userF.getText().trim(), pxF.getCharacters().toString(), "commons.wikimedia.org");
+				Platform.runLater(() -> loginButton.setDisable(true));
+				wiki = new Wiki(userF.getText().trim(), pxF.getCharacters().toString(), "en.wikipedia.org");
 				Platform.runLater(callback);
 				Platform.runLater(() -> ((Stage) ((Node) e.getSource()).getScene().getWindow()).close());
 			}
@@ -71,6 +79,7 @@ public class LoginController
 				Platform.runLater(() -> {
 					FXTool.alertUser("Login Failed!\n\n" + x.getMessage(), Alert.AlertType.ERROR);
 					pxF.clear();
+					loginButton.setDisable(false);
 				});
 			}
 		});

@@ -85,13 +85,14 @@ public class MTCController
 	/**
 	 * The Wiki objects to use with MTC.
 	 */
-	private Wiki enwp;
+	private Wiki wiki;
 
 	/**
 	 * The master HashSet of successfully transferred items
 	 */
 	private HashSet<String> tfl = new HashSet<>();
-
+	
+	
 	/**
 	 * The OS clipboard
 	 */
@@ -121,16 +122,16 @@ public class MTCController
 		MTCController mc = fl.getController();
 
 		mc.root = root;
-		mc.enwp = wiki.getWiki("en.wikipedia.org");
+		mc.wiki = wiki.getWiki("en.wikipedia.org");
 
 		// Initialize dynamic data for Nodes
-		mc.userLabel.setText(mc.enwp.whoami() + " ->");
+		mc.userLabel.setText(mc.wiki.whoami() + " ->");
 		mc.cb.getItems().addAll("File", "User", "Category", "Template");
 
 		// Initalize MTC base
 		try
 		{
-			MTC.init(mc.enwp);
+			MTC.init(mc.wiki);
 		}
 		catch (Throwable e)
 		{
@@ -157,6 +158,7 @@ public class MTCController
 		// Initialize and grab values from Nodes
 		MTC.ignoreFilter = disableFilterBox.isSelected();
 		updatePB(0, "Hold tight, querying server...");
+		transferButton.setDisable(true);
 
 		FXTool.runAsyncTask(() -> runTransfer(mode, text));
 	}
@@ -184,16 +186,16 @@ public class MTCController
 		switch (mode)
 		{
 			case "File":
-				fl = FL.toSAL(enwp.convertIfNotInNS(text, NS.FILE));
+				fl = FL.toSAL(wiki.convertIfNotInNS(text, NS.FILE));
 				break;
 			case "Category":
-				fl = enwp.getCategoryMembers(enwp.convertIfNotInNS(text, NS.CATEGORY), NS.FILE);
+				fl = wiki.getCategoryMembers(wiki.convertIfNotInNS(text, NS.CATEGORY), NS.FILE);
 				break;
 			case "User":
-				fl = enwp.getUserUploads(enwp.nss(text));
+				fl = wiki.getUserUploads(wiki.nss(text));
 				break;
 			case "Template":
-				fl = enwp.whatTranscludesHere(enwp.convertIfNotInNS(text, NS.TEMPLATE), NS.FILE);
+				fl = wiki.whatTranscludesHere(wiki.convertIfNotInNS(text, NS.TEMPLATE), NS.FILE);
 				break;
 			default:
 				fl = new ArrayList<>();
@@ -208,6 +210,7 @@ public class MTCController
 			Platform.runLater(() -> {
 				updatePB(0, "No matching files found! :(");
 				FXTool.warnUser("I couldn't find any file(s) matching your query; please verify that your input is correct");
+				transferButton.setDisable(false);
 			});
 
 			return;
@@ -234,6 +237,7 @@ public class MTCController
 		Platform.runLater(() -> {
 			updatePB(1, String.format("OK: Completed %d transfer(s)", success.size()));
 			cntLabel.setText("" + tfl.size());
+			transferButton.setDisable(false);
 		});
 	}
 
@@ -262,10 +266,10 @@ public class MTCController
 	/**
 	 * Posts a list of files transferred in the previous session to the user's transfer log.
 	 */
-	public void dumpLog()
+	protected void dumpLog()
 	{
 		if (!tfl.isEmpty())
-			enwp.edit(String.format("User:%s/Sandbox123", enwp.whoami()),
+			wiki.edit(String.format("User:%s/MTC! Transfer Log", wiki.whoami()),
 					WTool.listify("== ~~~~~ - v" + MTCui.version + " ==\n", tfl, true), "Update Transfer log");
 	}
 }

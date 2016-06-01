@@ -1,9 +1,11 @@
 package mtc;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import jwiki.core.Wiki;
+import jwikix.util.StrTool;
 import ui.FXTool;
 import ui.LoginController;
 
@@ -18,6 +20,11 @@ public class MTCui extends Application
 	 * Version number
 	 */
 	protected static final String version = "0.1";
+	
+	/**
+	 * The title of the page with the minimum version number
+	 */
+	private static final String serverVersionPage = "Wikipedia:MTC!/Version";
 	
 	/**
 	 * The LoginController for this Application
@@ -57,12 +64,21 @@ public class MTCui extends Application
 	}
 	
 	/**
-	 * Creates and shows the main MTC UI
+	 * Creates and shows the main MTC UI.  Also checks the minimum allowed version.
 	 * 
 	 * @param wiki The Wiki object to use with the UI
 	 */
 	private void createAndShowMTC(Wiki wiki)
 	{
+		String minVersion =  wiki.getPageText(serverVersionPage).trim();
+		if(!StrTool.versionCheck(version, minVersion))
+		{
+			FXTool.warnUser(String.format("Your version of MTC (%s) is outdated.  The new version is (%s).  Please update to the latest version.", version, minVersion)); 
+			getHostServices().showDocument("https://en.wikipedia.org/wiki/Wikipedia:MTC!");
+
+			Platform.exit();
+		}
+		
 		FXTool.setupAndShowStage(new Stage(), "MTC!", new Scene((mc = MTCController.load(wiki)).getRoot()));
 	}
 }

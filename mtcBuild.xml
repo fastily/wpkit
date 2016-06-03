@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<project default="createDist" name="Creates Runnable Jar for UI MTC">
+
+	<property name="dir.bin" value="bin" />
+	<property name="dir.build" value="build" />
+	<property name="dir.lib" value="lib" />
+
+	<!-- Assumes classes and dependencies are pre-compiled -->
+	<target name="createDist">
+		<delete dir="${dir.build}" />
+		<mkdir dir="${dir.build}" />
+
+		<jar destfile="${dir.build}/MTCui.jar" filesetmanifest="mergewithoutmain">
+			<manifest>
+				<attribute name="Main-Class" value="mtc.MTCui" />
+				<attribute name="Class-Path" value="." />
+			</manifest>
+
+			<fileset file="LICENSE.md" />
+			<fileset dir="${dir.bin}" includes="mtc/**,ui/**,jwiki/**,jwikix/**" excludes="**/test/**" />
+
+			<zipfileset excludes="META-INF/**,README,*.java" src="${dir.lib}/JSON-java.jar" />
+			<zipfileset excludes="META-INF/**,**/*.java,*.txt,README.md"
+				src="${dir.lib}/CLI.jar" />
+		</jar>
+	</target>
+</project>

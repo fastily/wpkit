@@ -67,7 +67,7 @@ public final class MTC
 	/**
 	 * The directory pointing to the location for file downloads
 	 */
-	private static final String fdump = "filedump/";
+	private static final String fdump = "mtcfiles/";
 
 	/**
 	 * The Path object pointing to <code>fdump</code>.
@@ -323,9 +323,9 @@ public final class MTC
 				}
 
 				if (WTask.downloadFile(wpFN, localFN, enwp)
-						&& com.upload(Paths.get(localFN), comFN, t, String.format("Transferred from [[w:%s|enwp]]", wpFN)))
+						&& com.upload(Paths.get(localFN), comFN, t, String.format("Transferred from [[w:%s|en.wikipedia]] ([[w:Wikipedia:MTC!|MTC!]])", wpFN)))
 					return enwp.edit(wpFN, String.format("{{subst:ncd|%s}}%n", comFN) + enwp.getPageText(wpFN).replaceAll(tRegex, ""),
-							"ncd");
+							"Transferred to Commons ([[Wikipedia:MTC!|MTC!]])");
 			}
 			catch (Throwable e)
 			{

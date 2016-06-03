@@ -222,7 +222,7 @@ public class MTCController
 
 		tol.stream().forEach(to -> {
 			Platform.runLater(() -> updatePB(((double) i.getAndIncrement()) / denom,
-					String.format("Transfering (%d/%d): %s", i.get(), total, to.wpFN)));
+					String.format("Transferring (%d/%d): %s", i.get(), total, to.wpFN)));
 			if (to.doTransfer())
 				success.add(to.wpFN);
 			else
@@ -270,6 +270,6 @@ public class MTCController
 	{
 		if (!tfl.isEmpty())
 			wiki.edit(String.format("User:%s/MTC! Transfer Log", wiki.whoami()),
-					WTool.listify("== ~~~~~ - v" + MTCui.version + " ==\n", tfl, true), "Update Transfer log");
+					WTool.listify("== ~~~~~ - v" + MTCui.version + " ==\n", tfl, true), "Update Transfer log ([[Wikipedia:MTC!|MTC!]])");
 	}
 }

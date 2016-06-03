@@ -19,7 +19,7 @@ public class MTCui extends Application
 	/**
 	 * Version number
 	 */
-	protected static final String version = "0.1";
+	protected static final String version = "0.1.0";
 	
 	/**
 	 * The title of the page with the minimum version number
@@ -60,7 +60,8 @@ public class MTCui extends Application
 	 */
 	public void stop()
 	{
-		mc.dumpLog();
+		if(mc != null) // Exit cleanly, in case user exits at login
+			mc.dumpLog();
 	}
 	
 	/**

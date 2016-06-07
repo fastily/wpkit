@@ -1,35 +1,20 @@
 package mtc;
 
-import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.Options;
-
-import jwiki.core.ColorLog;
 import jwiki.core.MQuery;
 import jwiki.core.NS;
-import jwiki.core.Req;
-import jwiki.core.WTask;
 import jwiki.core.Wiki;
 import jwiki.util.FError;
 import jwiki.util.FL;
-import jwiki.util.FString;
 import jwikix.util.StrTool;
 import jwikix.util.TParse;
-import jwikix.util.WikiGen;
-import util.FCLI;
 
 /**
- * CLI utility to assist with transfer of files from enwp to Commons.
+ * Business Logic for MTC
  * 
  * @author Fastily
  *
@@ -39,135 +24,80 @@ public final class MTC
 	/**
 	 * Files with these categories should not be transferred.
 	 */
-	private static final ArrayList<String> blacklist = FL.toSAL(
-			"Category:Wikipedia files on Wikimedia Commons for which a local copy has been requested to be kept",
-			"Category:Wikipedia files not suitable for Commons", "Category:Wikipedia files of no use beyond Wikipedia",
-			"Category:All non-free media", "Category:All Wikipedia files with unknown source",
-			"Category:All Wikipedia files with unknown copyright status", "Category:Candidates for speedy deletion",
-			"Category:All possibly unfree Wikipedia files", "Category:Wikipedia files for discussion", "Category:All free in US media",
-			"Category:Files deleted on Wikimedia Commons", "Category:All Wikipedia files with the same name on Wikimedia Commons",
-			"Category:All Wikipedia files with a different name on Wikimedia Commons",
-			"Category:Wikipedia files with disputed copyright information", "Category:Items pending OTRS confirmation of permission",
-			"Category:Wikipedia files with unconfirmed permission received by OTRS by date", "Category:Images in non-image formats",
-			"Category:All media requiring a US status confirmation", "Category:Files nominated for deletion on Wikimedia Commons",
-			"Category:Wikipedia files moved to Wikimedia Commons which could not be deleted",
-			"Category:Images published abroad that are in the public domain in the United States", "Category:Duplicate Wikipedia files",
-			"Category:Pre-1996 PD in home country US public domain images");
+	private final ArrayList<String> blacklist;
 
 	/**
 	 * Files must be members of at least one of the following categories to be eligible for transfer.
 	 */
-	private static final ArrayList<String> whitelist = FL.toSAL("Category:All free media", "Category:Self-published work",
+	private final ArrayList<String> whitelist = FL.toSAL("Category:All free media", "Category:Self-published work",
 			"Category:GFDL files with disclaimers");
 	/**
 	 * The Wiki objects
 	 */
-	private static Wiki enwp, com;
-
-	/**
-	 * The directory pointing to the location for file downloads
-	 */
-	private static final String fdump = "mtcfiles/";
-
-	/**
-	 * The Path object pointing to <code>fdump</code>.
-	 */
-	private static final Path fdPath = Paths.get(fdump);
+	protected final Wiki enwp, com;
 
 	/**
 	 * Creates the regular expression matching Copy to Wikimedia Commons
 	 */
-	private static String tRegex;
+	protected final String tRegex;
 
 	/**
-	 * Flag indicating whether this is a dry run (do not perform transfers)
+	 * Flag indicating whether this is a debug-mode/dry run (do not perform transfers)
 	 */
-	private static boolean dryRun;
+	protected boolean dryRun = false;
 
 	/**
 	 * Flag indicating whether the non-free content filter is to be ignored.
 	 */
-	protected static boolean ignoreFilter = false;
-	
+	protected boolean ignoreFilter = false;
+
 	/**
-	 * Main driver
-	 * 
-	 * @param args Program args
+	 * The text generator for this MTC instance.
 	 */
-	public static void main(String[] args) throws Throwable
-	{
-		CommandLine l = FCLI.gnuParse(makeOptList(), args, "MTC [-help] [-f <file>] [<titles|user|cat>]");
-		
-		// Do initial logins, and generate MTC regexes
-		init(WikiGen.wg.get("FastilyClone", "commons.wikimedia.org"));
-
-		dryRun = l.hasOption('d');
-
-		if (l.hasOption('f'))
-			procList(new ArrayList<>(Files.readAllLines(Paths.get(l.getOptionValue('f')))));
-
-		ArrayList<String> fl = new ArrayList<>();
-		for (String s : l.getArgs())
-		{
-			NS ns = enwp.whichNS(s);
-			if (ns.equals(NS.FILE))
-				fl.add(s);
-			else if (ns.equals(NS.CATEGORY))
-				fl.addAll(enwp.getCategoryMembers(s, NS.FILE));
-			else
-				fl.addAll(enwp.getUserUploads(s));
-		}
-
-		procList(fl);
-	}
+	protected final TGen tg;
 
 	/**
-	 * Initializes the Wiki objects and download folders for MTC. CAVEAT: This method MUST be called before you can run MTC.
+	 * Initializes the Wiki objects and download folders for MTC.
 	 * 
 	 * @param wiki A logged-in Wiki object
+	 * 
+	 * @throws Throwable On IO error
 	 */
-	protected static void init(Wiki wiki) throws Throwable
+	protected MTC(Wiki wiki) throws Throwable
 	{
-		// Generate download directory
-		if (Files.isRegularFile(fdPath))
-			FError.errAndExit(fdump + " is file, please remove it so MTC can continue");
-		else if (!Files.isDirectory(fdPath))
-			Files.createDirectory(fdPath);
+		try
+		{
+			// Generate download directory
+			if (Files.isRegularFile(Config.fdPath))
+				FError.errAndExit(Config.fdump + " is file, please remove it so MTC can continue");
+			else if (!Files.isDirectory(Config.fdPath))
+				Files.createDirectory(Config.fdPath);
+		}
+		catch (Throwable e)
+		{
+			FError.errAndExit(e, "Do you not have read rights?");
+		}
 
 		// Initialize Wiki objects
 		com = wiki.getWiki("commons.wikimedia.org");
 		enwp = wiki.getWiki("en.wikipedia.org");
 
+		tg = new TGen(enwp);
+
 		tRegex = TParse.makeTemplateRegex(enwp, "Template:Copy to Wikimedia Commons");
+		blacklist = enwp.getLinksOnPage("Wikipedia:MTC!/Blacklist", NS.CATEGORY);
 	}
 
 	/**
-	 * Filters (if enabled) and resolves Commons filenames for transfer candinates 
+	 * Filters (if enabled) and resolves Commons filenames for transfer candinates
+	 * 
 	 * @param titles The local files to transfer
 	 * @return An ArrayList of TransferObject objects.
 	 */
-	protected static ArrayList<TransferObject> filterAndResolve(ArrayList<String> titles)
+	protected ArrayList<TransferObject> filterAndResolve(ArrayList<String> titles)
 	{
-		return FL.toAL(resolveFileNames(!ignoreFilter ? canTransfer(titles) : titles).entrySet().stream().map(e -> new TransferObject(e.getKey(), e.getValue())));
-	}
-	
-	/**
-	 * Attempts to move files to Commons
-	 * 
-	 * @param titles The titles to try and move.
-	 */
-	private static void procList(ArrayList<String> titles)
-	{
-		ArrayList<TransferObject> tl = filterAndResolve(titles);
-		AtomicInteger i = new AtomicInteger();
-		int total = tl.size();
-		
-		ArrayList<String> fails = FL.toAL(tl.stream().filter(to -> { 
-			ColorLog.fyi(String.format("Processing item %d of %d", i.incrementAndGet(), total));
-			return !to.doTransfer(); 
-			}).map(to -> to.wpFN));
-		
-		System.out.printf("Task complete, with %d failures: %s%n", fails.size(), fails);
+		return FL.toAL(resolveFileNames(!ignoreFilter ? canTransfer(titles) : titles).entrySet().stream()
+				.map(e -> new TransferObject(e.getKey(), e.getValue(), this)));
 	}
 
 	/**
@@ -177,7 +107,7 @@ public final class MTC
 	 * @param l The list of enwp files to find a Commons filename for
 	 * @return The Map such that [ enwp_filename : commons_filename ]
 	 */
-	private static HashMap<String, String> resolveFileNames(ArrayList<String> l)
+	private HashMap<String, String> resolveFileNames(ArrayList<String> l)
 	{
 		HashMap<String, String> m = new HashMap<>();
 		for (Map.Entry<String, Boolean> e : MQuery.exists(com, l).entrySet())
@@ -207,7 +137,7 @@ public final class MTC
 	 * @param title The title to check
 	 * @return True if the file can <ins>probably</ins> be transfered to Commons.
 	 */
-	private static ArrayList<String> canTransfer(ArrayList<String> titles)
+	private ArrayList<String> canTransfer(ArrayList<String> titles)
 	{
 		ArrayList<String> l = FL.toAL(MQuery.getSharedDuplicatesOf(enwp, titles).entrySet().stream()
 				.filter(e -> e.getValue().size() == 0).map(Map.Entry::getKey));
@@ -215,180 +145,5 @@ public final class MTC
 				: FL.toAL(MQuery.getCategoriesOnPage(enwp, l).entrySet().stream()
 						.filter(e -> !StrTool.arraysIntersect(e.getValue(), blacklist) && StrTool.arraysIntersect(e.getValue(), whitelist))
 						.map(Map.Entry::getKey));
-	}
-
-	/**
-	 * Makes the list of CLI options.
-	 * 
-	 * @return The list of Command line options.
-	 */
-	private static Options makeOptList()
-	{
-		Options ol = FCLI.makeDefaultOptions();
-		ol.addOption(FCLI.makeArgOption("f", "Transfer titles listed in a text file", "file"));
-		ol.addOption("d", "Activate dry run/debug mode (does not transfer files)");
-		return ol;
-	}
-
-	/**
-	 * Represents a file to transwiki
-	 * 
-	 * @author Fastily
-	 *
-	 */
-	protected static class TransferObject
-	{
-		/**
-		 * The URL to post to.
-		 */
-		private static final String url = "http://tools.wmflabs.org/commonshelper/index.php";
-
-		/**
-		 * The template text to post to the wmflabs tool.
-		 */
-		private static final String posttext = "language=en&project=wikipedia&image=%s&newname=&ignorewarnings=1&doit=Get+text&test=%%2F";
-
-		/**
-		 * Matches vomit that CommonsHelper doesn't strip.
-		 */
-		private static final String uselessT = String.format("(?i)\\{\\{(%s)\\}\\}\n?",
-				FString.pipeFence("Green", "Red", "Yesno", "Center", "Own", "Section link", "Trademark", "Bad JPEG",
-						"Spoken article entry", "PD\\-BritishGov", "Convert", "Cc\\-by\\-sa", "Infosplit", "Cite book", "Trim", "Legend",
-						"Hidden begin", "Hidden end", "Createdwith", "Main other", "OTRS permission"));
-
-		/**
-		 * Matches GFDL-disclaimers templates
-		 */
-		private static final Pattern gfdlDiscl = Pattern.compile("(?i)\\{\\{GFDL\\-user\\-(w|en)\\-(with|no)\\-disclaimers");
-
-		/**
-		 * String which is a regex that matches caption sections
-		 */
-		private static final String captionRegexStr = "(?si)\n?\\=\\=\\s*?(Caption).+?\\|\\}";
-
-		/**
-		 * Matches caption sections
-		 */
-		private static final Pattern captionRegex = Pattern.compile(captionRegexStr);
-
-		/**
-		 * The of enwp usages of InfoSplit
-		 */
-		private static final ArrayList<String> infoSplitUses = enwp.whatTranscludesHere("Template:Infosplit");
-
-		/**
-		 * Matches infosplit templates
-		 */
-		private static final Pattern infoSplitT = Pattern.compile("(?si)\\{\\{(infosplit).+?\\}\\}");
-
-		/**
-		 * The enwp, commons, basefilename (just basename), and local path to the file.
-		 */
-		protected final String wpFN, comFN, baseFN, localFN;
-
-		/**
-		 * The text which goes on the file description page of the Commons copy
-		 */
-		private String t;
-
-		/**
-		 * Constructor, creates a TransferObject
-		 * 
-		 * @param wpFN The enwp title to transfer
-		 * @param comFN The commons title to transfer to
-		 */
-		private TransferObject(String wpFN, String comFN)
-		{
-			this.comFN = comFN;
-			this.wpFN = wpFN;
-			baseFN = enwp.nss(wpFN);
-			localFN = fdump + baseFN;
-		}
-
-		/**
-		 * Downloads this object's enwp file and transfers it to Commons.
-		 * 
-		 * @return True on success.
-		 */
-		protected boolean doTransfer()
-		{
-			try
-			{
-				generateText();
-
-				if (dryRun)
-				{
-					System.out.println(t);
-					return true;
-				}
-
-				if (WTask.downloadFile(wpFN, localFN, enwp)
-						&& com.upload(Paths.get(localFN), comFN, t, String.format("Transferred from [[w:%s|en.wikipedia]] ([[w:Wikipedia:MTC!|MTC!]])", wpFN)))
-					return enwp.edit(wpFN, String.format("{{subst:ncd|%s}}%n", comFN) + enwp.getPageText(wpFN).replaceAll(tRegex, ""),
-							"Transferred to Commons ([[Wikipedia:MTC!|MTC!]])");
-			}
-			catch (Throwable e)
-			{
-				e.printStackTrace();
-			}
-
-			return false;
-		}
-
-		/**
-		 * Generates a file description page for a file which will be moved to Commons
-		 * 
-		 * @throws Throwable Network error
-		 */
-		private void generateText() throws Throwable
-		{
-			ColorLog.fyi("Downloading text for " + wpFN);
-
-			// generate raw file desc text for Commons
-			String rawhtml = FString
-					.inputStreamToString(Req.genericPOST(new URL(url), null, Req.urlenc, String.format(posttext, FString.enc(baseFN))));
-			t = rawhtml.substring(rawhtml.indexOf("{{Info"), rawhtml.indexOf("</textarea>"));
-
-			// cleanup text
-			t = t.replaceAll(uselessT, "");
-			t = t.replaceAll("(?si)\\{\\{(\\QCc-by-sa-3.0-migrated\\E|Copy to Commons|Do not move to Commons).*?\\}\\}\n?", "");
-			t = t.replaceAll("\\Q<!--\\E.*?\\Q-->\\E\n?", "");
-			t = t.replaceAll("(?i)\\|(Permission)\\=.*?\n", "|Permission=\n");
-			t = t.replaceAll("(?i)\\|(Source)\\=(Transferred from).*?\n", "|Source={{Transferred from|en.wikipedia}}\n");
-			t = t.replaceAll("__NOTOC__\n?", "");
-			t = t.replace("&times;", "×");
-			t = t.replace("Original uploader was {{user at project", "{{Original uploader");
-
-			if (!t.contains("int:filedesc"))
-				t = "== {{int:filedesc}} ==\n" + t;
-
-			// fix malformed GFDL-disclaimers templates
-			Matcher m = gfdlDiscl.matcher(t);
-			if (m.find())
-				try
-				{
-					t = String.format("%s|1=%s%s", t.substring(0, m.end()), enwp.getRevisions(wpFN, 1, true, null, null).get(0).user,
-							t.substring(m.end()));
-				}
-				catch (Throwable e)
-				{
-					e.printStackTrace();
-				}
-
-			// fix malformed caption headers
-			if ((m = captionRegex.matcher(t)).find())
-			{
-				String capt = m.group(); // copy caption section
-				t = t.replaceAll(captionRegexStr, ""); // strip
-				t += capt; // dump it at the end
-			}
-
-			// Fixing missing {{Infosplit}}
-			if (infoSplitUses.contains(wpFN) && (m = infoSplitT.matcher(enwp.getPageText(wpFN))).find())
-			{
-				String isplit = m.group();
-				t = StrTool.insertAt(t, "\n" + isplit, t.indexOf("== {{int:license-header}} ==") - 2);
-			}
-		}
 	}
 }

@@ -22,9 +22,8 @@ import jwiki.core.NS;
 import jwiki.core.Wiki;
 import jwiki.util.FError;
 import jwiki.util.FL;
+import jwikix.ui.FXTool;
 import jwikix.util.WTool;
-import mtc.MTC.TransferObject;
-import ui.FXTool;
 
 /**
  * An MTC UI window
@@ -92,7 +91,11 @@ public class MTCController
 	 */
 	private HashSet<String> tfl = new HashSet<>();
 	
-	
+	/**
+	 * The MTC instance for this Controller.
+	 */
+	private static MTC mtc;
+
 	/**
 	 * The OS clipboard
 	 */
@@ -131,7 +134,7 @@ public class MTCController
 		// Initalize MTC base
 		try
 		{
-			MTC.init(mc.wiki);
+			mtc = new MTC(mc.wiki);
 		}
 		catch (Throwable e)
 		{
@@ -156,7 +159,7 @@ public class MTCController
 		}
 
 		// Initialize and grab values from Nodes
-		MTC.ignoreFilter = disableFilterBox.isSelected();
+		mtc.ignoreFilter = disableFilterBox.isSelected();
 		updatePB(0, "Hold tight, querying server...");
 		transferButton.setDisable(true);
 
@@ -204,7 +207,7 @@ public class MTCController
 
 		Set<String> fails = Collections.synchronizedSet(new HashSet<>()), success = Collections.synchronizedSet(new HashSet<>());
 
-		ArrayList<TransferObject> tol = MTC.filterAndResolve(fl);
+		ArrayList<TransferObject> tol = mtc.filterAndResolve(fl);
 		if (tol.isEmpty())
 		{
 			Platform.runLater(() -> {
@@ -270,6 +273,6 @@ public class MTCController
 	{
 		if (!tfl.isEmpty())
 			wiki.edit(String.format("User:%s/MTC! Transfer Log", wiki.whoami()),
-					WTool.listify("== ~~~~~ - v" + MTCui.version + " ==\n", tfl, true), "Update Transfer log ([[Wikipedia:MTC!|MTC!]])");
+					WTool.listify(String.format("== ~~~~~ - v%s ==%n", MTCui.version), tfl, true), "Update Transfer log " + Config.mtcLink);
 	}
 }

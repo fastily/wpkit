@@ -5,9 +5,9 @@ import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import jwiki.core.Wiki;
+import jwikix.ui.FXTool;
+import jwikix.ui.LoginController;
 import jwikix.util.StrTool;
-import ui.FXTool;
-import ui.LoginController;
 
 /**
  * A GUI wrapper for MTC

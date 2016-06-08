@@ -74,7 +74,7 @@ public class MTCui extends Application
 		String minVersion =  wiki.getPageText(serverVersionPage).trim();
 		if(!StrTool.versionCheck(version, minVersion))
 		{
-			FXTool.warnUser(String.format("Your version of MTC (%s) is outdated.  The new version is (%s).  Please update to the latest version.", version, minVersion)); 
+			FXTool.warnUser(String.format("Your version of MTC (%s) is outdated.  The new version is (%s).  Please download the newest version.", version, minVersion)); 
 			getHostServices().showDocument("https://en.wikipedia.org/wiki/Wikipedia:MTC!");
 
 			Platform.exit();

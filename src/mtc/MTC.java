@@ -65,18 +65,11 @@ public final class MTC
 	 */
 	protected MTC(Wiki wiki) throws Throwable
 	{
-		try
-		{
-			// Generate download directory
-			if (Files.isRegularFile(Config.fdPath))
-				FError.errAndExit(Config.fdump + " is file, please remove it so MTC can continue");
-			else if (!Files.isDirectory(Config.fdPath))
-				Files.createDirectory(Config.fdPath);
-		}
-		catch (Throwable e)
-		{
-			FError.errAndExit(e, "Do you not have read rights?");
-		}
+		// Generate download directory
+		if (Files.isRegularFile(Config.fdPath))
+			FError.errAndExit(Config.fdump + " is file, please remove it so MTC can continue");
+		else if (!Files.isDirectory(Config.fdPath))
+			Files.createDirectory(Config.fdPath);
 
 		// Initialize Wiki objects
 		com = wiki.getWiki("commons.wikimedia.org");

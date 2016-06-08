@@ -29,7 +29,7 @@ public class Config
 	/**
 	 * The template text to post to the wmflabs tool.
 	 */
-	protected static final String posttext = "language=en&project=wikipedia&image=%s&newname=&ignorewarnings=1&doit=Get+text&test=%%2F";
+	protected static final String chPOSTfmt = "language=en&project=wikipedia&image=%s&newname=&ignorewarnings=1&doit=Get+text&test=%%2F";
 
 	/**
 	 * Basic wikitext link to MTC!. For use in edit summaries.

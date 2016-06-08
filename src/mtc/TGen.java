@@ -79,12 +79,13 @@ public class TGen
 		try
 		{
 			String rawhtml = FString.inputStreamToString(
-					Req.genericPOST(new URL(Config.chURL), null, Req.urlenc, String.format(Config.posttext, FString.enc(to.baseFN))));
+					Req.genericPOST(new URL(Config.chURL), null, Req.urlenc, String.format(Config.chPOSTfmt, FString.enc(to.baseFN))));
 			t = rawhtml.substring(rawhtml.indexOf("{{Info"), rawhtml.indexOf("</textarea>"));
 
 		}
 		catch (Throwable e)
 		{
+			e.printStackTrace();
 			return null;
 		}
 

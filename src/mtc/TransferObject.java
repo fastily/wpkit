@@ -5,6 +5,7 @@ import static mtc.Config.fdump;
 import java.nio.file.Paths;
 
 import jwiki.core.WTask;
+import jwiki.core.Wiki;
 
 /**
  * Represents an enwp file prepared for transfer to Commons.
@@ -24,10 +25,9 @@ public class TransferObject
 	 */
 	private final String comFN, localFN;
 
-	/**
-	 * This TransferObject's parent MTC instance.
-	 */
 	private MTC m;
+	
+	private Wiki enwp, com;
 
 	/**
 	 * Constructor, creates a TransferObject
@@ -42,7 +42,11 @@ public class TransferObject
 		baseFN = m.enwp.nss(wpFN);
 		localFN = fdump + baseFN;
 
+		
 		this.m = m;
+		
+		enwp = m.enwp;
+		com = m.com;
 	}
 
 	/**
@@ -59,12 +63,15 @@ public class TransferObject
 			System.out.println(t);
 			return true;
 		}
-		else if (t != null && WTask.downloadFile(wpFN, localFN, m.enwp)
-				&& m.com.upload(Paths.get(localFN), comFN, t, String.format(Config.tFrom, wpFN)))
-			return m.enwp.edit(wpFN, String.format("{{subst:ncd|%s}}%n", comFN) + m.enwp.getPageText(wpFN).replaceAll(m.tRegex, ""),
+		else if (t != null && WTask.downloadFile(wpFN, localFN, enwp)
+				&& com.upload(Paths.get(localFN), comFN, t, String.format(Config.tFrom, wpFN)))
+			return enwp.edit(wpFN, String.format("{{subst:ncd|%s}}%n", comFN) + enwp.getPageText(wpFN).replaceAll(m.tRegex, ""),
 					Config.tTo);
 
 		return false;
 	}
 
+	
+	
+	
 }

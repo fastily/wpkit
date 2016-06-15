@@ -5,7 +5,6 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.TextStyle;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
@@ -16,6 +15,7 @@ import jwiki.util.FL;
 import jwiki.util.MapList;
 import jwiki.util.Tuple;
 import jwikix.util.WikiGen;
+import util.Toolbox;
 
 /**
  * Checks daily deletion categories on enwp and notifies users if they have not been notified.
@@ -33,9 +33,7 @@ public class DDNotifier
 	/**
 	 * A list of categories to check if users have been notified.
 	 */
-	private static final ArrayList<Tuple<String, String>> rules = FL
-			.toAL(Arrays.asList(wiki.getPageText("User:FastilyBot/Task6Rules").split("\n")).stream()
-					.filter(s -> !s.startsWith("<") && !s.isEmpty()).map(s -> s.split(";")).map(a -> new Tuple<>(a[0], a[1])));
+	private static final ArrayList<Tuple<String, String>> rules = FL.mapToList(Toolbox.fetchConfig(wiki, "User:FastilyBot/Task6Rules"));
 
 	/**
 	 * The start of today, and the start of yesterday (target date)

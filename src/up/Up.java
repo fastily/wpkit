@@ -42,7 +42,7 @@ public final class Up
 	 * The String template for file description pages
 	 */
 	private static final String infoT = "=={{int:filedesc}}==\n{{Information\n|description=%s\n|date=%s\n|source={{Own}}\n|"
-			+ "author=~~~\n|permission=\n|other versions=\n}}\n\n=={{int:license-header}}==\n{{self|Cc-by-sa-4.0}}\n\n[[Category:%s]]\n[[Category:Files by %s]]";
+			+ "author=~~~\n|permission=\n|other versions=\n}}\n\n=={{int:license-header}}==\n{{Self|Cc-by-sa-4.0}}\n\n[[Category:%s]]\n[[Category:Files by %s]]";
 
 	/**
 	 * The formatter to use for <code>date=</code> dates

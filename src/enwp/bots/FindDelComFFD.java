@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
 
 import jwiki.core.MQuery;
 import jwiki.core.NS;
-import jwiki.core.WTask;
+import jwiki.core.TPlate;
 import jwiki.core.Wiki;
 import jwiki.util.FL;
 import jwiki.util.Tuple;
@@ -64,7 +64,7 @@ public final class FindDelComFFD
 		String comFile;
 		for (Map.Entry<String, String> e : pageTexts.entrySet())
 		{
-			comFile = WTask.parseTemplate(enwp, TParse.extractTemplate(nomDelTemplPattern, e.getValue())).y.get("1");
+			comFile = TPlate.parse(enwp, TParse.extractTemplate(nomDelTemplPattern, e.getValue())).getStringFor("1");
 			if(comFile == null)
 				comFile = e.getKey();
 			

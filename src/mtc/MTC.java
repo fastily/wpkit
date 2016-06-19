@@ -1,12 +1,16 @@
 package mtc;
 
+import static mtc.Config.fdump;
+
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 import jwiki.core.MQuery;
 import jwiki.core.NS;
+import jwiki.core.WTask;
 import jwiki.core.Wiki;
 import jwiki.util.FError;
 import jwiki.util.FL;
@@ -51,10 +55,7 @@ public final class MTC
 	 */
 	protected boolean ignoreFilter = false;
 
-	/**
-	 * The text generator for this MTC instance.
-	 */
-	protected final TGen tg;
+	protected DGen dgen;
 
 	/**
 	 * Initializes the Wiki objects and download folders for MTC.
@@ -75,7 +76,7 @@ public final class MTC
 		com = wiki.getWiki("commons.wikimedia.org");
 		enwp = wiki.getWiki("en.wikipedia.org");
 
-		tg = new TGen(enwp);
+		dgen = new DGen(enwp, com);
 
 		tRegex = TParse.makeTemplateRegex(enwp, "Template:Copy to Wikimedia Commons");
 		blacklist = enwp.getLinksOnPage("Wikipedia:MTC!/Blacklist", NS.CATEGORY);
@@ -90,7 +91,7 @@ public final class MTC
 	protected ArrayList<TransferObject> filterAndResolve(ArrayList<String> titles)
 	{
 		return FL.toAL(resolveFileNames(!ignoreFilter ? canTransfer(titles) : titles).entrySet().stream()
-				.map(e -> new TransferObject(e.getKey(), e.getValue(), this)));
+				.map(e -> new TransferObject(e.getKey(), e.getValue())));
 	}
 
 	/**
@@ -138,5 +139,56 @@ public final class MTC
 				: FL.toAL(MQuery.getCategoriesOnPage(enwp, l).entrySet().stream()
 						.filter(e -> !StrTool.arraysIntersect(e.getValue(), blacklist) && StrTool.arraysIntersect(e.getValue(), whitelist))
 						.map(Map.Entry::getKey));
+	}
+	
+	
+	protected  class TransferObject
+	{
+		/**
+		 * The enwp, basefilename (just basename) filenames
+		 */
+		protected final String wpFN, baseFN;
+
+		/**
+		 * The commons and local filenames
+		 */
+		private final String comFN, localFN;
+
+		/**
+		 * Constructor, creates a TransferObject
+		 * 
+		 * @param wpFN The enwp title to transfer
+		 * @param comFN The commons title to transfer to
+		 */
+		protected TransferObject(String wpFN, String comFN)
+		{
+			this.comFN = comFN;
+			this.wpFN = wpFN;
+			baseFN = enwp.nss(wpFN);
+			localFN = fdump + baseFN;
+		}
+
+		/**
+		 * Attempts to transfer an enwp file to Commons
+		 * 
+		 * @return True on success.
+		 */
+		protected boolean doTransfer()
+		{
+			String t = dgen.generate(wpFN);
+
+			if (dryRun)
+			{
+				System.out.println(t);
+				return true;
+			}
+			else if (t != null && WTask.downloadFile(wpFN, localFN, enwp)
+					&& com.upload(Paths.get(localFN), comFN, t, String.format(Config.tFrom, wpFN)))
+				return enwp.edit(wpFN, String.format("{{subst:ncd|%s}}%n", comFN) + enwp.getPageText(wpFN).replaceAll(tRegex, ""),
+						Config.tTo);
+
+			return false;
+		}
+
 	}
 }

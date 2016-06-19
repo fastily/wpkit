@@ -16,7 +16,6 @@ import jwiki.dwrap.ImageInfo;
 import jwiki.util.FL;
 import jwiki.util.FString;
 import jwikix.util.TParse;
-import jwikix.util.WikiGen;
 import util.Toolbox;
 
 /**
@@ -31,7 +30,7 @@ public class DGen
 	 * Matches an Information template parameter
 	 */
 	private static final Pattern infoParams = Pattern
-			.compile("(?i)\\|\\s*?(Description|Source|Author|Date|Permission|other( |_)versions)");
+			.compile("(?i)\\|\\s*?(Description|Source|Author|Date|Permission|other( |_)versions)\\s*?\\=");
 
 	/**
 	 * Matches caption sections in enwp text
@@ -46,7 +45,7 @@ public class DGen
 	/**
 	 * Format String for {{Information}}
 	 */
-	private static final String infoFmt = "{{Information%n|description=%s%n|date=%s%n|source=%s%n|author=%s%n|permission=%s%n|other versions=%s%n}}%n";
+	private static final String infoFmt = "{{Information%n|Description=%s%n|Date=%s%n|Source=%s%n|Author=%s%n|Permission=%s%n|other versions=%s%n}}%n";
 
 	/**
 	 * The format String for a row in the Upload Log section.
@@ -79,7 +78,7 @@ public class DGen
 	 * @param enwp A Wiki object for the English Wikipedia
 	 * @param com A Wiki object for Commons
 	 */
-	public DGen(Wiki enwp, Wiki com)
+	protected DGen(Wiki enwp, Wiki com)
 	{
 		this.enwp = enwp;
 		this.com = com;
@@ -92,23 +91,21 @@ public class DGen
 		licRegexMap = Toolbox.fetchConfig(enwp, Config.fullname + "/Regexes");
 	}
 
-	public static void main(String[] args)
+	/**
+	 * Generates a file description page for the specified title
+	 * @param title The title to generate a file description page for
+	 * @return The file description page.
+	 */
+	protected String generate(String title)
 	{
-		Wiki wiki = WikiGen.wg.get("FastilyClone", "en.wikipedia.org");
-		DGen dg = new DGen(wiki, wiki.getWiki("commons.wikimedia.org"));
-
-		// dg.transfer("File:Liar Liar poster.JPG");
-		dg.transfer("File:SIMOX processing schematic.svg");
-
+		return new Desc(title).genText();
 	}
 
-	public String transfer(String title)
-	{
-		System.out.println(new Desc(title).genText());
-
-		return null;
-	}
-
+	/**
+	 * Represents a generated description for a file
+	 * @author Fastily
+	 *
+	 */
 	private class Desc
 	{
 		/**
@@ -183,7 +180,10 @@ public class DGen
 			for (String s : plx)
 			{
 				String[] pl = s.split("\\=", 2);
-				info.put(pl[0].substring(1).trim().toLowerCase().replace('_', ' '), pl[1].trim());
+				
+				String v = pl[1].trim();
+				if(!v.isEmpty())
+					info.put(pl[0].substring(1).trim().toLowerCase().replace('_', ' '), v);
 			}
 
 			t = infoTP.matcher(t).replaceAll(""); // remove {{Information}} since we're done
@@ -230,7 +230,7 @@ public class DGen
 			for (Map.Entry<String, Boolean> e : MQuery.exists(com, FL.toAL(tpl.stream().filter(s -> !licRegexMap.containsKey(s))))
 					.entrySet())
 			{
-				String s = findAndReplace(Pattern.compile(TParse.makeTitleRegex(FL.toSAL(e.getKey()))));
+				String s = findAndReplace(Pattern.compile(TParse.makeTitleRegex(FL.toSAL(enwp.nss(e.getKey())))));
 				if (e.getValue() && !s.isEmpty())
 					licSection.add(s);
 			}

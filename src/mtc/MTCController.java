@@ -24,6 +24,7 @@ import jwiki.util.FError;
 import jwiki.util.FL;
 import jwikix.ui.FXTool;
 import jwikix.util.WTool;
+import mtc.MTC.TransferObject;
 
 /**
  * An MTC UI window
@@ -273,6 +274,6 @@ public class MTCController
 	{
 		if (!tfl.isEmpty())
 			wiki.edit(String.format("User:%s/MTC! Transfer Log", wiki.whoami()),
-					WTool.listify(String.format("== ~~~~~ - v%s ==%n", MTCui.version), tfl, true), "Update Transfer log " + Config.mtcLink);
+					WTool.listify(String.format("== ~~~~~ - v%s ==%n", MTCui.version), tfl, true), String.format("Update Transfer log (%s)", Config.mtcLink));
 	}
 }

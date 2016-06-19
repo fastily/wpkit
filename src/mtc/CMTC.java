@@ -10,6 +10,7 @@ import jwiki.core.ColorLog;
 import jwiki.core.NS;
 import jwiki.util.FL;
 import jwikix.util.WikiGen;
+import mtc.MTC.TransferObject;
 import util.FCLI;
 
 /**

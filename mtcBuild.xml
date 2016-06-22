@@ -18,7 +18,7 @@
 			</manifest>
 
 			<fileset file="LICENSE.md" />
-			<fileset dir="${dir.bin}" includes="mtc/**,jwiki/**,jwikix/**" excludes="**/test/**" />
+			<fileset dir="${dir.bin}" includes="mtc/**,util/**,jwiki/**,jwikix/**" excludes="**/test/**" />
 
 			<zipfileset excludes="META-INF/**,README,**/*.java" src="${dir.lib}/JSON-java.jar" />
 			<zipfileset excludes="META-INF/**,**/*.java,**/*.html,*.txt,README.md" src="${dir.lib}/CLI.jar" />

@@ -24,7 +24,7 @@ public class MTCui extends Application
 	/**
 	 * The title of the page with the minimum version number
 	 */
-	private static final String serverVersionPage = "Wikipedia:MTC!/Version";
+	private static final String serverVersionPage = Config.fullname + "/Version";
 	
 	/**
 	 * The LoginController for this Application
@@ -75,7 +75,7 @@ public class MTCui extends Application
 		if(!StrTool.versionCheck(version, minVersion))
 		{
 			FXTool.warnUser(String.format("Your version of MTC (%s) is outdated.  The new version is (%s).  Please download the newest version.", version, minVersion)); 
-			getHostServices().showDocument("https://en.wikipedia.org/wiki/Wikipedia:MTC!");
+			getHostServices().showDocument("https://en.wikipedia.org/wiki/" + Config.fullname);
 
 			Platform.exit();
 		}

@@ -10,4 +10,4 @@ This repository is also currently the home to
 * [jwiki-extras](https://github.com/fastily/jwiki-extras)
 
 ### Minimum System Requirements
-* JRE >= 8
+* JRE ≥ 8

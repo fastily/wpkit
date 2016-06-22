@@ -47,6 +47,6 @@ public final class FindBrokenSPI
 		wiki.edit(report,
 				WTool.listify("{{/Header}}\n" + WPStrings.updatedAt, MQuery.resolveRedirects(wiki, new ArrayList<>(spiCases))
 						.entrySet().stream().filter(e -> e.getKey().equals(e.getValue())).map(Map.Entry::getValue), false),
-				"Update list");
+				"BOT: Update list");
 	}
 }

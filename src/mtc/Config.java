@@ -3,6 +3,8 @@ package mtc;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import jwikix.util.FSystem;
+
 /**
  * Configurable, frequently used constant Strings for MTC.
  * 
@@ -24,7 +26,7 @@ public class Config
 	/**
 	 * The directory pointing to the location for file downloads
 	 */
-	protected static final String fdump = "mtcfiles/";
+	protected static final String fdump = "mtcfiles" + FSystem.psep;
 
 	/**
 	 * The Path object pointing to <code>fdump</code>.

@@ -33,7 +33,7 @@ public final class CMTC
 	 */
 	public static void main(String[] args) throws Throwable
 	{
-		CommandLine l = FCLI.gnuParse(makeOptList(), args, "MTC [-help] [-f] [<titles|user|cat>]");
+		CommandLine l = FCLI.gnuParse(makeOptList(), args, "MTC [-help] [-f] [-d] [<titles|user|cat>]");
 
 		// Do initial logins, and generate MTC regexes
 		mtc = new MTC(WikiGen.wg.get("FastilyClone", "commons.wikimedia.org"));

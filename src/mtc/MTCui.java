@@ -7,7 +7,7 @@ import javafx.stage.Stage;
 import jwiki.core.Wiki;
 import jwikix.ui.FXTool;
 import jwikix.ui.LoginController;
-import jwikix.util.StrTool;
+import util.Toolbox;
 
 /**
  * A GUI wrapper for MTC
@@ -19,7 +19,7 @@ public class MTCui extends Application
 	/**
 	 * Version number
 	 */
-	protected static final String version = "0.1.0";
+	protected static final String version = "0.1.1";
 	
 	/**
 	 * The title of the page with the minimum version number
@@ -72,7 +72,7 @@ public class MTCui extends Application
 	private void createAndShowMTC(Wiki wiki)
 	{
 		String minVersion =  wiki.getPageText(serverVersionPage).trim();
-		if(!StrTool.versionCheck(version, minVersion))
+		if(!Toolbox.versionCheck(version, minVersion))
 		{
 			FXTool.warnUser(String.format("Your version of MTC (%s) is outdated.  The new version is (%s).  Please download the newest version.", version, minVersion)); 
 			getHostServices().showDocument("https://en.wikipedia.org/wiki/" + Config.fullname);

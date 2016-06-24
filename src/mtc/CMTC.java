@@ -50,6 +50,8 @@ public final class CMTC
 				fl.add(s);
 			else if (ns.equals(NS.CATEGORY))
 				fl.addAll(mtc.enwp.getCategoryMembers(s, NS.FILE));
+			else if (ns.equals(NS.TEMPLATE))
+				fl.addAll(mtc.enwp.whatTranscludesHere(s, NS.FILE));
 			else
 				fl.addAll(mtc.enwp.getUserUploads(s));
 		}

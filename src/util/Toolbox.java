@@ -6,12 +6,14 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import jwiki.core.ColorLog;
 import jwiki.core.Req;
 import jwiki.core.Wiki;
+import jwikix.util.StrTool;
 
 /**
  * Miscellaneous custom functions common to my scripts/bots.
@@ -21,6 +23,13 @@ import jwiki.core.Wiki;
  */
 public final class Toolbox
 {
+	/**
+	 * Random number generator.
+	 * 
+	 * @see #permuteFileName(String)
+	 */
+	private static final Random rand = new Random();
+
 	/**
 	 * Constructors disallowed
 	 */
@@ -68,5 +77,38 @@ public final class Toolbox
 			e.printStackTrace();
 			return false;
 		}
+	}
+	
+	/**
+	 * Checks the version String of a program with the version String of the server. PRECONDITION: <code>local</code> and
+	 * <code>ext</code> ONLY contain numbers and '.' characters.
+	 * 
+	 * @param local The version String of the program. (e.g. 0.2.1)
+	 * @param minVersion The version String of the server. (e.g. 1.3.2)
+	 * @return True if the version of the local String is greater than or equal to the server's version String.
+	 */
+	public static boolean versionCheck(String local, String minVersion)
+	{
+		try
+		{
+			return Integer.parseInt(local.replace(".", "")) >= Integer.parseInt(minVersion.replace(".", ""));
+		}
+		catch (Throwable e)
+		{
+			e.printStackTrace();
+		}
+		return false;
+	}
+	
+	/**
+	 * Permutes a filename by adding a random number to the end before the file extension. PRECONDITION: <code>fn</code>
+	 * is a valid filename with an extension, of the format (e.g. blahblah.jpg)
+	 * 
+	 * @param fn The base filename to permute
+	 * @return The permuted filename
+	 */
+	public static String permuteFileName(String fn)
+	{
+		return StrTool.insertAt(fn, " " + rand.nextInt(), fn.lastIndexOf('.'));
 	}
 }

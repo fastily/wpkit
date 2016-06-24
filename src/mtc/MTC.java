@@ -1,7 +1,5 @@
 package mtc;
 
-import static mtc.Config.fdump;
-
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -17,7 +15,6 @@ import jwiki.core.Wiki;
 import jwiki.dwrap.ImageInfo;
 import jwiki.util.FError;
 import jwiki.util.FL;
-import jwikix.util.StrTool;
 import jwikix.util.TParse;
 import util.Toolbox;
 
@@ -126,7 +123,7 @@ public final class MTC
 				String comFN;
 				do
 				{
-					comFN = StrTool.permuteFileName(enwp.nss(title));
+					comFN = Toolbox.permuteFileName(enwp.nss(title));
 				} while (com.exists(comFN)); // loop until available filename is found
 
 				m.put(title, comFN);
@@ -187,7 +184,7 @@ public final class MTC
 			this.wpFN = wpFN;
 			
 			String baseFN = enwp.nss(wpFN);
-			localFN = fdump + baseFN.hashCode() + baseFN.substring(baseFN.lastIndexOf('.'));
+			localFN = Config.fdump + baseFN.hashCode() + baseFN.substring(baseFN.lastIndexOf('.'));
 		}
 
 		/**

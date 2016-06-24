@@ -38,15 +38,15 @@ public class DGen
 	private static final Pattern captionRegex = Pattern.compile("(?si)\n?\\=\\=\\s*?(Caption).+?\\|\\}");
 
 	/**
-	 * The title for OTRS, Info, Self, and MTC templates.
+	 * The title for Info, Self, and MTC templates.
 	 */
-	private static final String tOTRS = "Template:OTRS permission", tINFO = "Template:Information", tSELF = "Template:Self",
+	private static final String tINFO = "Template:Information", tSELF = "Template:Self",
 			tMTC = "Template:Copy to Wikimedia Commons";
 
 	/**
 	 * The Set of templates which should be handled specially.
 	 */
-	private static final HashSet<String> specialTL = FL.toSHS(tOTRS, tINFO, tSELF, tMTC);
+	private static final HashSet<String> specialTL = FL.toSHS(tINFO, tSELF, tMTC);
 
 	/**
 	 * Format String for {{Information}}
@@ -191,11 +191,6 @@ public class DGen
 		 */
 		private void extractLics()
 		{
-			// OTRS templates
-			if (tpl.contains(tOTRS))
-				licSection.add(findAndReplace(mtc.regexMap.get(tOTRS)));
-
-			// All other licenses
 			for (String tp : tpl)
 				if (mtc.regexMap.containsKey(tp) && !specialTL.contains(tp))
 				{

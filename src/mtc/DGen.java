@@ -40,8 +40,7 @@ public class DGen
 	/**
 	 * The title for Info, Self, and MTC templates.
 	 */
-	private static final String tINFO = "Template:Information", tSELF = "Template:Self",
-			tMTC = "Template:Copy to Wikimedia Commons";
+	private static final String tINFO = "Template:Information", tSELF = "Template:Self", tMTC = "Template:Copy to Wikimedia Commons";
 
 	/**
 	 * The Set of templates which should be handled specially.
@@ -147,76 +146,51 @@ public class DGen
 			imgInfoL = to.ii;
 
 			stripJunk();
-			extractLics();
-			parseInfo();
-			extractMiscComponents();
+			extractFileDesc();
 		}
 
 		/**
-		 * Parses the Information template, if applicable.
+		 * Extracts templates and text from the enwp file description page.
 		 */
-		private void parseInfo()
+		private void extractFileDesc()
 		{
-			if (!tpl.contains(tINFO))
-				return;
-
-			Pattern infoTP = mtc.regexMap.get(tINFO);
-			String rawInfo = TParse.extractTemplate(infoTP, t);
-			rawInfo = rawInfo.substring(2, rawInfo.length() - 2);
-
-			Matcher m = infoParams.matcher(rawInfo);
-			ArrayList<Integer> l = new ArrayList<>();
-			while (m.find())
-				l.add(m.start());
-
-			ArrayList<String> plx = new ArrayList<>();
-			for (int i = 0; i < l.size() - 1; i++)
-				plx.add(rawInfo.substring(l.get(i), l.get(i + 1)));
-			plx.add(rawInfo.substring(l.get(l.size() - 1)));
-
-			for (String s : plx)
-			{
-				String[] pl = s.split("\\=", 2);
-
-				String v = pl[1].trim();
-				if (!v.isEmpty())
-					info.put(pl[0].substring(1).trim().toLowerCase().replace('_', ' '), v);
-			}
-
-			t = infoTP.matcher(t).replaceAll(""); // remove {{Information}} since we're done
-		}
-
-		/**
-		 * Extracts valid license templates from the page
-		 */
-		private void extractLics()
-		{
+			// Extract License Tags
 			for (String tp : tpl)
 				if (mtc.regexMap.containsKey(tp) && !specialTL.contains(tp))
 				{
 					String s = findAndReplace(mtc.regexMap.get(tp));
 					licSection.add(s.isEmpty() ? String.format("{{%s}}", enwp.nss(tp)) : s);
 				}
-		}
 
-		/**
-		 * Strips junk that does not transfer well to Commons
-		 */
-		private void stripJunk()
-		{
-			t = t.replaceAll("(?i)\\n?\\[\\[(Category:).*?\\]\\]", ""); // categories don't transfer well.
-			t = t.replaceAll("(?mi)^\\==.*?(Summary|Lic|filedesc).*?==$", ""); // strip headers
-			t = t.replaceAll("(?<=\\[\\[)(.+?\\]\\])", "w:$1"); // add enwp prefix to links
+			// Extract {{Information}}
+			if (tpl.contains(tINFO))
+			{
+				Pattern infoTP = mtc.regexMap.get(tINFO);
+				String rawInfo = TParse.extractTemplate(infoTP, t);
+				rawInfo = rawInfo.substring(2, rawInfo.length() - 2);
 
-			t = mtc.regexMap.get(tSELF).matcher(t).replaceAll("");
-			t = mtc.regexMap.get(tMTC).matcher(t).replaceAll("");
-		}
+				Matcher m = infoParams.matcher(rawInfo);
+				ArrayList<Integer> l = new ArrayList<>();
+				while (m.find())
+					l.add(m.start());
 
-		/**
-		 * Extract misc components, see section comments for details.
-		 */
-		private void extractMiscComponents()
-		{
+				ArrayList<String> plx = new ArrayList<>();
+				for (int i = 0; i < l.size() - 1; i++)
+					plx.add(rawInfo.substring(l.get(i), l.get(i + 1)));
+				plx.add(rawInfo.substring(l.get(l.size() - 1)));
+
+				for (String s : plx)
+				{
+					String[] pl = s.split("\\=", 2);
+
+					String v = pl[1].trim();
+					if (!v.isEmpty())
+						info.put(pl[0].substring(1).trim().toLowerCase().replace('_', ' '), v);
+				}
+
+				t = infoTP.matcher(t).replaceAll(""); // remove {{Information}} since we're done
+			}
+
 			// Keep non-lic templates used on Commons, strip the rest.
 			for (Map.Entry<String, Boolean> e : MQuery.exists(com, FL.toAL(tpl.stream().filter(s -> !mtc.regexMap.containsKey(s))))
 					.entrySet())
@@ -235,6 +209,19 @@ public class DGen
 			t = t.trim();
 			if (!t.isEmpty())
 				info.put("description", info.containsKey("description") ? info.get("description") + "\n" + t : t);
+		}
+
+		/**
+		 * Strips junk that does not transfer well to Commons
+		 */
+		private void stripJunk()
+		{
+			t = t.replaceAll("(?i)\\n?\\[\\[(Category:).*?\\]\\]", ""); // categories don't transfer well.
+			t = t.replaceAll("(?mi)^\\==.*?(Summary|Lic|filedesc).*?==$", ""); // strip headers
+			t = t.replaceAll("(?<=\\[\\[)(.+?\\]\\])", "w:$1"); // add enwp prefix to links
+
+			t = mtc.regexMap.get(tSELF).matcher(t).replaceAll("");
+			t = mtc.regexMap.get(tMTC).matcher(t).replaceAll("");
 		}
 
 		/**

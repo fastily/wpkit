@@ -13,7 +13,7 @@ import java.util.stream.Stream;
 import jwiki.core.Wiki;
 import jwiki.util.FL;
 import jwiki.util.FString;
-import jwikix.util.WikiGen;
+import jwikix.core.WikiGen;
 
 /**
  * Simple Wikimedia Commons Uploader

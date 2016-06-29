@@ -4,7 +4,7 @@ import java.util.HashSet;
 
 import jwiki.core.NS;
 import jwiki.core.Wiki;
-import jwikix.util.WikiGen;
+import jwikix.core.WikiGen;
 
 /**
  * Finds enwp files which are flagged as both free and non-free.

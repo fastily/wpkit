@@ -14,7 +14,7 @@ import jwiki.core.Wiki;
 import jwiki.util.FL;
 import jwiki.util.MapList;
 import jwiki.util.Tuple;
-import jwikix.util.WikiGen;
+import jwikix.core.WikiGen;
 import util.Toolbox;
 
 /**
@@ -33,7 +33,7 @@ public class DDNotifier
 	/**
 	 * A list of categories to check if users have been notified.
 	 */
-	private static final ArrayList<Tuple<String, String>> rules = FL.mapToList(Toolbox.fetchConfig(wiki, "User:FastilyBot/Task6Rules"));
+	private static final ArrayList<Tuple<String, String>> rules = FL.mapToList(Toolbox.fetchPairedConfig(wiki, "User:FastilyBot/Task6Rules"));
 
 	/**
 	 * The start of today, and the start of yesterday (target date)

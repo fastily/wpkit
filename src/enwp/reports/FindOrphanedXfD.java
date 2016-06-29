@@ -9,10 +9,10 @@ import jwiki.core.MQuery;
 import jwiki.core.NS;
 import jwiki.core.Wiki;
 import jwiki.util.FL;
+import jwikix.core.WikiGen;
 import jwikix.util.StrTool;
 import jwikix.util.Triple;
-import jwikix.util.WTool;
-import jwikix.util.WikiGen;
+import util.Toolbox;
 import util.WPStrings;
 
 /**
@@ -44,7 +44,7 @@ public class FindOrphanedXfD
 	public static void main(String[] args)
 	{
 		wiki.edit("User:FastilyBot/Orphaned XfD",
-				WTool.listify(WPStrings.updatedAt,
+				Toolbox.listify(WPStrings.updatedAt,
 						l.stream()
 								.flatMap(t -> MQuery.linksHere(wiki, false, wiki.whatTranscludesHere(t.x, t.z)).entrySet().stream()
 										.filter(e -> !StrTool.hasStrWithPrefix(e.getValue(), t.y)).map(Map.Entry::getKey)),

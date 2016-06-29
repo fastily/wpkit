@@ -9,7 +9,7 @@ import jwiki.core.Wiki;
 import jwiki.util.FError;
 import jwiki.util.FL;
 import jwiki.util.Tuple;
-import jwikix.util.WikiGen;
+import jwikix.core.WikiGen;
 
 /**
  * Report which totals MTC counts by user

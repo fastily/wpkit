@@ -5,9 +5,9 @@ import java.util.HashSet;
 import jwiki.core.NS;
 import jwiki.core.Wiki;
 import jwiki.util.FL;
-import jwikix.util.TParse;
-import jwikix.util.WTool;
-import jwikix.util.WikiGen;
+import jwikix.core.TParse;
+import jwikix.core.WikiX;
+import jwikix.core.WikiGen;
 
 /**
  * Removes Copy to Wikimedia Commons on enwp files that may be ineligible for transfer to Commons.
@@ -40,7 +40,7 @@ public final class RemoveBadMTC
 	public static void main(String[] args) throws Throwable
 	{
 		HashSet<String> mtcFiles = new HashSet<>(wiki.filterByNS(wiki.whatTranscludesHere(mtc), NS.FILE));
-		mtcFiles.removeAll(WTool.getCategoryMembersR(wiki, "Category:Copy to Wikimedia Commons reviewed by a human").y); //ignore reviewed files
+		mtcFiles.removeAll(WikiX.getCategoryMembersR(wiki, "Category:Copy to Wikimedia Commons reviewed by a human").y); //ignore reviewed files
 		
 		for (String blt : wiki.getLinksOnPage("User:FastilyBot/Task2Blacklist"))
 			for (String x : FL.toAL(wiki.getCategoryMembers(blt, NS.FILE).stream().filter(mtcFiles::contains)))

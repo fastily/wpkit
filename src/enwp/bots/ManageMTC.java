@@ -10,8 +10,8 @@ import jwiki.util.FL;
 import jwiki.util.GroupQueue;
 import jwiki.util.Tuple;
 import jwikix.core.MQueryX;
-import jwikix.util.TParse;
-import jwikix.util.WikiGen;
+import jwikix.core.TParse;
+import jwikix.core.WikiGen;
 
 /**
  * Bot which finds files on enwp which have been copied to Commons and tags them for human review.

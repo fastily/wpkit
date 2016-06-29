@@ -8,8 +8,8 @@ import jwiki.core.MQuery;
 import jwiki.core.NS;
 import jwiki.core.Wiki;
 import jwiki.util.FL;
-import jwikix.util.WTool;
-import jwikix.util.WikiGen;
+import jwikix.core.WikiGen;
+import util.Toolbox;
 import util.WPStrings;
 
 /**
@@ -45,7 +45,7 @@ public final class FindBrokenSPI
 		spiCases.removeAll(wiki.getLinksOnPage(report + "/Ignore"));
 
 		wiki.edit(report,
-				WTool.listify("{{/Header}}\n" + WPStrings.updatedAt, MQuery.resolveRedirects(wiki, new ArrayList<>(spiCases))
+				Toolbox.listify("{{/Header}}\n" + WPStrings.updatedAt, MQuery.resolveRedirects(wiki, new ArrayList<>(spiCases))
 						.entrySet().stream().filter(e -> e.getKey().equals(e.getValue())).map(Map.Entry::getValue), false),
 				"BOT: Update list");
 	}

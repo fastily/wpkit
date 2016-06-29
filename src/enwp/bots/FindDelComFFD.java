@@ -11,8 +11,8 @@ import jwiki.core.TPlate;
 import jwiki.core.Wiki;
 import jwiki.util.FL;
 import jwiki.util.Tuple;
-import jwikix.util.TParse;
-import jwikix.util.WikiGen;
+import jwikix.core.TParse;
+import jwikix.core.WikiGen;
 
 /**
  * Finds local enwp files transferred to Commons which have then been deleted on Commons.

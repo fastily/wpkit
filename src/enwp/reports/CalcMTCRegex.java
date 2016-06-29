@@ -9,8 +9,8 @@ import jwiki.core.Wiki;
 import jwiki.util.FL;
 import jwiki.util.FString;
 import jwiki.util.Tuple;
-import jwikix.util.WTool;
-import jwikix.util.WikiGen;
+import jwikix.core.WikiX;
+import jwikix.core.WikiGen;
 
 /**
  * Pre-computes regexes for MTC!
@@ -36,7 +36,7 @@ public class CalcMTCRegex
 		for (Tuple<String, ArrayList<String>> e : FL.mapToList(MQuery.linksHere(wiki, true, new ArrayList<>(rawL))))
 		{
 			e.y.add(e.x);
-			x += String.format("%s;%s%n", e.x, FString.pipeFence(WTool.stripNamespaces(wiki, e.y)));
+			x += String.format("%s;%s%n", e.x, FString.pipeFence(WikiX.stripNamespaces(wiki, e.y)));
 		}
 
 		x += "</pre>";

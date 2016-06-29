@@ -5,7 +5,9 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -13,6 +15,7 @@ import java.util.stream.Stream;
 import jwiki.core.ColorLog;
 import jwiki.core.Req;
 import jwiki.core.Wiki;
+import jwiki.util.FL;
 import jwikix.util.StrTool;
 
 /**
@@ -39,6 +42,18 @@ public final class Toolbox
 	}
 
 	/**
+	 * Fetches the contents of a page, splits them by new line, and strips empty Strings and Strings starting with '&gt;'
+	 * 
+	 * @param wiki The Wiki object to use
+	 * @param title The title of the config page to parse
+	 * @return An unclosed String with the specified data.
+	 */
+	private static Stream<String> fetchRawConfig(Wiki wiki, String title)
+	{
+		return Stream.of(wiki.getPageText(title).split("\n")).filter(s -> !s.startsWith("<") && !s.isEmpty());
+	}
+
+	/**
 	 * Parses a config page with key-value pairs. Empty lines and lines starting with '&gt;' are ignored. Key-value pairs
 	 * should be split by <code>;</code>, one pair per line.
 	 * 
@@ -46,10 +61,22 @@ public final class Toolbox
 	 * @param title The title of the config page to parse
 	 * @return A HashMap with the parsed pairs.
 	 */
-	public static HashMap<String, String> fetchConfig(Wiki wiki, String title)
+	public static HashMap<String, String> fetchPairedConfig(Wiki wiki, String title)
 	{
 		return new HashMap<>(Stream.of(wiki.getPageText(title).split("\n")).filter(s -> !s.startsWith("<") && !s.isEmpty())
 				.map(s -> s.split(";", 2)).collect(Collectors.toMap(a -> a[0], a -> a[1])));
+	}
+
+	/**
+	 * Parses a config page with a list of items. Empty lines and lines starting with '&gt;' are ignored.
+	 * 
+	 * @param wiki The Wiki object to use
+	 * @param title The title of the config page to parse
+	 * @return A HashSet with the list of items.
+	 */
+	public static HashSet<String> fetchSimpleConfig(Wiki wiki, String title)
+	{
+		return FL.toSet(fetchRawConfig(wiki, title));
 	}
 
 	/**
@@ -62,7 +89,7 @@ public final class Toolbox
 	public static boolean downloadFile(URL u, String localpath)
 	{
 		ColorLog.fyi("Downloading a file to " + localpath);
-		
+
 		byte[] bf = new byte[1024 * 512]; // 512kb buffer.
 		int read;
 		try (InputStream in = Req.genericGET(u, null); OutputStream out = Files.newOutputStream(Paths.get(localpath)))
@@ -78,7 +105,7 @@ public final class Toolbox
 			return false;
 		}
 	}
-	
+
 	/**
 	 * Checks the version String of a program with the version String of the server. PRECONDITION: <code>local</code> and
 	 * <code>ext</code> ONLY contain numbers and '.' characters.
@@ -99,7 +126,7 @@ public final class Toolbox
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Permutes a filename by adding a random number to the end before the file extension. PRECONDITION: <code>fn</code>
 	 * is a valid filename with an extension, of the format (e.g. blahblah.jpg)
@@ -110,5 +137,39 @@ public final class Toolbox
 	public static String permuteFileName(String fn)
 	{
 		return StrTool.insertAt(fn, " " + rand.nextInt(), fn.lastIndexOf('.'));
+	}
+	
+	/**
+	 * Generates a Wiki-text ready, wiki-linked, unordered list from a list of titles.
+	 * 
+	 * @param header A header/lead string to apply at the beginning of the returned String.
+	 * @param titles The titles to use
+	 * @param doEscape Set as true to escape titles. i.e. adds a <code>:</code> before each link so that files and
+	 *           categories are properly escaped and appear as links.
+	 * @return A String with the titles as a linked, unordered list, in Wiki-text.
+	 */
+	public static String listify(String header, Collection<String> titles, boolean doEscape)
+	{
+		String fmtStr = "* [[" + (doEscape ? ":" : "") + "%s]]\n";
+
+		String x = "" + header;
+		for (String s : titles)
+			x += String.format(fmtStr, s);
+
+		return x;
+	}
+	
+	/**
+	 * Generates a Wiki-text ready, wiki-linked, unordered list from a list of titles.
+	 * 
+	 * @param header A header/lead string to apply at the beginning of the returned String.
+	 * @param titles The titles to use
+	 * @param doEscape Set as true to escape titles. i.e. adds a <code>:</code> before each link so that files and
+	 *           categories are properly escaped and appear as links.
+	 * @return A String with the titles as a linked, unordered list, in Wiki-text.
+	 */
+	public static String listify(String header, Stream<String> titles, boolean doEscape)
+	{
+		return listify(header, FL.toAL(titles), doEscape);
 	}
 }

@@ -15,7 +15,7 @@ import jwiki.core.Wiki;
 import jwiki.dwrap.ImageInfo;
 import jwiki.util.FL;
 import jwiki.util.FString;
-import jwikix.util.TParse;
+import jwikix.core.TParse;
 import mtc.MTC.TransferObject;
 
 /**

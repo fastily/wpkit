@@ -7,8 +7,8 @@ import jwiki.core.NS;
 import jwiki.core.Wiki;
 import jwiki.util.FL;
 import jwikix.core.MQueryX;
-import jwikix.util.TParse;
-import jwikix.util.WikiGen;
+import jwikix.core.TParse;
+import jwikix.core.WikiGen;
 
 /**
  * Finds files on enwp nominated for deletion on Commons and flags the local file.

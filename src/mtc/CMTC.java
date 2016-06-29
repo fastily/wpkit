@@ -9,7 +9,7 @@ import org.apache.commons.cli.Options;
 import jwiki.core.ColorLog;
 import jwiki.core.NS;
 import jwiki.util.FL;
-import jwikix.util.WikiGen;
+import jwikix.core.WikiGen;
 import mtc.MTC.TransferObject;
 import util.FCLI;
 

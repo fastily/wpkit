@@ -13,8 +13,8 @@ import jwiki.core.MQuery;
 import jwiki.core.NS;
 import jwiki.core.Wiki;
 import jwiki.util.FL;
-import jwikix.util.WTool;
-import jwikix.util.WikiGen;
+import jwikix.core.WikiGen;
+import util.Toolbox;
 import util.WPStrings;
 
 import static java.nio.file.StandardOpenOption.*;
@@ -81,7 +81,7 @@ public final class FindUntaggedDD
 			sections = new ArrayList<>(sections.subList(0, maxOldReports));
 			
 		wiki.edit(reportPage,
-				WTool.listify("\n== ~~~~~ ==\n", MQuery.exists(wiki, true, new ArrayList<>(cacheList)), true)
+				Toolbox.listify("\n== ~~~~~ ==\n", MQuery.exists(wiki, true, new ArrayList<>(cacheList)), true)
 						+ sections.stream().collect(Collectors.joining()),
 				"Updating report");
 

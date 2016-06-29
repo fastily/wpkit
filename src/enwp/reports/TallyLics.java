@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 import jwiki.core.MQuery;
 import jwiki.core.NS;
 import jwiki.core.Wiki;
-import jwikix.util.WikiGen;
+import jwikix.core.WikiGen;
 import util.WPStrings;
 
 /**

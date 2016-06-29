@@ -15,7 +15,7 @@ import jwiki.core.Wiki;
 import jwiki.dwrap.ImageInfo;
 import jwiki.util.FError;
 import jwiki.util.FL;
-import jwikix.util.TParse;
+import jwikix.core.TParse;
 import util.Toolbox;
 
 /**
@@ -80,7 +80,7 @@ public final class MTC
 		enwp = wiki.getWiki("en.wikipedia.org");
 
 		// Fetch Regexes
-		regexMap = new HashMap<String, Pattern>(Toolbox.fetchConfig(enwp, Config.fullname + "/Regexes").entrySet().stream()
+		regexMap = new HashMap<String, Pattern>(Toolbox.fetchPairedConfig(enwp, Config.fullname + "/Regexes").entrySet().stream()
 				.collect(Collectors.toMap(Map.Entry::getKey, e -> Pattern.compile(TParse.makeTitleRegex(FL.toSAL(e.getValue().split("\\|")))))));
 		dgen = new DGen(this);
 

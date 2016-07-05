@@ -40,7 +40,9 @@ public class FlagOI
 	{
 		HashSet<String> l = new HashSet<>(wiki.getCategoryMembers("Category:All free media", NS.FILE));
 		l.removeAll(new HashSet<>(wiki.getCategoryMembers("Category:Wikipedia orphaned files", NS.FILE)));
-
+		l.removeAll(wiki.allPages(null, false, true, -1, NS.FILE)); // avoid these because they often have many usages
+		l.removeAll(wiki.whatTranscludesHere("Template:Bots", NS.FILE));
+		
 		GroupQueue<String> gq = new GroupQueue<>(new ArrayList<>(l), 50);
 		while (gq.has())
 			FL.mapToList(MQuery.fileUsage(wiki, gq.poll())).stream().filter(t -> StrTool.omitStrWithPrefix(t.y, ignorePrefixes).isEmpty())

@@ -48,7 +48,7 @@ public class TallyLics
 	 */
 	public static void main(String[] args)
 	{
-		String dump = WPStrings.updatedAt + "\n{| class=\"wikitable sortable\" style=\"width:80%;\" \n! # !! Name !! Commons? \n";
+		String dump = WPStrings.updatedAt + "\n{| class=\"wikitable sortable\" style=\"margin-left: auto; margin-right: auto;width:100%;\" \n! # !! Name !! Commons? \n";
 		int i = 0;
 		for (String s : enwptpl)
 			dump += String.format("|-%n|%d ||{{Tlx|%s}} ||[[c:%s|%b]] %n", i++, enwp.nss(s), s, comtpl.contains(s));

@@ -10,7 +10,7 @@ import jwiki.util.FL;
 import jwiki.util.FString;
 import jwiki.util.Tuple;
 import jwikix.core.WikiX;
-import jwikix.core.WikiGen;
+import util.Toolbox;
 
 /**
  * Pre-computes regexes for MTC!
@@ -27,7 +27,7 @@ public class CalcMTCRegex
 	 */
 	public static void main(String[] args)
 	{
-		Wiki wiki = WikiGen.wg.get("FastilyBot", "en.wikipedia.org");
+		Wiki wiki = Toolbox.getFastilyBot();
 
 		HashSet<String> rawL = new HashSet<>(wiki.getLinksOnPage("Wikipedia:MTC!/Regexes/IncludeAlso", NS.TEMPLATE));
 		rawL.addAll(TallyLics.comtpl);

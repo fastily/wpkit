@@ -12,7 +12,7 @@ import jwiki.core.Wiki;
 import jwiki.util.FL;
 import jwiki.util.Tuple;
 import jwikix.core.TParse;
-import jwikix.core.WikiGen;
+import util.Toolbox;
 
 /**
  * Finds local enwp files transferred to Commons which have then been deleted on Commons.
@@ -25,7 +25,7 @@ public final class FindDelComFFD
 	/**
 	 * The Wiki objects to use
 	 */
-	private static final Wiki enwp = WikiGen.wg.get("FastilyBot", "en.wikipedia.org"), com = enwp.getWiki("commons.wikimedia.org");
+	private static final Wiki enwp = Toolbox.getFastilyBot(), com = enwp.getWiki("commons.wikimedia.org");
 
 	/**
 	 * Nominated for deletion on Commons Template title

@@ -9,7 +9,6 @@ import jwiki.core.MQuery;
 import jwiki.core.NS;
 import jwiki.core.Wiki;
 import jwiki.util.FL;
-import jwikix.core.WikiGen;
 import jwikix.util.StrTool;
 import jwikix.util.Triple;
 import util.Toolbox;
@@ -34,7 +33,7 @@ public class FindOrphanedXfD
 	/**
 	 * The Wiki object to use
 	 */
-	private static final Wiki wiki = WikiGen.wg.get("FastilyBot", "en.wikipedia.org");
+	private static final Wiki wiki = Toolbox.getFastilyBot();
 
 	/**
 	 * Main driver

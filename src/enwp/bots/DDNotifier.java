@@ -14,7 +14,6 @@ import jwiki.core.Wiki;
 import jwiki.util.FL;
 import jwiki.util.MapList;
 import jwiki.util.Tuple;
-import jwikix.core.WikiGen;
 import util.Toolbox;
 
 /**
@@ -28,7 +27,7 @@ public class DDNotifier
 	/**
 	 * The Wiki object to use
 	 */
-	private static final Wiki wiki = WikiGen.wg.get("FastilyBot", "en.wikipedia.org");
+	private static final Wiki wiki = Toolbox.getFastilyBot();
 
 	/**
 	 * A list of categories to check if users have been notified.
@@ -139,7 +138,7 @@ public class DDNotifier
 	 * Test if a user has been notified about a File in the past calendar day.
 	 * 
 	 * @param userTalk The user's talk page, to be checked for links to the specified files in <code>l</code>
-	 * @param l The list of files to check for on <code>userTakl</code>.
+	 * @param l The list of files to check for on <code>userTalk</code>.
 	 * @return A list of files that the user should be notified about.
 	 */
 	private static ArrayList<String> testNotifiedFor(String userTalk, ArrayList<String> l)

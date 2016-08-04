@@ -7,8 +7,8 @@ import java.util.HashSet;
 
 import jwiki.core.NS;
 import jwiki.core.Wiki;
-import jwikix.core.WikiGen;
 import jwikix.util.FSystem;
+import util.Toolbox;
 
 /**
  * Crude search for NSD files
@@ -26,7 +26,7 @@ public class FindPossibleNSD
 	 */
 	public static void main(String[] args) throws Throwable
 	{
-		Wiki wiki = WikiGen.wg.get("FastilyBot", "en.wikipedia.org");
+		Wiki wiki = Toolbox.getFastilyBot();
 
 		HashSet<String> l = new HashSet<>(wiki.getCategoryMembers("Category:All free media", NS.FILE));
 

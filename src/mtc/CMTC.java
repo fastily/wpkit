@@ -9,9 +9,9 @@ import org.apache.commons.cli.Options;
 import jwiki.core.ColorLog;
 import jwiki.core.NS;
 import jwiki.util.FL;
-import jwikix.core.WikiGen;
 import mtc.MTC.TransferObject;
 import util.FCLI;
+import util.Toolbox;
 
 /**
  * Command line interface for MTC.
@@ -36,7 +36,7 @@ public final class CMTC
 		CommandLine l = FCLI.gnuParse(makeOptList(), args, "MTC [-help] [-f] [-d] [<titles|user|cat>]");
 
 		// Do initial logins, and generate MTC regexes
-		mtc = new MTC(WikiGen.wg.get("FastilyClone", "commons.wikimedia.org"));
+		mtc = new MTC(Toolbox.getFastilyClone());
 		mtc.dryRun = l.hasOption('d');
 
 		if (l.hasOption('f'))

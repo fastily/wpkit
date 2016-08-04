@@ -8,7 +8,7 @@ import jwiki.core.Wiki;
 import jwiki.util.FL;
 import jwiki.util.GroupQueue;
 import jwikix.core.TParse;
-import jwikix.core.WikiGen;
+import util.Toolbox;
 
 /**
  * Reomves {{Orphan image}} from freely licensed files which contain file links in the main space.
@@ -21,7 +21,7 @@ public final class UnflagOI
 	/**
 	 * The Wiki object to use
 	 */
-	private static final Wiki wiki = WikiGen.wg.get("FastilyBot", "en.wikipedia.org");
+	private static final Wiki wiki = Toolbox.getFastilyBot();
 
 	/**
 	 * The full title for the Orphan Image template

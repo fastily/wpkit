@@ -16,6 +16,7 @@ import jwiki.core.ColorLog;
 import jwiki.core.Req;
 import jwiki.core.Wiki;
 import jwiki.util.FL;
+import jwikix.core.WikiGen;
 import jwikix.util.StrTool;
 
 /**
@@ -39,6 +40,47 @@ public final class Toolbox
 	private Toolbox()
 	{
 
+	}
+
+	/**
+	 * Gets the specified WikiGen user at en.wikipedia.org.
+	 * 
+	 * @param user The user to get a Wiki object for
+	 * @return A Wiki object, or null on error
+	 */
+	private static Wiki getUser(String user)
+	{
+		return WikiGen.wg.get(user, "en.wikipedia.org");
+	}
+
+	/**
+	 * Gets a Wiki (from WikiGen) for Fastily at en.wikipedia.org.
+	 * 
+	 * @return A Wiki object, or null on error
+	 */
+	public static Wiki getFastily()
+	{
+		return getUser("Fastily");
+	}
+
+	/**
+	 * Gets a Wiki (from WikiGen) for FastilyClone at en.wikipedia.org.
+	 * 
+	 * @return A Wiki object, or null on error
+	 */
+	public static Wiki getFastilyClone()
+	{
+		return getUser("FastilyClone");
+	}
+
+	/**
+	 * Gets a Wiki (from WikiGen) for FastilyBot at en.wikipedia.org.
+	 * 
+	 * @return A Wiki object, or null on error
+	 */
+	public static Wiki getFastilyBot()
+	{
+		return getUser("FastilyBot");
 	}
 
 	/**
@@ -138,7 +180,7 @@ public final class Toolbox
 	{
 		return StrTool.insertAt(fn, " " + rand.nextInt(), fn.lastIndexOf('.'));
 	}
-	
+
 	/**
 	 * Generates a Wiki-text ready, wiki-linked, unordered list from a list of titles.
 	 * 
@@ -158,7 +200,7 @@ public final class Toolbox
 
 		return x;
 	}
-	
+
 	/**
 	 * Generates a Wiki-text ready, wiki-linked, unordered list from a list of titles.
 	 * 

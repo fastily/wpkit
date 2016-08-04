@@ -6,7 +6,7 @@ import jwiki.core.NS;
 import jwiki.core.Wiki;
 import jwikix.core.TParse;
 import jwikix.core.WikiX;
-import jwikix.core.WikiGen;
+import util.Toolbox;
 
 /**
  * Fills in date parameter (and other missing parameters) for files in [[Category:Wikipedia files with the same name on
@@ -20,7 +20,7 @@ public class DateNowCommons
 	/**
 	 * The Wiki Object to use
 	 */
-	private static final Wiki wiki = WikiGen.wg.get("FastilyBot", "en.wikipedia.org");
+	private static final Wiki wiki = Toolbox.getFastilyBot();
 
 	/**
 	 * Matches {{Now Commons}} templates

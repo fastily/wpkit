@@ -4,7 +4,7 @@ import java.util.HashSet;
 
 import jwiki.core.NS;
 import jwiki.core.Wiki;
-import jwikix.core.WikiGen;
+import util.Toolbox;
 
 /**
  * Finds enwp files which are flagged as both free and non-free.
@@ -17,7 +17,7 @@ public final class FindLicConflict
 	/**
 	 * The Wiki object to use
 	 */
-	private static final Wiki wiki = WikiGen.wg.get("FastilyBot", "en.wikipedia.org");
+	private static final Wiki wiki = Toolbox.getFastilyBot();
 
 	/**
 	 * Main driver

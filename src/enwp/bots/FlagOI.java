@@ -8,7 +8,6 @@ import jwiki.core.NS;
 import jwiki.core.Wiki;
 import jwiki.util.FL;
 import jwiki.util.GroupQueue;
-import jwikix.core.WikiGen;
 import jwikix.util.StrTool;
 import util.Toolbox;
 
@@ -23,7 +22,7 @@ public class FlagOI
 	/**
 	 * The Wiki object to use
 	 */
-	private static final Wiki wiki = WikiGen.wg.get("FastilyBot", "en.wikipedia.org");
+	private static final Wiki wiki = Toolbox.getFastilyBot();
 
 	/**
 	 * Files linked to pages with the specified title prefixes will be ignored. In other words, the are not counted as a

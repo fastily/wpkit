@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 import jwiki.core.MQuery;
 import jwiki.core.NS;
 import jwiki.core.Wiki;
-import jwikix.core.WikiGen;
+import util.Toolbox;
 import util.WPStrings;
 
 /**
@@ -22,7 +22,7 @@ public class TallyLics
 	/**
 	 * The Wiki objects to use
 	 */
-	private static final Wiki enwp = WikiGen.wg.get("FastilyBot", "en.wikipedia.org"), com = enwp.getWiki("commons.wikimedia.org");
+	private static final Wiki enwp = Toolbox.getFastilyBot(), com = enwp.getWiki("commons.wikimedia.org");
 
 	/**
 	 * The blacklist of pages to omit from the final report

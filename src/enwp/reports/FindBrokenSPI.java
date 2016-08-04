@@ -8,7 +8,6 @@ import jwiki.core.MQuery;
 import jwiki.core.NS;
 import jwiki.core.Wiki;
 import jwiki.util.FL;
-import jwikix.core.WikiGen;
 import util.Toolbox;
 import util.WPStrings;
 
@@ -23,7 +22,7 @@ public final class FindBrokenSPI
 	/**
 	 * The Wiki object to use
 	 */
-	private static final Wiki wiki = WikiGen.wg.get("FastilyBot", "en.wikipedia.org");
+	private static final Wiki wiki = Toolbox.getFastilyBot();
 
 	/**
 	 * The title to post reports on

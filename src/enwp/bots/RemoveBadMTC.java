@@ -7,7 +7,7 @@ import jwiki.core.Wiki;
 import jwiki.util.FL;
 import jwikix.core.TParse;
 import jwikix.core.WikiX;
-import jwikix.core.WikiGen;
+import util.Toolbox;
 
 /**
  * Removes Copy to Wikimedia Commons on enwp files that may be ineligible for transfer to Commons.
@@ -20,7 +20,7 @@ public final class RemoveBadMTC
 	/**
 	 * The Wiki object to use
 	 */
-	private static final Wiki wiki = WikiGen.wg.get("FastilyBot", "en.wikipedia.org");
+	private static final Wiki wiki = Toolbox.getFastilyBot();
 
 	/**
 	 * The Copy to Wikimedia Commons template title

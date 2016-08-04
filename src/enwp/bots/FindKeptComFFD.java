@@ -5,7 +5,7 @@ import jwiki.core.Wiki;
 import jwiki.util.FL;
 import jwikix.core.MQueryX;
 import jwikix.core.TParse;
-import jwikix.core.WikiGen;
+import util.Toolbox;
 
 /**
  * Finds local enwp files which were nominated for deletion on Commons but kept.
@@ -18,7 +18,7 @@ public final class FindKeptComFFD
 	/**
 	 * The Wiki object to use
 	 */
-	private static final Wiki wiki = WikiGen.wg.get("FastilyBot", "en.wikipedia.org");
+	private static final Wiki wiki = Toolbox.getFastilyBot();
 
 	/**
 	 * The regex matching Template:Nominated for deletion on Commons.

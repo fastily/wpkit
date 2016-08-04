@@ -11,7 +11,7 @@ import jwiki.util.GroupQueue;
 import jwiki.util.Tuple;
 import jwikix.core.MQueryX;
 import jwikix.core.TParse;
-import jwikix.core.WikiGen;
+import util.Toolbox;
 
 /**
  * Bot which finds files on enwp which have been copied to Commons and tags them for human review.
@@ -22,14 +22,9 @@ import jwikix.core.WikiGen;
 public final class ManageMTC
 {
 	/**
-	 * The username of the bot to use
-	 */
-	private static final String botName = "FastilyBot";
-
-	/**
 	 * The Wiki Object used for the bot.
 	 */
-	private static final Wiki wiki = WikiGen.wg.get(botName, "en.wikipedia.org");
+	private static final Wiki wiki = Toolbox.getFastilyBot();
 
 	/**
 	 * The Copy to Wikimedia Commons template title
@@ -55,7 +50,7 @@ public final class ManageMTC
 	 * The ncd template to fill out
 	 */
 	protected static final String ncd = String.format("{{Now Commons|%%s|date=%s|bot=%s}}%n",
-			DateTimeFormatter.ISO_LOCAL_DATE.format(LocalDate.now(ZoneId.of("UTC"))), botName);
+			DateTimeFormatter.ISO_LOCAL_DATE.format(LocalDate.now(ZoneId.of("UTC"))), "FastilyBot");
 
 	/**
 	 * Main driver

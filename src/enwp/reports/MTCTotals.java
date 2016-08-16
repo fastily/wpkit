@@ -1,7 +1,6 @@
 package enwp.reports;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -10,9 +9,10 @@ import jwiki.core.Wiki;
 import jwiki.util.FL;
 import jwiki.util.Tuple;
 import util.Toolbox;
+import util.WPStrings;
 
 /**
- * Report which totals MTC counts by user
+ * Report which totals MTC counts by user.  Truncated to first 500 entries max in MTC.
  * 
  * @author Fastily
  *
@@ -28,7 +28,7 @@ public class MTCTotals
 	 * The MtC category to inspect.
 	 */
 	private static String mtcCat = "Category:Copy to Wikimedia Commons";
-
+	
 	/**
 	 * Main driver
 	 * 
@@ -41,14 +41,14 @@ public class MTCTotals
 
 		HashSet<String> fileCache = new HashSet<>(), userCache = new HashSet<>();
 		HashMap<String, Integer> m = new HashMap<>();
-
-		int i = 0;
+		
+		ArrayList<String> mtcList = wiki.getCategoryMembers(mtcCat, NS.FILE);
 		String user;
-		for (String s : wiki.getCategoryMembers(mtcCat, NS.FILE))
+		for (int i = 0; i < 500; i++)
 		{
-			System.err.printf("Processing item %d%n", ++i);
+			System.err.printf("Processing item %d%n", i);
 			
-			if (!fileCache.contains(s) && !userCache.contains(user = wiki.getRevisions(s, 1, true, null, null).get(0).user))
+			if (!fileCache.contains(mtcList.get(i)) && !userCache.contains(user = wiki.getRevisions(mtcList.get(i), 1, true, null, null).get(0).user))
 				try
 				{
 					ArrayList<String> l = wiki.getUserUploads(user);
@@ -62,15 +62,16 @@ public class MTCTotals
 				}
 		}
 
-		ArrayList<Tuple<String, Integer>> l = FL.mapToList(m);
-		Collections.sort(l, (o1, o2) -> o2.y.compareTo(o1.y)); // G -> L
+		int cnt = 1;
+		String dump = WPStrings.updatedAt
+				+ "\n{| class=\"wikitable sortable\" style=\"margin-left: auto; margin-right: auto;width:80%;\" \n! # !! User !! Uploads \n";
 
-		String x = "Updated ~~~~~\n\n";
-		for (Tuple<String, Integer> e : l)
-			if (e.y >= 5)
-				x += String.format("# [[Special:ListFiles/%s|%s]] - %d%n", e.x, e.x, e.y);
+		for (Tuple<String, Integer> e : FL.mapToList(m))
+			dump += String.format("|-%n|%d ||[[Special:ListFiles/%s|%s]] ||%s%n", cnt++, e.x, e.x, e.y);
 
-		wiki.edit("User:FastilyBot/Sandbox1", x, "Update report");
+		dump += "|}";
+
+		wiki.edit("User:FastilyBot/Sandbox1", dump, "Update report");
 
 	}
 }

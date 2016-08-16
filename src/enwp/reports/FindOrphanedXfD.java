@@ -10,7 +10,7 @@ import jwiki.core.NS;
 import jwiki.core.Wiki;
 import jwiki.util.FL;
 import jwikix.util.StrTool;
-import jwikix.util.Triple;
+import jwiki.util.Triple;
 import util.Toolbox;
 import util.WPStrings;
 

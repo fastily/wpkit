@@ -5,14 +5,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import jwiki.core.MQuery;
 import jwiki.core.NS;
 import jwiki.core.Wiki;
 import jwiki.util.FL;
+import jwiki.util.Triple;
 import util.Toolbox;
 import util.WPStrings;
 
@@ -34,7 +32,7 @@ public final class FindUntaggedDD
 	/**
 	 * The title of the report page
 	 */
-	private static final String reportPage = "User:FastilyBot/Recently Untagged Dated Deletion Files";
+	private static final String reportPage = "User:FastilyBot/Recently Untagged Dated Deletion Files 1";
 
 	/**
 	 * The list of root categories to inspect
@@ -57,7 +55,7 @@ public final class FindUntaggedDD
 	 * The maximum number of old reports to keep on the <code>reportPage</code>.
 	 */
 	private static final int maxOldReports = 13;
-	
+
 	/**
 	 * Main driver
 	 * 
@@ -74,14 +72,13 @@ public final class FindUntaggedDD
 
 		HashSet<String> cacheList = FL.toSet(Files.lines(wpddfiles));
 		cacheList.removeAll(l);
-		
-		ArrayList<String> sections = sectionSplit(wiki.getPageText(reportPage));
-		if(sections.size() > maxOldReports)
-			sections = new ArrayList<>(sections.subList(0, maxOldReports));
-			
-		wiki.edit(reportPage,
-				Toolbox.listify("\n== ~~~~~ ==\n", MQuery.exists(wiki, true, new ArrayList<>(cacheList)), true)
-						+ sections.stream().collect(Collectors.joining()),
+
+		String text = wiki.getPageText(reportPage);
+		ArrayList<Triple<Integer, String, Integer>> sections = wiki.getSectionHeaders(reportPage);
+		if (sections.size() > maxOldReports)
+			text = text.substring(0, sections.get(sections.size() - 1).z);
+
+		wiki.edit(reportPage, Toolbox.listify("== ~~~~~ ==\n", MQuery.exists(wiki, true, new ArrayList<>(cacheList)), true) + text,
 				"Updating report");
 
 		dump(l, false);
@@ -99,30 +96,5 @@ public final class FindUntaggedDD
 		Files.write(wpddfiles, l, CREATE, WRITE, TRUNCATE_EXISTING);
 		if (exit)
 			System.exit(0);
-	}
-
-	/**
-	 * A dumb page section splitting method. PRECONDITION: The text being parsed contains level 2 headers
-	 * 
-	 * @param text The text to split into sections
-	 * @return An ArrayList with the sections of the page.
-	 */
-	private static ArrayList<String> sectionSplit(String text)
-	{
-		ArrayList<Integer> indexList = new ArrayList<>();
-		Matcher m = Pattern.compile("(?m)^\\=\\=").matcher(text);
-		while (m.find())
-			indexList.add(m.start());
-
-		if (indexList.size() <= 1)
-			return FL.toSAL(text);
-
-		ArrayList<String> l = new ArrayList<>();
-		for (int i = 0; i < indexList.size() - 1; i++)
-			l.add(text.substring(indexList.get(i), indexList.get(i + 1)));
-
-		l.add(text.substring(indexList.get(indexList.size() - 1)));
-
-		return l;
 	}
 }

@@ -1,20 +1,25 @@
 package enwp.bots;
 
 import java.time.Instant;
-import java.time.ZoneId;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 
 import jwiki.core.NS;
 import jwiki.core.Wiki;
 import jwiki.util.FL;
 import jwiki.util.MapList;
 import jwiki.util.Tuple;
+import jwikix.core.WikiX;
 import util.Toolbox;
+import util.WPStrings;
 
 /**
  * Checks daily deletion categories on enwp and notifies users if they have not been notified.
@@ -32,13 +37,13 @@ public class DDNotifier
 	/**
 	 * A list of categories to check if users have been notified.
 	 */
-	private static final ArrayList<Tuple<String, String>> rules = FL.mapToList(Toolbox.fetchPairedConfig(wiki, "User:FastilyBot/Task6Rules"));
+	private static final ArrayList<Tuple<String, String>> rules = FL
+			.mapToList(Toolbox.fetchPairedConfig(wiki, "User:FastilyBot/Task6Rules"));
 
 	/**
 	 * The start of today, and the start of yesterday (target date)
 	 */
-	private static final ZonedDateTime targetDT = ZonedDateTime.now(ZoneId.of("UTC")).withHour(0).withMinute(0).withSecond(0)
-			.withNano(0).minusDays(1);
+	private static final ZonedDateTime targetDT = ZonedDateTime.of(LocalDate.now(ZoneOffset.UTC), LocalTime.of(0, 0), ZoneOffset.UTC).minusDays(1);
 
 	/**
 	 * Time stamps, used to select talk page revisions which were made in the past day only.
@@ -54,12 +59,14 @@ public class DDNotifier
 	/**
 	 * The title blacklist; the bot will not edit any page transcluding {{bots}}
 	 */
-	private static final HashSet<String> talkPageBL = new HashSet<>(wiki.whatTranscludesHere("Template:Bots"));
+	private static final HashSet<String> talkPageBL = Toolbox.fetchNoBots(wiki);
 
 	/**
 	 * The list of files with templates that trigger the bot unnecessarily.
 	 */
-	private static final HashSet<String> idkL = initIdk();
+	private static final HashSet<String> idkL = FL
+			.toSet(FL.toSAL("Template:Don't know", "Template:Somewebsite", "Template:Untagged", "Template:No copyright holder",
+					"Template:No copyright information").stream().flatMap(s -> wiki.whatTranscludesHere(s).stream()));
 
 	/**
 	 * Main driver
@@ -80,100 +87,30 @@ public class DDNotifier
 	 */
 	private static void procPair(String rootCat, String templ)
 	{
-		String cat = fetchCat(rootCat);
-		if (cat == null)
+		Optional<String> cat = wiki.getCategoryMembers(rootCat, NS.CATEGORY).stream().filter(s -> s.endsWith(targetDateStr)).findAny();
+		if (!cat.isPresent())
 			return;
 
 		MapList<String, String> ml = new MapList<>();
-		for (String s : wiki.getCategoryMembers(cat, NS.FILE))
+		for (String s : wiki.getCategoryMembers(cat.get(), NS.FILE))
 			if (!idkL.contains(s))
-				try
-				{
-					ml.put(wiki.getRevisions(s, 1, true, null, null).get(0).user, s);
-				}
-				catch (Throwable e)
-				{
-					e.printStackTrace();
-				}
+				ml.put(WikiX.getPageAuthor(wiki, s), s); // null keys allowed
 
 		for (Map.Entry<String, ArrayList<String>> e : ml.l.entrySet())
 		{
-			String talkpage = "User talk:" + e.getKey();
-			if (talkPageBL.contains(talkpage))
+			String tp = "User talk:" + e.getKey();
+			if (talkPageBL.contains(tp))
 				continue;
 
-			ArrayList<String> notifyList = testNotifiedFor(talkpage, e.getValue());
+			ArrayList<String> notifyList = Toolbox.detLinksInHist(wiki, tp, e.getValue(), start, end);
 			if (notifyList.isEmpty())
 				continue;
 
-			wiki.addText(talkpage, generateMessage(notifyList, templ), "BOT: Notify user of possible file issue(s)", false);
+			String x = String.format("%n{{subst:%s|1=%s}}%n", templ, notifyList.get(0));
+			if (notifyList.size() > 1)
+				x += Toolbox.listify("\nAlso:\n", notifyList.subList(1, notifyList.size()), true);
+			
+			wiki.addText(tp, x + WPStrings.notBotNom, "BOT: Notify user of possible file issue(s)", false);
 		}
-	}
-
-	/**
-	 * Generates a message which will be sent to a user
-	 * 
-	 * @param l The list of titles to use
-	 * @param templ The base message Template.
-	 * @return The message, as a String.
-	 */
-	private static String generateMessage(ArrayList<String> l, String templ)
-	{
-		String x = String.format("%n{{subst:%s|1=%s}}%n", templ, l.get(0));
-
-		if (l.size() > 1)
-		{
-			x += "\nAlso:\n";
-			for (int i = 1; i < l.size(); i++)
-				x += String.format("* [[:%s]]%n", l.get(i));
-		}
-
-		return x
-				+ "\n<span style=\"color:red;font-weight:bold;\">ATTENTION</span>: This is an automated, [[Wikipedia:Bots|BOT]]-generated message.  "
-				+ "This bot DID NOT nominate your file(s) for deletion; please refer to the [[Help:Page history|page history]] of each individual file "
-				+ "for details. Thanks, ~~~~";
-	}
-
-	/**
-	 * Test if a user has been notified about a File in the past calendar day.
-	 * 
-	 * @param userTalk The user's talk page, to be checked for links to the specified files in <code>l</code>
-	 * @param l The list of files to check for on <code>userTalk</code>.
-	 * @return A list of files that the user should be notified about.
-	 */
-	private static ArrayList<String> testNotifiedFor(String userTalk, ArrayList<String> l)
-	{
-		ArrayList<String> texts = FL.toAL(wiki.getRevisions(userTalk, -1, false, start, end).stream().map(r -> r.text));
-		return FL.toAL(l.stream().filter(s -> texts.stream().noneMatch(t -> t.matches("(?si).*?\\[\\[:(\\Q" + s + "\\E)\\]\\].*?"))));
-	}
-
-	/**
-	 * Fetches an applicable category title from root categories.
-	 * 
-	 * @param rootCat The root category to check
-	 * @return Yesterday's daily deletion category for the specified <code>rootCat</code>, or null if it doesn't exist.
-	 */
-	private static String fetchCat(String rootCat)
-	{
-		for (String s : wiki.getCategoryMembers(rootCat, NS.CATEGORY))
-			if (s.endsWith(targetDateStr))
-				return s;
-
-		return null;
-	}
-
-	/**
-	 * Initializes the list of files which transclude templates that trigger the bot unnecessarily.
-	 * 
-	 * @return The list of files with templates that trigger the bot unnecessarily.
-	 */
-	private static HashSet<String> initIdk()
-	{
-		HashSet<String> l = new HashSet<>();
-		for (String s : FL.toSAL("Template:Don't know", "Template:Somewebsite", "Template:Untagged", "Template:No copyright holder",
-				"Template:No copyright information"))
-			l.addAll(wiki.whatTranscludesHere(s));
-
-		return l;
 	}
 }

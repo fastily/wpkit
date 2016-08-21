@@ -5,6 +5,8 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -33,7 +35,7 @@ public final class Toolbox
 	 * @see #permuteFileName(String)
 	 */
 	private static final Random rand = new Random();
-
+	
 	/**
 	 * Constructors disallowed
 	 */
@@ -213,5 +215,32 @@ public final class Toolbox
 	public static String listify(String header, Stream<String> titles, boolean doEscape)
 	{
 		return listify(header, FL.toAL(titles), doEscape);
+	}
+
+	/**
+	 * Fetches pages on a Wiki transcluding <code>{{Bots}}</code>.  CAVEAT: This method is not cached.
+	 * 
+	 * @param wiki The Wiki object to use
+	 * @return A Set of pages transcluding <code>{{Bots}}</code>.
+	 */
+	public static HashSet<String> fetchNoBots(Wiki wiki)
+	{
+		return new HashSet<>(wiki.whatTranscludesHere("Template:Bots"));
+	}
+
+	/**
+	 * Determine if a set of link(s) has existed on a page over a given time period.
+	 * 
+	 * @param wiki The Wiki object to use
+	 * @param title The title to query
+	 * @param l The list of link(s) to look for in the history of <code>title</code>.
+	 * @param start The time to start looking at (inclusive). Optional - set null to disable.
+	 * @param end The time to stop the search at (exclusive). Optional - set null to disable.
+	 * @return A list of link(s) that were found at some point in the page's history.
+	 */
+	public static ArrayList<String> detLinksInHist(Wiki wiki, String title, ArrayList<String> l, Instant start, Instant end)
+	{
+		ArrayList<String> texts = FL.toAL(wiki.getRevisions(title, -1, false, start, end).stream().map(r -> r.text));
+		return FL.toAL(l.stream().filter(s -> texts.stream().noneMatch(t -> t.matches("(?si).*?\\[\\[:??(\\Q" + s + "\\E)\\]\\].*?"))));
 	}
 }

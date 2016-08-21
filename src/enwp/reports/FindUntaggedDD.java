@@ -32,7 +32,7 @@ public final class FindUntaggedDD
 	/**
 	 * The title of the report page
 	 */
-	private static final String reportPage = "User:FastilyBot/Recently Untagged Dated Deletion Files 1";
+	private static final String reportPage = "User:FastilyBot/Recently Untagged Dated Deletion Files";
 
 	/**
 	 * The list of root categories to inspect

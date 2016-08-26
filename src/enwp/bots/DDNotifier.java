@@ -110,7 +110,7 @@ public class DDNotifier
 			if (notifyList.size() > 1)
 				x += Toolbox.listify("\nAlso:\n", notifyList.subList(1, notifyList.size()), true);
 			
-			wiki.addText(tp, x + WPStrings.notBotNom, "BOT: Notify user of possible file issue(s)", false);
+			wiki.addText(tp, x + WPStrings.botNote, "BOT: Notify user of possible file issue(s)", false);
 		}
 	}
 }

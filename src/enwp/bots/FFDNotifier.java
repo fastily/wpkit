@@ -74,10 +74,11 @@ public final class FFDNotifier
 			if (rl.isEmpty())
 				continue;
 
-			String x = String.format("%n{{subst:fdw|%s}}", wiki.nss(rl.get(0)));
+			String x = String.format("%n{{subst:User:FastilyBot/Task12Note|%s|%s}}", rl.get(0), targetFFD);
 			if (rl.size() > 1)
 				x += Toolbox.listify("\nAlso:\n", rl.subList(1, rl.size()), true);
-			wiki.addText(tp, x + WPStrings.notBotNom, "BOT: Notify user of FfD", false);
+			//wiki.addText(tp, x + WPStrings.botNote, "BOT: Notify user of FfD", false);
+			System.err.println(x + WPStrings.botNote);
 		}
 	}
 }

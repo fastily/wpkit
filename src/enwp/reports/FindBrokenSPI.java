@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Map;
 
-import jwiki.core.MQuery;
-import jwiki.core.NS;
-import jwiki.core.Wiki;
-import jwiki.util.FL;
+import fastily.jwiki.core.MQuery;
+import fastily.jwiki.core.NS;
+import fastily.jwiki.core.Wiki;
+import fastily.jwiki.util.FL;
 import util.Toolbox;
 import util.WPStrings;
 

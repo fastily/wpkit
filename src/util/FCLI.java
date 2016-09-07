@@ -1,6 +1,6 @@
 package util;
 
-import jwiki.util.FError;
+import fastily.jwiki.util.FError;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;

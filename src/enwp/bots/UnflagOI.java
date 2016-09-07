@@ -2,11 +2,11 @@ package enwp.bots;
 
 import java.util.Map;
 
-import jwiki.core.MQuery;
-import jwiki.core.NS;
-import jwiki.core.Wiki;
-import jwiki.util.FL;
-import jwiki.util.GroupQueue;
+import fastily.jwiki.core.MQuery;
+import fastily.jwiki.core.NS;
+import fastily.jwiki.core.Wiki;
+import fastily.jwiki.util.FL;
+import fastily.jwiki.util.GroupQueue;
 import jwikix.core.TParse;
 import util.Toolbox;
 

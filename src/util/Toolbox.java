@@ -14,10 +14,10 @@ import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import jwiki.core.ColorLog;
-import jwiki.core.Req;
-import jwiki.core.Wiki;
-import jwiki.util.FL;
+import fastily.jwiki.core.ColorLog;
+import fastily.jwiki.core.Req;
+import fastily.jwiki.core.Wiki;
+import fastily.jwiki.util.FL;
 import jwikix.core.WikiGen;
 import jwikix.util.StrTool;
 

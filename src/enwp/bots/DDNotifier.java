@@ -12,11 +12,11 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-import jwiki.core.NS;
-import jwiki.core.Wiki;
-import jwiki.util.FL;
-import jwiki.util.MapList;
-import jwiki.util.Tuple;
+import fastily.jwiki.core.NS;
+import fastily.jwiki.core.Wiki;
+import fastily.jwiki.util.FL;
+import fastily.jwiki.util.MapList;
+import fastily.jwiki.util.Tuple;
 import jwikix.core.WikiX;
 import util.Toolbox;
 import util.WPStrings;

@@ -10,11 +10,11 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Locale;
 
-import jwiki.core.NS;
-import jwiki.core.Wiki;
-import jwiki.util.FL;
-import jwiki.util.MapList;
-import jwiki.util.Tuple;
+import fastily.jwiki.core.NS;
+import fastily.jwiki.core.Wiki;
+import fastily.jwiki.util.FL;
+import fastily.jwiki.util.MapList;
+import fastily.jwiki.util.Tuple;
 import jwikix.core.WikiX;
 import util.Toolbox;
 import util.WPStrings;
@@ -77,8 +77,7 @@ public final class FFDNotifier
 			String x = String.format("%n{{subst:User:FastilyBot/Task12Note|%s|%s}}", rl.get(0), targetFFD);
 			if (rl.size() > 1)
 				x += Toolbox.listify("\nAlso:\n", rl.subList(1, rl.size()), true);
-			//wiki.addText(tp, x + WPStrings.botNote, "BOT: Notify user of FfD", false);
-			System.err.println(x + WPStrings.botNote);
+			wiki.addText(tp, x + WPStrings.botNote, "BOT: Notify user of FfD", false);
 		}
 	}
 }

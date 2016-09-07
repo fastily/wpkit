@@ -9,12 +9,12 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import jwiki.core.MQuery;
-import jwiki.core.NS;
-import jwiki.core.Wiki;
-import jwiki.dwrap.ImageInfo;
-import jwiki.util.FError;
-import jwiki.util.FL;
+import fastily.jwiki.core.MQuery;
+import fastily.jwiki.core.NS;
+import fastily.jwiki.core.Wiki;
+import fastily.jwiki.dwrap.ImageInfo;
+import fastily.jwiki.util.FError;
+import fastily.jwiki.util.FL;
 import jwikix.core.TParse;
 import util.Toolbox;
 

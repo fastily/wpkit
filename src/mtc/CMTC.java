@@ -6,9 +6,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 
-import jwiki.core.ColorLog;
-import jwiki.core.NS;
-import jwiki.util.FL;
+import fastily.jwiki.core.ColorLog;
+import fastily.jwiki.core.NS;
+import fastily.jwiki.util.FL;
 import mtc.MTC.TransferObject;
 import util.FCLI;
 import util.Toolbox;

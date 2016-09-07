@@ -10,11 +10,11 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import jwiki.core.MQuery;
-import jwiki.core.Wiki;
-import jwiki.dwrap.ImageInfo;
-import jwiki.util.FL;
-import jwiki.util.FString;
+import fastily.jwiki.core.MQuery;
+import fastily.jwiki.core.Wiki;
+import fastily.jwiki.dwrap.ImageInfo;
+import fastily.jwiki.util.FL;
+import fastily.jwiki.util.FString;
 import jwikix.core.TParse;
 import mtc.MTC.TransferObject;
 

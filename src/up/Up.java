@@ -10,9 +10,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.stream.Stream;
 
-import jwiki.core.Wiki;
-import jwiki.util.FL;
-import jwiki.util.FString;
+import fastily.jwiki.core.Wiki;
+import fastily.jwiki.util.FL;
+import fastily.jwiki.util.FString;
 import jwikix.core.WikiGen;
 
 /**

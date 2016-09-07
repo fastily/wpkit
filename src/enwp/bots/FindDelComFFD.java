@@ -5,12 +5,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import jwiki.core.MQuery;
-import jwiki.core.NS;
-import jwiki.core.TPlate;
-import jwiki.core.Wiki;
-import jwiki.util.FL;
-import jwiki.util.Tuple;
+import fastily.jwiki.core.MQuery;
+import fastily.jwiki.core.NS;
+import fastily.jwiki.core.TPlate;
+import fastily.jwiki.core.Wiki;
+import fastily.jwiki.util.FL;
+import fastily.jwiki.util.Tuple;
 import jwikix.core.TParse;
 import util.Toolbox;
 

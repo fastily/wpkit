@@ -2,8 +2,8 @@ package enwp.bots;
 
 import java.util.ArrayList;
 
-import jwiki.core.NS;
-import jwiki.core.Wiki;
+import fastily.jwiki.core.NS;
+import fastily.jwiki.core.Wiki;
 import jwikix.core.TParse;
 import jwikix.core.WikiX;
 import util.Toolbox;

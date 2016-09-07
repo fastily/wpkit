@@ -2,8 +2,8 @@ package enwp.bots;
 
 import java.util.HashSet;
 
-import jwiki.core.NS;
-import jwiki.core.Wiki;
+import fastily.jwiki.core.NS;
+import fastily.jwiki.core.Wiki;
 import util.Toolbox;
 
 /**

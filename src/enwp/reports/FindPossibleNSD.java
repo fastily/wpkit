@@ -5,8 +5,8 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.HashSet;
 
-import jwiki.core.NS;
-import jwiki.core.Wiki;
+import fastily.jwiki.core.NS;
+import fastily.jwiki.core.Wiki;
 import jwikix.util.FSystem;
 import util.Toolbox;
 

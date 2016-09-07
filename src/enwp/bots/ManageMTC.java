@@ -5,10 +5,10 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 
-import jwiki.core.Wiki;
-import jwiki.util.FL;
-import jwiki.util.GroupQueue;
-import jwiki.util.Tuple;
+import fastily.jwiki.core.Wiki;
+import fastily.jwiki.util.FL;
+import fastily.jwiki.util.GroupQueue;
+import fastily.jwiki.util.Tuple;
 import jwikix.core.MQueryX;
 import jwikix.core.TParse;
 import util.Toolbox;

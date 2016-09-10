@@ -10,7 +10,7 @@ import fastily.jwiki.core.Wiki;
 import fastily.jwiki.util.FL;
 import fastily.jwiki.util.Triple;
 import fastily.jwiki.core.MQuery;
-import jwikix.util.StrTool;
+import fastily.jwikix.util.StrTool;
 
 import util.Toolbox;
 import util.WPStrings;

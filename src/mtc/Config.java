@@ -3,7 +3,7 @@ package mtc;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import jwikix.util.FSystem;
+import fastily.jwikix.util.FSystem;
 
 /**
  * Configurable, frequently used constant Strings for MTC.

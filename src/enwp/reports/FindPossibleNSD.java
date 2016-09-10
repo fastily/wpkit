@@ -7,7 +7,7 @@ import java.util.HashSet;
 
 import fastily.jwiki.core.NS;
 import fastily.jwiki.core.Wiki;
-import jwikix.util.FSystem;
+import fastily.jwikix.util.FSystem;
 import util.Toolbox;
 
 /**

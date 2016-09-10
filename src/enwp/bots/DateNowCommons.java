@@ -4,8 +4,8 @@ import java.util.ArrayList;
 
 import fastily.jwiki.core.NS;
 import fastily.jwiki.core.Wiki;
-import jwikix.core.TParse;
-import jwikix.core.WikiX;
+import fastily.jwikix.core.TParse;
+import fastily.jwikix.core.WikiX;
 import util.Toolbox;
 
 /**

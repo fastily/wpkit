@@ -15,7 +15,7 @@ import fastily.jwiki.core.Wiki;
 import fastily.jwiki.dwrap.ImageInfo;
 import fastily.jwiki.util.FL;
 import fastily.jwiki.util.FString;
-import jwikix.core.TParse;
+import fastily.jwikix.core.TParse;
 import mtc.MTC.TransferObject;
 
 /**

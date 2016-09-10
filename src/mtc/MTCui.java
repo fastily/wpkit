@@ -5,8 +5,8 @@ import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import fastily.jwiki.core.Wiki;
-import jwikix.ui.FXTool;
-import jwikix.ui.LoginController;
+import fastily.jwikix.ui.FXTool;
+import fastily.jwikix.ui.LoginController;
 import util.Toolbox;
 
 /**

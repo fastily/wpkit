@@ -8,7 +8,7 @@ import fastily.jwiki.core.NS;
 import fastily.jwiki.core.Wiki;
 import fastily.jwiki.util.FL;
 import fastily.jwiki.util.GroupQueue;
-import jwikix.util.StrTool;
+import fastily.jwikix.util.StrTool;
 import util.Toolbox;
 
 /**

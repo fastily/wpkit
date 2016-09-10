@@ -22,7 +22,7 @@ import fastily.jwiki.core.NS;
 import fastily.jwiki.core.Wiki;
 import fastily.jwiki.util.FError;
 import fastily.jwiki.util.FL;
-import jwikix.ui.FXTool;
+import fastily.jwikix.ui.FXTool;
 import mtc.MTC.TransferObject;
 import util.Toolbox;
 

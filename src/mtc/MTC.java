@@ -15,7 +15,7 @@ import fastily.jwiki.core.Wiki;
 import fastily.jwiki.dwrap.ImageInfo;
 import fastily.jwiki.util.FError;
 import fastily.jwiki.util.FL;
-import jwikix.core.TParse;
+import fastily.jwikix.core.TParse;
 import util.Toolbox;
 
 /**

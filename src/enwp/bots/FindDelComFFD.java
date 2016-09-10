@@ -11,7 +11,7 @@ import fastily.jwiki.core.TPlate;
 import fastily.jwiki.core.Wiki;
 import fastily.jwiki.util.FL;
 import fastily.jwiki.util.Tuple;
-import jwikix.core.TParse;
+import fastily.jwikix.core.TParse;
 import util.Toolbox;
 
 /**

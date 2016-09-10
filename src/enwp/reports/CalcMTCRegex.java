@@ -9,7 +9,7 @@ import fastily.jwiki.core.Wiki;
 import fastily.jwiki.util.FL;
 import fastily.jwiki.util.FString;
 import fastily.jwiki.util.Tuple;
-import jwikix.core.WikiX;
+import fastily.jwikix.core.WikiX;
 import util.Toolbox;
 
 /**

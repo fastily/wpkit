@@ -18,8 +18,8 @@ import fastily.jwiki.core.ColorLog;
 import fastily.jwiki.core.Req;
 import fastily.jwiki.core.Wiki;
 import fastily.jwiki.util.FL;
-import jwikix.core.WikiGen;
-import jwikix.util.StrTool;
+import fastily.jwikix.core.WikiGen;
+import fastily.jwikix.util.StrTool;
 
 /**
  * Miscellaneous custom functions common to my scripts/bots.

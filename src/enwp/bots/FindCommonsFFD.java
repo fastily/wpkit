@@ -6,8 +6,8 @@ import java.util.HashSet;
 import fastily.jwiki.core.NS;
 import fastily.jwiki.core.Wiki;
 import fastily.jwiki.util.FL;
-import jwikix.core.MQueryX;
-import jwikix.core.TParse;
+import fastily.jwikix.core.MQueryX;
+import fastily.jwikix.core.TParse;
 import util.Toolbox;
 
 /**

@@ -1,0 +1,6 @@
+rootProject.name = 'ctools'
+
+include ":jwiki-extras", ":jwiki"
+
+project(":jwiki").projectDir = file("../jwiki")
+project(":jwiki-extras").projectDir = file("../jwiki-extras")

@@ -4,9 +4,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -14,8 +12,8 @@ import fastily.jwiki.core.MQuery;
 import fastily.jwiki.core.Wiki;
 import fastily.jwiki.dwrap.ImageInfo;
 import fastily.jwiki.util.FL;
-import fastily.jwiki.util.FString;
-import fastily.jwikix.core.TParse;
+import fastily.jwikix.tplate.ParsedItem;
+import fastily.jwikix.tplate.Template;
 import mtc.MTC.TransferObject;
 
 /**
@@ -27,30 +25,9 @@ import mtc.MTC.TransferObject;
 public class DGen
 {
 	/**
-	 * Matches an Information template parameter
-	 */
-	private static final Pattern infoParams = Pattern
-			.compile("(?i)\\|\\s*?(Description|Source|Author|Date|Permission|other( |_)versions)\\s*?\\=");
-
-	/**
 	 * Matches caption sections in enwp text
 	 */
 	private static final Pattern captionRegex = Pattern.compile("(?si)\n?\\=\\=\\s*?(Caption).+?\\|\\}");
-
-	/**
-	 * The title for Info, Self, and MTC templates.
-	 */
-	private static final String tINFO = "Template:Information", tSELF = "Template:Self", tMTC = "Template:Copy to Wikimedia Commons";
-
-	/**
-	 * The Set of templates which should be handled specially.
-	 */
-	private static final HashSet<String> specialTL = FL.toSHS(tINFO, tSELF, tMTC);
-
-	/**
-	 * Format String for {{Information}}
-	 */
-	private static final String infoFmt = "{{Information%n|Description=%s%n|Date=%s%n|Source=%s%n|Author=%s%n|Permission=%s%n|other versions=%s%n}}%n";
 
 	/**
 	 * The format String for a row in the Upload Log section.
@@ -92,7 +69,7 @@ public class DGen
 	 */
 	protected String generate(TransferObject to)
 	{
-		return new Desc(to).genText();
+		return new Desc(to).toString();
 	}
 
 	/**
@@ -104,24 +81,14 @@ public class DGen
 	private class Desc
 	{
 		/**
-		 * The local enwp text of the file. May be modified via processing.
+		 * The root ParsedItem for the file's enwp page.
 		 */
-		private String t;
-
+		private ParsedItem root;
+		
 		/**
-		 * Parsed values for the Information template.
+		 * The summary and license sections.
 		 */
-		private HashMap<String, String> info = new HashMap<>();
-
-		/**
-		 * The list of templates on the local enwp page.
-		 */
-		private HashSet<String> tpl;
-
-		/**
-		 * The list of templates which will be added to the Licensing section.
-		 */
-		private ArrayList<String> sumSection = new ArrayList<>(), licSection = new ArrayList<>();
+		private String sumSection = "== {{int:filedesc}} ==\n", licSection = "\n== {{int:license-header}} ==\n";
 
 		/**
 		 * The list of old revisions for the file
@@ -129,9 +96,9 @@ public class DGen
 		private ArrayList<ImageInfo> imgInfoL;
 
 		/**
-		 * The full ('File:' prefix included) title of the file.
+		 * The user who originally uploaded the file.  Excludes <code>User:</code> prefix.
 		 */
-		private String title;
+		private String uploader;
 
 		/**
 		 * Constructor, creates a Desc object
@@ -140,148 +107,129 @@ public class DGen
 		 */
 		private Desc(TransferObject to)
 		{
-			this.title = to.wpFN;
-			t = enwp.getPageText(title);
-			tpl = new HashSet<>(enwp.getTemplatesOnPage(title));
+			root = ParsedItem.parse(enwp, to.wpFN);
+			
 			imgInfoL = to.ii;
+			uploader = imgInfoL.get(imgInfoL.size() - 1).user;
 
-			stripJunk();
-			extractFileDesc();
+			procText();
 		}
-
+		
 		/**
-		 * Extracts templates and text from the enwp file description page.
+		 * Processes parsed text and templates from the API
 		 */
-		private void extractFileDesc()
+		private void procText()
 		{
-			// Extract License Tags
-			for (String tp : tpl)
-				if (mtc.regexMap.containsKey(tp) && !specialTL.contains(tp))
+			ArrayList<Template> masterTPL = root.getTemplateR();
+			
+			// Normalize license and special template titles
+			for (Template t : masterTPL)
+				if (mtc.tpMap.containsKey(t.title))
+					t.title = mtc.tpMap.get(t.title);
+			
+			ArrayList<Template> tpl = new ArrayList<>(masterTPL);
+			
+			// Filter Templates which are not on Commons
+			HashSet<String> ncomT = FL
+					.toSet(MQuery.exists(com, false, FL.toAL(tpl.stream().map(t -> "Template:" + t.title))).stream().map(com::nss));
+			for(Template t : new ArrayList<>(tpl))
+				if (ncomT.contains(t.title))
+					tpl.remove(t.drop());
+			
+			// Process special Templates
+			Template info = null;
+			for(Template t : new ArrayList<>(tpl))
+				switch (t.title)
 				{
-					String s = findAndReplace(mtc.regexMap.get(tp));
-					licSection.add(s.isEmpty() ? String.format("{{%s}}", enwp.nss(tp)) : s);
-				}
-
-			// Extract {{Information}}
-			if (tpl.contains(tINFO))
-			{
-				Pattern infoTP = mtc.regexMap.get(tINFO);
-				String rawInfo = TParse.extractTemplate(infoTP, t);
-				rawInfo = rawInfo.substring(2, rawInfo.length() - 2);
-
-				Matcher m = infoParams.matcher(rawInfo);
-				ArrayList<Integer> l = new ArrayList<>();
-				while (m.find())
-					l.add(m.start());
-
-				ArrayList<String> plx = new ArrayList<>();
-				for (int i = 0; i < l.size() - 1; i++)
-					plx.add(rawInfo.substring(l.get(i), l.get(i + 1)));
-				plx.add(rawInfo.substring(l.get(l.size() - 1)));
-
-				for (String s : plx)
-				{
-					String[] pl = s.split("\\=", 2);
-
-					String v = pl[1].trim();
-					if (!v.isEmpty())
-						info.put(pl[0].substring(1).trim().toLowerCase().replace('_', ' '), v);
-				}
-
-				t = infoTP.matcher(t).replaceAll(""); // remove {{Information}} since we're done
+					case "Information":
+						info = t;
+						tpl.remove(t.drop());
+						break;
+					case "Self":
+						if (!t.has("author"))
+							t.put("author", String.format("{{User at project|%s|w|en}}", uploader));
+						break;
+					case "PD-self":
+						t.title = "PD-user-en";
+						t.put("1", uploader);
+						break;
+					case "Copy to Wikimedia Commons":
+						tpl.remove(t.drop());
+						break;
+					default:
+						break;
 			}
+			
+			// Add any Commons-compatible top-level templates to License section.
+			tpl.retainAll(root.tplates);
+			for(Template t : tpl)
+				licSection += String.format("%s%n", t);
 
-			// Keep non-lic templates used on Commons, strip the rest.
-			for (Map.Entry<String, Boolean> e : MQuery.exists(com, FL.toAL(tpl.stream().filter(s -> !mtc.regexMap.containsKey(s))))
-					.entrySet())
-			{
-				String s = findAndReplace(Pattern.compile(TParse.makeTitleRegex(FL.toSAL(enwp.nss(e.getKey())))));
-				if (e.getValue() && !s.isEmpty())
-					licSection.add(s);
-			}
+			// Create and fill in missing {{Information}} fields with default values.
+			if (info == null)
+				info = new Template("Information");
 
-			// Extract captions
-			String caption = findAndReplace(captionRegex);
-			if (!caption.isEmpty())
-				sumSection.add(caption);
-
-			// t should be empty by now. If it is not, then add it to the section list
-			t = t.trim();
-			if (!t.isEmpty())
-				info.put("description", info.containsKey("description") ? info.get("description") + "\n" + t : t);
-		}
-
-		/**
-		 * Strips junk that does not transfer well to Commons
-		 */
-		private void stripJunk()
-		{
-			t = t.replaceAll("(?i)\\n?\\[\\[(Category:).*?\\]\\]", ""); // categories don't transfer well.
-			t = t.replaceAll("(?mi)^\\==.*?(Summary|Lic|filedesc).*?==$", ""); // strip headers
-			t = t.replaceAll("(?<=\\[\\[)(.+?\\]\\])", "w:$1"); // add enwp prefix to links
-
-			t = mtc.regexMap.get(tSELF).matcher(t).replaceAll("");
-			t = mtc.regexMap.get(tMTC).matcher(t).replaceAll("");
-		}
-
-		/**
-		 * Finds the specified pattern, extract it from <code>t</code>, and return it.
-		 * 
-		 * @param p The Pattern to match.
-		 * @return The first String matching <code>p</code>, or the empty String if nothing was found.
-		 */
-		private String findAndReplace(Pattern p)
-		{
+			if (!info.has("Description"))
+				info.put("Description", "");
+			if (!info.has("Date"))
+				info.put("Date", "");
+			if (!info.has("Source"))
+				info.put("Source", String.format("{{Transferred from|en.wikipedia|%s|%s}}", enwp.whoami(), Config.mtcComLink));
+			if (!info.has("Author"))
+				info.put("Author", String.format("{{Original uploader|%s|w}}", uploader));
+			if (!info.has("Permission"))
+				info.put("Permission", "");
+			if (!info.has("other versions"))
+				info.put("other versions", "");
+			
+			// Append any additional Strings to the description.
+			if(!root.contents.isEmpty())
+				info.append("Description", " " + String.join(" ", root.contents));
+			
+			// Convert {{Information}} to String and save result.
+			sumSection += info.toString(true) + "\n";
+			
+			// Extract the first caption table and move it to the end of the sumSection
 			String x = "";
-			Matcher m = p.matcher(t);
+			Matcher m = captionRegex.matcher(sumSection);
 			if (m.find())
 			{
 				x = m.group();
-				t = m.reset().replaceAll("");
+				sumSection = m.reset().replaceAll("");
+				sumSection += "\n" + x;
 			}
-
-			return x;
 		}
 
 		/**
-		 * Gets <code>info</code> value or the empty String if the value does not exist.
-		 * 
-		 * @param k The key to get a value for
-		 * @return The value, or the empty String if key <code>k</code> was not found
+		 * Generates an upload log for this Desc.
+		 * @return An upload log section for this Desc.
 		 */
-		private String getInfo(String k)
+		private String genUploadLog()
 		{
-			return info.containsKey(k) ? info.get(k) : "";
-		}
-
-		/**
-		 * Generates a Commons description page for this Desc object
-		 * 
-		 * @return The Commons file description page.
-		 */
-		private String genText()
-		{
-			String dump = "== {{int:filedesc}} ==\n";
-			dump += String.format(infoFmt, getInfo("description"), getInfo("date"),
-					info.containsKey("source") ? info.get("source")
-							: String.format("{{Transferred from|en.wikipedia|%s|%s}}", enwp.whoami(), Config.mtcComLink),
-					info.containsKey("author") ? info.get("author")
-							: String.format("{{Original uploader|%s|w}}", imgInfoL.get(imgInfoL.size() - 1).user),
-					getInfo("permission"), getInfo("other versions"));
-			dump += String.join("\n", sumSection);
-			dump += "\n== {{int:license-header}} ==\n";
-			dump += String.join("\n", licSection);
-			dump += "\n\n== {{Original upload log}} ==\n";
-			dump += String.format("{{Original description page|en.wikipedia|%s}}%n", FString.enc(enwp.nss(title)));
-			dump += "{| class=\"wikitable\"\n! {{int:filehist-datetime}} !! {{int:filehist-dimensions}} !! {{int:filehist-user}} !! {{int:filehist-comment}}\n|-\n";
-
+			String s = "\n== {{Original upload log}} ==\n{| class=\"wikitable\"\n! {{int:filehist-datetime}} !!"
+					+ " {{int:filehist-dimensions}} !! {{int:filehist-user}} !! {{int:filehist-comment}}\n|-\n";
+			
 			for (ImageInfo ii : imgInfoL)
-				dump += String.format(uLFmt, dtf.format(LocalDateTime.ofInstant(ii.timestamp, ZoneOffset.UTC)), ii.dimensions.x,
+				s += String.format(uLFmt, dtf.format(LocalDateTime.ofInstant(ii.timestamp, ZoneOffset.UTC)), ii.dimensions.x,
 						ii.dimensions.y, ii.user, ii.user, ii.summary.replace("\n", " "));
-
-			dump += "|}\n\n{{Subst:Unc}}";
-
-			return dump;
+			s += "|}\n\n{{Subst:Unc}}";
+			
+			return s;
+		}
+	
+		/**
+		 * Renders this Desc as wikitext for Commons.
+		 */
+		public String toString()
+		{
+			String t = sumSection + licSection;
+			
+			t = t.replaceAll("(?s)\\<!\\-\\-.*?\\-\\-\\>", ""); // strip comments
+			t = t.replaceAll("(?i)\\n?\\[\\[(Category:).*?\\]\\]", ""); // categories don't transfer well.
+			t = t.replaceAll("(?<=\\[\\[)(.+?\\]\\])", "w:$1"); // add enwp prefix to links
+			t = t.replace("[[w::", "[[w:"); // Remove any double colons in interwiki links
+			
+			return t + genUploadLog();
 		}
 	}
 }

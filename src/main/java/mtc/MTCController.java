@@ -23,8 +23,6 @@ import fastily.jwiki.core.Wiki;
 import fastily.jwiki.util.FError;
 import fastily.jwiki.util.FL;
 import fastily.jwikix.ui.FXTool;
-import mtc.MTC.TransferObject;
-import util.Toolbox;
 
 /**
  * An MTC UI window
@@ -208,7 +206,7 @@ public class MTCController
 
 		Set<String> fails = Collections.synchronizedSet(new HashSet<>()), success = Collections.synchronizedSet(new HashSet<>());
 
-		ArrayList<TransferObject> tol = mtc.filterAndResolve(fl);
+		ArrayList<TransferFile> tol = mtc.filterAndResolve(fl);
 		if (tol.isEmpty())
 		{
 			Platform.runLater(() -> {
@@ -265,15 +263,5 @@ public class MTCController
 	public Parent getRoot()
 	{
 		return root;
-	}
-
-	/**
-	 * Posts a list of files transferred in the previous session to the user's transfer log.
-	 */
-	protected void dumpLog()
-	{
-		if (!tfl.isEmpty())
-			wiki.edit(String.format("User:%s/MTC! Transfer Log", wiki.whoami()),
-					Toolbox.listify(String.format("== ~~~~~ - v%s ==%n", MTCui.version), tfl, true), String.format("Update Transfer log (%s)", Config.mtcLink));
 	}
 }

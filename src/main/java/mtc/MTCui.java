@@ -32,11 +32,6 @@ public class MTCui extends Application
 	private static LoginController lc;
 
 	/**
-	 * The MTCController for this Application
-	 */
-	private static MTCController mc;
-	
-	/**
 	 * Main Driver
 	 * 
 	 * @param args Program args, not used.
@@ -53,15 +48,6 @@ public class MTCui extends Application
 	{
 		FXTool.setupAndShowStage(primaryStage, "MTC!",
 				new Scene((lc = LoginController.load(() -> createAndShowMTC(lc.getWiki()))).getRoot()));
-	}
-
-	/**
-	 * Dumps a log of transferred items to the user's userspace.
-	 */
-	public void stop()
-	{
-		if(mc != null) // Exit cleanly, in case user exits at login
-			mc.dumpLog();
 	}
 	
 	/**
@@ -80,6 +66,6 @@ public class MTCui extends Application
 			Platform.exit();
 		}
 		
-		FXTool.setupAndShowStage(new Stage(), "MTC!", new Scene((mc = MTCController.load(wiki)).getRoot()));
+		FXTool.setupAndShowStage(new Stage(), "MTC!", new Scene(MTCController.load(wiki).getRoot()));
 	}
 }

@@ -1,7 +1,6 @@
 package mtc;
 
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -11,7 +10,6 @@ import java.util.TreeMap;
 import fastily.jwiki.core.MQuery;
 import fastily.jwiki.core.NS;
 import fastily.jwiki.core.Wiki;
-import fastily.jwiki.dwrap.ImageInfo;
 import fastily.jwiki.util.FError;
 import fastily.jwiki.util.FL;
 import fastily.jwikix.tplate.Template;
@@ -34,6 +32,7 @@ public final class MTC
 	 * Files must be members of at least one of the following categories to be eligible for transfer.
 	 */
 	private final HashSet<String> whitelist;
+	
 	/**
 	 * The Wiki objects to use
 	 */
@@ -53,11 +52,6 @@ public final class MTC
 	 * Contains data for license tags
 	 */
 	protected TreeMap<String, String> tpMap = new TreeMap<>(new Template.TValueCmp());
-
-	/**
-	 * The DGen associated with this MTC.
-	 */
-	protected DGen dgen;
 
 	/**
 	 * Initializes the Wiki objects and download folders for MTC.
@@ -86,12 +80,6 @@ public final class MTC
 				tpMap.put(s, t);
 		}
 
-		// regexMap = new HashMap<String, Pattern>(Toolbox.fetchPairedConfig(enwp, Config.fullname +
-		// "/Regexes").entrySet().stream()
-		// .collect(Collectors.toMap(Map.Entry::getKey, e ->
-		// Pattern.compile(TParse.makeTitleRegex(FL.toSAL(e.getValue().split("\\|")))))));
-		dgen = new DGen(this);
-
 		// Generate whitelist & blacklist
 		HashMap<String, ArrayList<String>> l = MQuery.getLinksOnPage(enwp,
 				FL.toSAL(Config.fullname + "/Blacklist", Config.fullname + "/Whitelist"), NS.CATEGORY);
@@ -105,10 +93,10 @@ public final class MTC
 	 * @param titles The local files to transfer
 	 * @return An ArrayList of TransferObject objects.
 	 */
-	protected ArrayList<TransferObject> filterAndResolve(ArrayList<String> titles)
+	protected ArrayList<TransferFile> filterAndResolve(ArrayList<String> titles)
 	{
 		return FL.toAL(resolveFileNames(!ignoreFilter ? canTransfer(titles) : titles).entrySet().stream()
-				.map(e -> new TransferObject(e.getKey(), e.getValue())));
+				.map(e -> new TransferFile(e.getKey(), e.getValue(), this)));
 	}
 
 	/**
@@ -156,67 +144,5 @@ public final class MTC
 				: FL.toAL(MQuery.getCategoriesOnPage(enwp, l).entrySet().stream().filter(
 						e -> !e.getValue().stream().anyMatch(blacklist::contains) && e.getValue().stream().anyMatch(whitelist::contains))
 						.map(Map.Entry::getKey));
-	}
-
-	/**
-	 * Represents a file to transfer to Commons
-	 * 
-	 * @author Fastily
-	 *
-	 */
-	protected class TransferObject
-	{
-		/**
-		 * The enwp filename
-		 */
-		protected final String wpFN;
-
-		/**
-		 * The commons filename and local path
-		 */
-		private final String comFN, localFN;
-
-		/**
-		 * The local, enwp ImageInfo objects associated with this TransferObject.
-		 */
-		protected ArrayList<ImageInfo> ii;
-
-		/**
-		 * Constructor, creates a TransferObject
-		 * 
-		 * @param wpFN The enwp title to transfer
-		 * @param comFN The commons title to transfer to
-		 */
-		private TransferObject(String wpFN, String comFN)
-		{
-			this.comFN = comFN;
-			this.wpFN = wpFN;
-
-			String baseFN = enwp.nss(wpFN);
-			localFN = Config.fdump + baseFN.hashCode() + baseFN.substring(baseFN.lastIndexOf('.'));
-		}
-
-		/**
-		 * Attempts to transfer an enwp file to Commons
-		 * 
-		 * @return True on success.
-		 */
-		protected boolean doTransfer()
-		{
-			ii = enwp.getImageInfo(wpFN);
-
-			String t = dgen.generate(this);
-
-			if (dryRun)
-			{
-				System.out.println(t);
-				return true;
-			}
-			else if (t != null && Toolbox.downloadFile(ii.get(0).url, localFN)
-					&& com.upload(Paths.get(localFN), comFN, t, String.format(Config.tFrom, wpFN)))
-				return enwp.addText(wpFN, String.format("{{subst:ncd|%s}}%n", comFN), Config.tTo, true);
-
-			return false;
-		}
 	}
 }

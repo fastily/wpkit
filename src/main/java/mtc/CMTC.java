@@ -9,7 +9,6 @@ import org.apache.commons.cli.Options;
 import fastily.jwiki.core.ColorLog;
 import fastily.jwiki.core.NS;
 import fastily.jwiki.util.FL;
-import mtc.MTC.TransferObject;
 import util.FCLI;
 import util.Toolbox;
 
@@ -66,7 +65,7 @@ public final class CMTC
 	 */
 	private static void procList(ArrayList<String> titles)
 	{
-		ArrayList<TransferObject> tl = mtc.filterAndResolve(titles);
+		ArrayList<TransferFile> tl = mtc.filterAndResolve(titles);
 		AtomicInteger i = new AtomicInteger();
 		int total = tl.size();
 
@@ -90,5 +89,4 @@ public final class CMTC
 		ol.addOption("d", "Activate dry run/debug mode (does not transfer files)");
 		return ol;
 	}
-
 }

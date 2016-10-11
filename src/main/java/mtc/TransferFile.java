@@ -29,7 +29,7 @@ public class TransferFile
 	/**
 	 * Matches caption sections in enwp text
 	 */
-	private static final Pattern captionRegex = Pattern.compile("(?si)\n?\\=\\=\\s*?(Caption).+?\\|\\}");
+	private static final Pattern captionRegex = Pattern.compile("(?si)\n?\\{\\|\\s*?class\\=\"wikitable.+?\\|\\}");
 
 	/**
 	 * The format String for a row in the Upload Log section.
@@ -205,9 +205,9 @@ public class TransferFile
 		Matcher m = captionRegex.matcher(sumSection);
 		if (m.find())
 		{
-			x = m.group();
+			x = m.group().trim();
 			sumSection = m.reset().replaceAll("");
-			sumSection += "\n" + x;
+			sumSection += x + "\n";
 		}
 	}
 

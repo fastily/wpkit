@@ -5,12 +5,13 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 
+import enwp.WTP;
+import fastily.jwiki.core.NS;
 import fastily.jwiki.core.Wiki;
 import fastily.jwiki.util.FL;
 import fastily.jwiki.util.GroupQueue;
 import fastily.jwiki.util.Tuple;
 import fastily.jwikix.core.MQueryX;
-import fastily.jwikix.core.TParse;
 import util.Toolbox;
 
 /**
@@ -27,30 +28,25 @@ public final class ManageMTC
 	private static final Wiki wiki = Toolbox.getFastilyBot();
 
 	/**
-	 * The Copy to Wikimedia Commons template title
-	 */
-	private static final String mtc = "Template:Copy to Wikimedia Commons";
-
-	/**
 	 * Creates the regular expression matching Copy to Wikimedia Commons
 	 */
-	private static final String tRegex = TParse.makeTemplateRegex(wiki, mtc);
+	private static final String tRegex = WTP.mtc.getRegex(wiki);
 
 	/**
 	 * The list of pages transcluding {{Now Commons}}
 	 */
-	private static final HashSet<String> nowCommons = new HashSet<>(wiki.whatTranscludesHere("Template:Now Commons"));
+	private static final HashSet<String> nowCommons = WTP.ncd.getTransclusionSet(wiki, NS.FILE);
 
 	/**
 	 * The list of pages for bots to avoid
 	 */
-	private static final HashSet<String> nobots = new HashSet<>(wiki.whatTranscludesHere("Template:Bots"));
+	private static final HashSet<String> nobots = WTP.nobots.getTransclusionSet(wiki, NS.FILE);
 	
 	/**
 	 * The ncd template to fill out
 	 */
 	protected static final String ncd = String.format("{{Now Commons|%%s|date=%s|bot=%s}}%n",
-			DateTimeFormatter.ISO_LOCAL_DATE.format(LocalDate.now(ZoneId.of("UTC"))), "FastilyBot");
+			DateTimeFormatter.ISO_LOCAL_DATE.format(LocalDate.now(ZoneId.of("UTC"))), wiki.whoami());
 
 	/**
 	 * Main driver
@@ -59,7 +55,7 @@ public final class ManageMTC
 	 */
 	public static void main(String[] args)
 	{
-		GroupQueue<String> l = new GroupQueue<>(wiki.whatTranscludesHere(mtc), 50);
+		GroupQueue<String> l = new GroupQueue<>(wiki.whatTranscludesHere(WTP.mtc.title), 50);
 
 		while (l.has())
 			for (Tuple<String, String> e : FL.mapToList(MQueryX.getFirstOnlySharedDuplicate(wiki, l.poll())))

@@ -1,4 +1,4 @@
-package util;
+package enwp;
 
 /**
  * Common, shared static Strings.

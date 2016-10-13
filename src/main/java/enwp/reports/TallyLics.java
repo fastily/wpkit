@@ -5,11 +5,11 @@ import java.util.HashSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import enwp.WPStrings;
 import fastily.jwiki.core.MQuery;
 import fastily.jwiki.core.NS;
 import fastily.jwiki.core.Wiki;
 import util.Toolbox;
-import util.WPStrings;
 
 /**
  * Counts up free license tags and checks if a Commons counterpart exists.

@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Locale;
 
+import enwp.WPStrings;
 import fastily.jwiki.core.NS;
 import fastily.jwiki.core.Wiki;
 import fastily.jwiki.util.FL;
@@ -17,7 +18,6 @@ import fastily.jwiki.util.MapList;
 import fastily.jwiki.util.Tuple;
 import fastily.jwikix.core.WikiX;
 import util.Toolbox;
-import util.WPStrings;
 
 /**
  * Leaves courtesy notifications (where possible) for users whose files were nominated at FfD.

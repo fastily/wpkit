@@ -95,7 +95,7 @@ public final class FCLI
 	public static Options makeDefaultOptions()
 	{
 		Options ol = new Options();
-		ol.addOption("help", false, "Print this help message and exit");
+		ol.addOption("help", "help", false, "Print this help message and exit");
 		return ol;
 	}
 }

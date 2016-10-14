@@ -218,17 +218,6 @@ public final class Toolbox
 	}
 
 	/**
-	 * Fetches pages on a Wiki transcluding <code>{{Bots}}</code>.  CAVEAT: This method is not cached.
-	 * 
-	 * @param wiki The Wiki object to use
-	 * @return A Set of pages transcluding <code>{{Bots}}</code>.
-	 */
-	public static HashSet<String> fetchNoBots(Wiki wiki)
-	{
-		return new HashSet<>(wiki.whatTranscludesHere("Template:Bots"));
-	}
-
-	/**
 	 * Determine if a set of link(s) has existed on a page over a given time period.
 	 * 
 	 * @param wiki The Wiki object to use

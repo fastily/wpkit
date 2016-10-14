@@ -1,4 +1,4 @@
-package enwp.reports;
+package enwp.analysis;
 
 import java.util.ArrayList;
 import java.util.HashMap;

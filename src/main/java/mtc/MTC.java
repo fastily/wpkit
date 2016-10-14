@@ -60,7 +60,7 @@ public final class MTC
 	 * 
 	 * @throws Throwable On IO error
 	 */
-	protected MTC(Wiki wiki) throws Throwable
+	public MTC(Wiki wiki) throws Throwable
 	{
 		// Generate download directory
 		if (Files.isRegularFile(Config.fdPath))
@@ -136,7 +136,7 @@ public final class MTC
 	 * @param title The title to check
 	 * @return True if the file can <ins>probably</ins> be transfered to Commons.
 	 */
-	private ArrayList<String> canTransfer(ArrayList<String> titles)
+	public ArrayList<String> canTransfer(ArrayList<String> titles)
 	{
 		ArrayList<String> l = FL.toAL(MQuery.getSharedDuplicatesOf(enwp, titles).entrySet().stream()
 				.filter(e -> e.getValue().size() == 0).map(Map.Entry::getKey));

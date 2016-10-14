@@ -45,7 +45,7 @@ public final class CMTC
 
 		ArrayList<String> fl = new ArrayList<>();
 		if (l.hasOption('s'))
-			fl = wiki.getLinksOnPage(String.format("User:%s/MTCSources", wiki.whoami()), NS.FILE);
+			fl = wiki.getLinksOnPage(String.format("User:%s/MTCSources/List", wiki.whoami()), NS.FILE);
 		else
 			for (String s : l.getArgs())
 			{

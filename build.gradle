@@ -33,4 +33,6 @@ dependencies {
     compile project(":jwiki-extras")
 }
 
-
+task wrapper(type: Wrapper) {
+    gradleVersion = '3.1'
+}

@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import enwp.WPStrings;
+import enwp.WTP;
 import fastily.jwiki.core.NS;
 import fastily.jwiki.core.Wiki;
 import fastily.jwiki.util.FL;
@@ -59,7 +60,7 @@ public class DDNotifier
 	/**
 	 * The title blacklist; the bot will not edit any page transcluding {{bots}}
 	 */
-	private static final HashSet<String> talkPageBL = Toolbox.fetchNoBots(wiki);
+	private static final HashSet<String> talkPageBL = WTP.nobots.getTransclusionSet(wiki, NS.USER_TALK);
 
 	/**
 	 * The list of files with templates that trigger the bot unnecessarily.

@@ -29,7 +29,7 @@ public class TransferFile
 	/**
 	 * Matches caption sections in enwp text
 	 */
-	private static final Pattern captionRegex = Pattern.compile("(?si)\n?\\{\\|\\s*?class\\=\"wikitable.+?\\|\\}");
+	private static final Pattern captionRegex = Pattern.compile("(?si)\\{\\|\\s*?class\\=\"wikitable.+?\\|\\}");
 
 	/**
 	 * The format String for a row in the Upload Log section.
@@ -162,6 +162,10 @@ public class TransferFile
 					break;
 				case "PD-self":
 					t.title = "PD-user-en";
+					t.put("1", uploader);
+					break;
+				case "GFDL-self-with-disclaimers":
+					t.title = "GFDL-user-en-with-disclaimers";
 					t.put("1", uploader);
 					break;
 				case "Copy to Wikimedia Commons":

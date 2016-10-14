@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.Locale;
 
 import enwp.WPStrings;
+import enwp.WTP;
 import fastily.jwiki.core.NS;
 import fastily.jwiki.core.Wiki;
 import fastily.jwiki.util.FL;
@@ -51,7 +52,7 @@ public final class FFDNotifier
 	/**
 	 * The list of pages transcluding {{Bots}}. These are avoided.
 	 */
-	private static final HashSet<String> noBots = Toolbox.fetchNoBots(wiki);
+	private static final HashSet<String> noBots = WTP.nobots.getTransclusionSet(wiki, NS.USER_TALK);
 
 	/**
 	 * Main driver

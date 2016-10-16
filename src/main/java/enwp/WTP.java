@@ -35,14 +35,11 @@ public final class WTP
 	 */
 	public static final WTP orphan = new WTP("Template:Orphan image");
 
-	
 	/**
 	 * The template title, including namespace
 	 */
 	public final String title;
 
-	
-	
 	/**
 	 * The String regex of the template.
 	 */

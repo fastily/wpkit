@@ -181,21 +181,7 @@ public class TransferFile
 			licSection += String.format("%s%n", t);
 
 		// Create and fill in missing {{Information}} fields with default values.
-		if (info == null)
-			info = new Template("Information");
-
-		if (!info.has("Description"))
-			info.put("Description", "");
-		if (!info.has("Date"))
-			info.put("Date", "");
-		if (!info.has("Source"))
-			info.put("Source", String.format("{{Transferred from|en.wikipedia|%s|%s}}", enwp.whoami(), Config.mtcComLink));
-		if (!info.has("Author"))
-			info.put("Author", String.format("{{Original uploader|%s|w}}", uploader));
-		if (!info.has("Permission"))
-			info.put("Permission", "");
-		if (!info.has("other versions"))
-			info.put("other versions", "");
+		info = filterFillInfo(info == null ? new Template("Information") : info);
 
 		// Append any additional Strings to the description.
 		if (!root.contents.isEmpty())
@@ -213,6 +199,27 @@ public class TransferFile
 			sumSection = m.reset().replaceAll("");
 			sumSection += x + "\n";
 		}
+	}
+
+	/**
+	 * Filters nonsense {{Information}} parameters and fills in missing default values.
+	 * 
+	 * @param info The information template
+	 * @return A new Template with filtered keys and default values where applicable
+	 */
+	private Template filterFillInfo(Template info)
+	{
+		Template t = new Template("Information");
+
+		t.put("Description", info.has("Description") ? info.get("Description") : "");
+		t.put("Date", info.has("Date") ? info.get("Date") : "");
+		t.put("Source", info.has("Source") ? info.get("Source")
+				: String.format("{{Transferred from|en.wikipedia|%s|%s}}", enwp.whoami(), Config.mtcComLink));
+		t.put("Author", info.has("Author") ? info.get("Author") : String.format("{{Original uploader|%s|w}}", uploader));
+		t.put("Permission", info.has("Permission") ? info.get("Permission") : "");
+		t.put("other versions", info.has("other versions") ? info.get("other versions") : "");
+
+		return t;
 	}
 
 	/**

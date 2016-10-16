@@ -15,6 +15,7 @@ import enwp.bots.ManageMTC;
 import enwp.bots.RemoveBadMTC;
 import enwp.bots.UnflagOI;
 import enwp.reports.CalcMTCRegex;
+import enwp.reports.FFDCount;
 import enwp.reports.FindBrokenSPI;
 import enwp.reports.FindOrphanedXfD;
 import enwp.reports.FindUntaggedDD;
@@ -101,6 +102,9 @@ public final class BMgr
 					break;
 				case 4:
 					CalcMTCRegex.main(pArgs);
+					break;
+				case 5:
+					FFDCount.main(pArgs);
 					break;
 				default:
 					System.err.printf(badNumberFmt, cl.getOptionValue('r'), "report");

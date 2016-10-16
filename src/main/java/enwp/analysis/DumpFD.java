@@ -31,7 +31,7 @@ public final class DumpFD
 	/**
 	 * The selection query offset and maximum number of items. These are off by default.
 	 */
-	private static int offset = 0, max = -1;
+	private static int offset = 0, max = 0;
 
 	/**
 	 * Regexes matching MTC and Orphan image templates.
@@ -69,7 +69,7 @@ public final class DumpFD
 				l = prepWS(wiki.whatTranscludesHere(srcMTC, NS.FILE));
 				break;
 			case 14: // category members
-				l = prepWS(wiki.getCategoryMembers(srcMTC, 10, NS.FILE));
+				l = prepWS(wiki.getCategoryMembers(srcMTC, max, NS.FILE));
 				break;
 			default:
 				throw new IllegalArgumentException(srcMTC + " is not a valid source for MTC files");
@@ -85,7 +85,6 @@ public final class DumpFD
 
 		wiki.edit(String.format("User:%s/MTCSources", wiki.whoami()), x, "Updating report");
 		wiki.edit(String.format("User:%s/MTCSources/List", wiki.whoami()), Toolbox.listify("", tl, true), "Updating report");
-		
 	}
 
 	/**
@@ -106,7 +105,7 @@ public final class DumpFD
 	 */
 	private static ArrayList<String> prepWS(ArrayList<String> l)
 	{
-		return max == -1 ? l : new ArrayList<>(l.subList(offset, max));
+		return max <= 0 ? l : new ArrayList<>(l.subList(offset, offset+max));
 	}
 
 	/**

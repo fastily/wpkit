@@ -4,22 +4,11 @@ apply plugin: 'maven'
 
 description="ctools build script"
 version="1.0.0"
-//group="fastily"
-
-sourceSets {
-    main {
-        resources {
-            srcDirs = ['.']
-            includes=['*.md']
-        }
-    }
-}
 
 compileJava {
     sourceCompatibility = "1.8"
     targetCompatibility = "1.8"
 }
-
 
 repositories {
     mavenCentral()
@@ -27,7 +16,6 @@ repositories {
 }
 
 dependencies {
-    compile 'org.slf4j:slf4j-api:1.7.21'
     compile 'commons-cli:commons-cli:1.3.1'
 
     compile project(":jwiki-extras")
@@ -35,4 +23,19 @@ dependencies {
 
 task wrapper(type: Wrapper) {
     gradleVersion = '3.1'
+}
+
+jar {
+  archiveName = "MTC-0.1.1.jar"
+
+  from {
+    configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    configurations.runtime.collect { it.isDirectory() ? it : zipTree(it) }
+  }
+    
+  manifest {
+    attributes 'Main-Class': 'mtc.MTCui'
+  }
+  
+  exclude "**/test/**", "enwp/**", "up/**", "**/README.md", "**/ToDo.md"
 }

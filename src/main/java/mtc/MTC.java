@@ -12,6 +12,7 @@ import fastily.jwiki.core.NS;
 import fastily.jwiki.core.Wiki;
 import fastily.jwiki.util.FError;
 import fastily.jwiki.util.FL;
+import fastily.jwikix.core.TParse;
 import fastily.jwikix.tplate.Template;
 import util.Toolbox;
 
@@ -39,6 +40,11 @@ public final class MTC
 	protected final Wiki enwp, com;
 
 	/**
+	 * Regex matching Copy to Commons templates.
+	 */
+	protected final String mtcRegex;
+	
+	/**
 	 * Flag indicating whether this is a debug-mode/dry run (do not perform transfers)
 	 */
 	protected boolean dryRun = false;
@@ -48,6 +54,11 @@ public final class MTC
 	 */
 	protected boolean ignoreFilter = false;
 
+	/**
+	 * Flag indicating whether the Commons category tracking transfers should be used.
+	 */
+	protected boolean useTrackingCat = true;
+	
 	/**
 	 * Contains data for license tags
 	 */
@@ -72,6 +83,8 @@ public final class MTC
 		com = wiki.getWiki("commons.wikimedia.org");
 		enwp = wiki.getWiki("en.wikipedia.org");
 
+		mtcRegex = TParse.makeTemplateRegex(enwp, "Template:Copy to Wikimedia Commons");
+		
 		// Process template data
 		for (Map.Entry<String, String> e : Toolbox.fetchPairedConfig(enwp, Config.fullname + "/Regexes").entrySet())
 		{

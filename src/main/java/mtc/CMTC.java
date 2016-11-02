@@ -38,6 +38,7 @@ public final class CMTC
 		Wiki wiki = Toolbox.getFastilyClone();
 		// Do initial logins, and generate MTC regexes
 		mtc = new MTC(wiki);
+		mtc.useTrackingCat = false;
 		mtc.dryRun = l.hasOption('d');
 
 		if (l.hasOption('f'))

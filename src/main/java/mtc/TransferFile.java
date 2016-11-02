@@ -10,6 +10,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import fastily.jwiki.core.MQuery;
+import fastily.jwiki.core.NS;
 import fastily.jwiki.core.Wiki;
 import fastily.jwiki.dwrap.ImageInfo;
 import fastily.jwiki.util.FL;
@@ -106,22 +107,29 @@ public class TransferFile
 	 */
 	protected boolean doTransfer()
 	{
-		root = ParsedItem.parse(enwp, wpFN);
-
-		imgInfoL = enwp.getImageInfo(wpFN);
-		uploader = imgInfoL.get(imgInfoL.size() - 1).user;
-
-		procText();
-		String t = gen();
-
-		if (mtc.dryRun)
+		try
 		{
-			System.out.println(t);
-			return true;
+			root = ParsedItem.parse(enwp, wpFN);
+
+			imgInfoL = enwp.getImageInfo(wpFN);
+			uploader = imgInfoL.get(imgInfoL.size() - 1).user;
+
+			procText();
+			String t = gen();
+
+			if (mtc.dryRun)
+			{
+				System.out.println(t);
+				return true;
+			}
+			else if (t != null && Toolbox.downloadFile(imgInfoL.get(0).url, localFN)
+					&& com.upload(Paths.get(localFN), comFN, t, String.format(Config.tFrom, wpFN)))
+				return enwp.edit(wpFN, String.format("{{subst:ncd|%s|reviewer=%s}}%n", comFN, enwp.whoami()) + enwp.getPageText(wpFN).replaceAll(mtc.mtcRegex, ""), Config.tTo);
 		}
-		else if (t != null && Toolbox.downloadFile(imgInfoL.get(0).url, localFN)
-				&& com.upload(Paths.get(localFN), comFN, t, String.format(Config.tFrom, wpFN)))
-			return enwp.addText(wpFN, String.format("{{subst:ncd|%s}}%n", comFN), Config.tTo, true);
+		catch (Throwable e)
+		{
+			e.printStackTrace();
+		}
 
 		return false;
 	}
@@ -135,8 +143,11 @@ public class TransferFile
 
 		// Normalize license and special template titles
 		for (Template t : masterTPL)
-			if (mtc.tpMap.containsKey(t.title))
-				t.title = mtc.tpMap.get(t.title);
+		{
+			String tp = enwp.whichNS(t.title).equals(NS.TEMPLATE) ? enwp.nss(t.title): t.title;
+			if (mtc.tpMap.containsKey(tp))
+				t.title = mtc.tpMap.get(tp);
+		}
 
 		ArrayList<Template> tpl = new ArrayList<>(masterTPL);
 
@@ -167,6 +178,10 @@ public class TransferFile
 				case "GFDL-self-with-disclaimers":
 					t.title = "GFDL-user-en-with-disclaimers";
 					t.put("1", uploader);
+					break;
+				case "GFDL-self":
+					t.title = "GFDL-self-en";
+					t.put("author", String.format("{{User at project|%s|w|en}}", uploader));
 					break;
 				case "Copy to Wikimedia Commons":
 					tpl.remove(t.drop());
@@ -215,7 +230,7 @@ public class TransferFile
 		t.put("Date", info.has("Date") ? info.get("Date") : "");
 		t.put("Source", info.has("Source") ? info.get("Source")
 				: String.format("{{Transferred from|en.wikipedia|%s|%s}}", enwp.whoami(), Config.mtcComLink));
-		t.put("Author", info.has("Author") ? info.get("Author") : String.format("{{Original uploader|%s|w}}", uploader));
+		t.put("Author", info.has("Author") ? info.get("Author") : "See below");
 		t.put("Permission", info.has("Permission") ? info.get("Permission") : "");
 		t.put("other versions", info.has("other versions") ? info.get("other versions") : "");
 
@@ -245,6 +260,9 @@ public class TransferFile
 					ii.user, ii.user, ii.summary.replace("\n", " "));
 		t += "|}\n\n{{Subst:Unc}}";
 
+		if(mtc.useTrackingCat)
+			t += "\n[[Category:Uploaded with MTC!]]";
+		
 		return t;
 	}
 }

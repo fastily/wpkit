@@ -22,7 +22,7 @@ import fastily.jwiki.core.NS;
 import fastily.jwiki.core.Wiki;
 import fastily.jwiki.util.FError;
 import fastily.jwiki.util.FL;
-import fastily.jwikix.ui.FXTool;
+import ctools.ui.FXTool;
 
 /**
  * An MTC UI window

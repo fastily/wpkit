@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import ctools.util.Toolbox;
 import enwp.WPStrings;
 import fastily.jwiki.core.NS;
 import fastily.jwiki.core.Wiki;
 import fastily.jwiki.util.FL;
 import fastily.jwiki.util.Tuple;
-import util.Toolbox;
 
 /**
  * Report which totals MTC counts by user.  Truncated to first 500 entries max in MTC.

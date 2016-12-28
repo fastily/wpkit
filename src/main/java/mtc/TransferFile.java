@@ -1,5 +1,6 @@
 package mtc;
 
+import java.net.URLEncoder;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -9,15 +10,14 @@ import java.util.HashSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import ctools.util.Toolbox;
 import fastily.jwiki.core.MQuery;
 import fastily.jwiki.core.NS;
 import fastily.jwiki.core.Wiki;
 import fastily.jwiki.dwrap.ImageInfo;
 import fastily.jwiki.util.FL;
-import fastily.jwiki.util.FString;
 import fastily.jwikix.tplate.ParsedItem;
 import fastily.jwikix.tplate.Template;
-import util.Toolbox;
 
 /**
  * Represents a file to transfer to Commons
@@ -122,7 +122,7 @@ public class TransferFile
 				System.out.println(t);
 				return true;
 			}
-			else if (t != null && Toolbox.downloadFile(imgInfoL.get(0).url, localFN)
+			else if (t != null && Toolbox.downloadFile(enwp.apiclient.client, imgInfoL.get(0).url.toString(), localFN)
 					&& com.upload(Paths.get(localFN), comFN, t, String.format(Config.tFrom, wpFN)))
 				return enwp.edit(wpFN, String.format("{{subst:ncd|%s|reviewer=%s}}%n", comFN, enwp.whoami()) + enwp.getPageText(wpFN).replaceAll(mtc.mtcRegex, ""), Config.tTo);
 		}
@@ -250,11 +250,18 @@ public class TransferFile
 		t = t.replaceAll("(?i)\\[\\[(w::|w:w:)", "[[w:"); // Remove any double colons in interwiki links
 
 		// Generate Upload Log Section
+		try
+		{
 		t += "\n== {{Original upload log}} ==\n"
-				+ String.format("{{Original description page|en.wikipedia|%s}}%n", FString.enc(enwp.nss(wpFN)))
+				+ String.format("{{Original description page|en.wikipedia|%s}}%n", URLEncoder.encode(enwp.nss(wpFN), "UTF-8"))
 				+ "{| class=\"wikitable\"\n! {{int:filehist-datetime}} !! {{int:filehist-dimensions}} !! {{int:filehist-user}} "
 				+ "!! {{int:filehist-comment}}\n|-\n";
-
+		}
+		catch(Throwable e)
+		{
+			e.printStackTrace();
+		}
+		
 		for (ImageInfo ii : imgInfoL)
 			t += String.format(uLFmt, dtf.format(LocalDateTime.ofInstant(ii.timestamp, ZoneOffset.UTC)), ii.dimensions.x, ii.dimensions.y,
 					ii.user, ii.user, ii.summary.replace("\n", " "));

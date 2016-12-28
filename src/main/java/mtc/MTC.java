@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.TreeMap;
 
+import ctools.util.Toolbox;
 import fastily.jwiki.core.MQuery;
 import fastily.jwiki.core.NS;
 import fastily.jwiki.core.Wiki;
@@ -14,7 +15,6 @@ import fastily.jwiki.util.FError;
 import fastily.jwiki.util.FL;
 import fastily.jwikix.core.TParse;
 import fastily.jwikix.tplate.Template;
-import util.Toolbox;
 
 /**
  * Business Logic for MTC. Contains shared methods, constants, and Objects.
@@ -146,7 +146,7 @@ public final class MTC
 	/**
 	 * Performs checks to determine if a file can be transfered to Commons.
 	 * 
-	 * @param title The title to check
+	 * @param titles The title to check
 	 * @return True if the file can <ins>probably</ins> be transfered to Commons.
 	 */
 	public ArrayList<String> canTransfer(ArrayList<String> titles)

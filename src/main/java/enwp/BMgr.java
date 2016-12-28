@@ -20,7 +20,7 @@ import enwp.reports.FindBrokenSPI;
 import enwp.reports.FindOrphanedXfD;
 import enwp.reports.FindUntaggedDD;
 import enwp.reports.TallyLics;
-import util.FCLI;
+import ctools.util.FCLI;
 
 /**
  * CLI interface which makes it easy to launch enwp bots/reports

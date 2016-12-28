@@ -2,17 +2,16 @@ package enwp.bots;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.regex.Pattern;
 
+import ctools.util.Toolbox;
 import fastily.jwiki.core.MQuery;
 import fastily.jwiki.core.NS;
-import fastily.jwiki.core.TPlate;
 import fastily.jwiki.core.Wiki;
 import fastily.jwiki.util.FL;
 import fastily.jwiki.util.Tuple;
 import fastily.jwikix.core.TParse;
-import util.Toolbox;
+import fastily.jwikix.tplate.ParsedItem;
 
 /**
  * Finds local enwp files transferred to Commons which have then been deleted on Commons.
@@ -62,22 +61,27 @@ public final class FindDelComFFD
 		HashMap<String, String> comPairs = new HashMap<>();
 
 		String comFile;
-		for (Map.Entry<String, String> e : pageTexts.entrySet())
-		{
-			comFile = TPlate.parse(enwp, TParse.extractTemplate(nomDelTemplPattern, e.getValue())).getStringFor("1");
-			if(comFile == null)
-				comFile = e.getKey();
-			
-			comPairs.put(e.getKey(), enwp.convertIfNotInNS(comFile, NS.FILE));
-		}
+		for (Tuple<String, String> e : FL.mapToList(pageTexts))
+			try
+			{
+				comFile = ParsedItem.parse(enwp, e.x, TParse.extractTemplate(nomDelTemplPattern, e.y)).tplates.get(0).get("1").getString();
+				if (comFile == null)
+					continue;
+
+				comPairs.put(e.x, enwp.convertIfNotInNS(comFile, NS.FILE));
+			}
+			catch (Throwable t)
+			{
+				t.printStackTrace();
+			}
 
 		HashMap<String, String> comDeletedPairs = new HashMap<>();
 		for (String s : MQuery.exists(com, false, new ArrayList<>(comPairs.keySet())))
 			if (!com.getLogs(comPairs.get(s), null, "delete", 1).isEmpty())
 				comDeletedPairs.put(s, comPairs.get(s));
-		
+
 		for (Tuple<String, String> t : FL.mapToList(comDeletedPairs))
 			enwp.edit(t.x, pageTexts.get(t.x).replaceAll(nomDelTemplRegex, String.format(delOnCom, enwp.nss(t.y))),
-					"BOT: Adding note that file has been deleted on Commons");
+				"BOT: Adding note that file has been deleted on Commons");
 	}
 }

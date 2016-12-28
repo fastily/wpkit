@@ -12,7 +12,6 @@ import java.util.stream.Stream;
 
 import fastily.jwiki.core.Wiki;
 import fastily.jwiki.util.FL;
-import fastily.jwiki.util.FString;
 import fastily.jwikix.core.WikiGen;
 
 /**
@@ -36,7 +35,7 @@ public final class Up
 	/**
 	 * The regex matching file extensions which can be uploaded to Commons
 	 */
-	private static final String extRegex = "(?i).+?\\.(" + FString.pipeFence(wiki.getAllowedFileExts()) + ")";
+	private static final String extRegex = "(?i).+?\\.(" + FL.pipeFence(wiki.getAllowedFileExts()) + ")";
 
 	/**
 	 * The String template for file description pages

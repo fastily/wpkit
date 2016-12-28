@@ -1,8 +1,7 @@
-package util;
+package ctools.util;
 
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.Instant;
@@ -15,11 +14,13 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import fastily.jwiki.core.ColorLog;
-import fastily.jwiki.core.Req;
 import fastily.jwiki.core.Wiki;
 import fastily.jwiki.util.FL;
 import fastily.jwikix.core.WikiGen;
 import fastily.jwikix.util.StrTool;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 /**
  * Miscellaneous custom functions common to my scripts/bots.
@@ -130,12 +131,29 @@ public final class Toolbox
 	 * @param localpath The local path to save the file at.
 	 * @return True on success.
 	 */
-	public static boolean downloadFile(URL u, String localpath)
+	public static boolean downloadFile(OkHttpClient client, String u, String localpath)
 	{
 		ColorLog.fyi("Downloading a file to " + localpath);
 
 		byte[] bf = new byte[1024 * 512]; // 512kb buffer.
 		int read;
+		try(Response r = client.newCall(new Request.Builder().url(u).get().build()).execute(); OutputStream out = Files.newOutputStream(Paths.get(localpath)))
+		{
+			InputStream in = r.body().byteStream();
+			while ((read = in.read(bf)) > -1)
+				out.write(bf, 0, read);
+			
+			return true;
+		}
+		catch(Throwable e)
+		{
+			e.printStackTrace();
+		}
+		
+		return false;
+		
+
+		/*int read;
 		try (InputStream in = Req.genericGET(u, null); OutputStream out = Files.newOutputStream(Paths.get(localpath)))
 		{
 			while ((read = in.read(bf)) > -1)
@@ -147,7 +165,7 @@ public final class Toolbox
 		{
 			e.printStackTrace();
 			return false;
-		}
+		}*/
 	}
 
 	/**

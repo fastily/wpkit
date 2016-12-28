@@ -11,9 +11,9 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import ctools.util.Toolbox;
 import fastily.jwiki.core.Wiki;
 import fastily.jwiki.util.FL;
-import util.Toolbox;
 
 /**
  * Keeps track of daily FfD count in a graph on wiki.
@@ -63,8 +63,9 @@ public class FFDCount
 		xl.add(String.format("%d/%d", ld.getMonthValue(), ld.getDayOfMonth()));
 
 		// Truncate to most recent 30 results
-		truncateAL(xl, 30);
-		truncateAL(yl, 30);
+		
+		xl = xl.size() > 30 ? new ArrayList<>(xl.subList(0, 30)) : xl;
+		yl = yl.size() > 30 ? new ArrayList<>(yl.subList(0, 30)) : yl;
 
 		// Edit
 		String x = String.join(",", xl), y = String.join(",", yl);
@@ -77,18 +78,6 @@ public class FFDCount
 		// Save results to disk for next run
 		Files.write(graphData, FL.toSAL(x, y), StandardOpenOption.CREATE, StandardOpenOption.WRITE,
 				StandardOpenOption.TRUNCATE_EXISTING);
-	}
-
-	/**
-	 * Truncates an ArrayList in size if it is larger than a specified amount.
-	 * 
-	 * @param l The ArrayList to truncate
-	 * @param max The maximum size this <code>l</code> should be
-	 */
-	private static void truncateAL(ArrayList<String> l, int max)
-	{
-		if (l.size() > max)
-			l.subList(0, max);
 	}
 
 	/**

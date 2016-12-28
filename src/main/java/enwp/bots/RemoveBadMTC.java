@@ -2,12 +2,12 @@ package enwp.bots;
 
 import java.util.HashSet;
 
+import ctools.util.Toolbox;
 import fastily.jwiki.core.NS;
 import fastily.jwiki.core.Wiki;
 import fastily.jwiki.util.FL;
 import fastily.jwikix.core.TParse;
 import fastily.jwikix.core.WikiX;
-import util.Toolbox;
 
 /**
  * Removes Copy to Wikimedia Commons on enwp files that may be ineligible for transfer to Commons.

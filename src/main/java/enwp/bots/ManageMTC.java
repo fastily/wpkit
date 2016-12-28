@@ -5,6 +5,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 
+import ctools.util.Toolbox;
 import enwp.WTP;
 import fastily.jwiki.core.NS;
 import fastily.jwiki.core.Wiki;
@@ -12,7 +13,6 @@ import fastily.jwiki.util.FL;
 import fastily.jwiki.util.GroupQueue;
 import fastily.jwiki.util.Tuple;
 import fastily.jwikix.core.MQueryX;
-import util.Toolbox;
 
 /**
  * Bot which finds files on enwp which have been copied to Commons and tags them for human review.

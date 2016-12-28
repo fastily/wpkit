@@ -1,4 +1,4 @@
-package util;
+package ctools.util;
 
 import fastily.jwiki.util.FError;
 

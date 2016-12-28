@@ -3,14 +3,13 @@ package enwp.reports;
 import java.util.ArrayList;
 import java.util.HashSet;
 
+import ctools.util.Toolbox;
 import fastily.jwiki.core.MQuery;
 import fastily.jwiki.core.NS;
 import fastily.jwiki.core.Wiki;
 import fastily.jwiki.util.FL;
-import fastily.jwiki.util.FString;
 import fastily.jwiki.util.Tuple;
 import fastily.jwikix.core.WikiX;
-import util.Toolbox;
 
 /**
  * Pre-computes regexes for MTC!
@@ -36,7 +35,7 @@ public class CalcMTCRegex
 		for (Tuple<String, ArrayList<String>> e : FL.mapToList(MQuery.linksHere(wiki, true, new ArrayList<>(rawL))))
 		{
 			e.y.add(e.x);
-			x += String.format("%s;%s%n", e.x, FString.pipeFence(WikiX.stripNamespaces(wiki, e.y)));
+			x += String.format("%s;%s%n", e.x, FL.pipeFence(WikiX.stripNamespaces(wiki, e.y)));
 		}
 
 		x += "</pre>";

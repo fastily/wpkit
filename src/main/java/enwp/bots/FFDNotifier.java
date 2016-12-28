@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Locale;
 
+import ctools.util.Toolbox;
 import enwp.WPStrings;
 import enwp.WTP;
 import fastily.jwiki.core.NS;
@@ -18,7 +19,6 @@ import fastily.jwiki.util.FL;
 import fastily.jwiki.util.MapList;
 import fastily.jwiki.util.Tuple;
 import fastily.jwikix.core.WikiX;
-import util.Toolbox;
 
 /**
  * Leaves courtesy notifications (where possible) for users whose files were nominated at FfD.

@@ -2,9 +2,9 @@ package enwp.bots;
 
 import java.util.HashSet;
 
+import ctools.util.Toolbox;
 import fastily.jwiki.core.NS;
 import fastily.jwiki.core.Wiki;
-import util.Toolbox;
 
 /**
  * Finds enwp files which are flagged as both free and non-free.

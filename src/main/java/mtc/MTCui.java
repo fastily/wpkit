@@ -4,10 +4,10 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import ctools.util.Toolbox;
 import fastily.jwiki.core.Wiki;
-import fastily.jwikix.ui.FXTool;
-import fastily.jwikix.ui.LoginController;
-import util.Toolbox;
+import ctools.ui.FXTool;
+import ctools.ui.LoginController;
 
 /**
  * A GUI wrapper for MTC

@@ -12,8 +12,8 @@ import fastily.jwiki.core.Wiki;
 import fastily.jwiki.util.FL;
 import fastily.jwiki.util.Tuple;
 import mtc.MTC;
-import util.FCLI;
-import util.Toolbox;
+import ctools.util.FCLI;
+import ctools.util.Toolbox;
 
 /**
  * Generates a report where each matching file found is dumped out username + <code>/MTCSources</code>.
@@ -29,9 +29,9 @@ public final class DumpFD
 	private static String srcMTC = "Category:Copy to Wikimedia Commons reviewed by a human";
 
 	/**
-	 * The selection query offset and maximum number of items. These are off by default.
+	 * The maximum number of items to generate a report for.  Set -1 to disable.
 	 */
-	private static int offset = 0, max = 0;
+	private static int max = 150;
 
 	/**
 	 * Regexes matching MTC and Orphan image templates.
@@ -45,15 +45,13 @@ public final class DumpFD
 	 */
 	public static void main(String[] args) throws Throwable
 	{
-		CommandLine cl = FCLI.gnuParse(makeOpts(), args, "DumpFD [-m] [-o] [-s]");
+		CommandLine cl = FCLI.gnuParse(makeOpts(), args, "DumpFD [-m] [-s]");
 		Wiki wiki = Toolbox.getFastilyClone();
 		mtcRegex = WTP.mtc.getRegex(wiki);
 		orRegex = WTP.orphan.getRegex(wiki);
 		
 		if (cl.hasOption('m'))
 			max = Integer.parseInt(cl.getOptionValue('m'));
-		if (cl.hasOption('o'))
-			offset = Integer.parseInt(cl.getOptionValue('o'));
 		if (cl.hasOption('s'))
 			srcMTC = cl.getOptionValue('s');
 
@@ -63,13 +61,13 @@ public final class DumpFD
 		{
 			case 0: // user, but sometimes w/o namespace.
 			case 2: // user
-				l = prepWS(wiki.getUserUploads(srcMTC));
+				l = wiki.getUserUploads(srcMTC);
 				break;
-			case 10: // template transclusions
-				l = prepWS(wiki.whatTranscludesHere(srcMTC, NS.FILE));
-				break;
+//			case 10: // template transclusions
+//				l = prepWS(wiki.whatTranscludesHere(srcMTC, NS.FILE));
+//				break;
 			case 14: // category members
-				l = prepWS(wiki.getCategoryMembers(srcMTC, max, NS.FILE));
+				l = wiki.getCategoryMembers(srcMTC, max, NS.FILE);
 				break;
 			default:
 				throw new IllegalArgumentException(srcMTC + " is not a valid source for MTC files");
@@ -96,17 +94,6 @@ public final class DumpFD
 	{		
 		return text.replaceAll("(?m)^\\=\\=.+?\\=\\=$\\s*", "").replaceAll(mtcRegex, "").replaceAll(orRegex, "");
 	}
-	
-	/**
-	 * Prepares the working set of files. Applies offsets and truncates the working set as specified by the user
-	 * 
-	 * @param l The raw input list
-	 * @return The updated working set of files.
-	 */
-	private static ArrayList<String> prepWS(ArrayList<String> l)
-	{
-		return max <= 0 ? l : new ArrayList<>(l.subList(offset, offset+max));
-	}
 
 	/**
 	 * Creates CLI options for DumpFD
@@ -117,7 +104,6 @@ public final class DumpFD
 	{
 		Options ol = FCLI.makeDefaultOptions();
 		ol.addOption(FCLI.makeArgOption("m", "The maximum number of items to fetch", "num"));
-		ol.addOption(FCLI.makeArgOption("o", "Offset the result set by the specified amount", "offset"));
 		ol.addOption(FCLI.makeArgOption("s", "The source page", "source"));
 
 		return ol;

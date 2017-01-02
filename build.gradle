@@ -11,18 +11,18 @@ compileJava {
 }
 
 repositories {
-    mavenCentral()
     jcenter()
 }
 
 dependencies {
     compile 'commons-cli:commons-cli:1.3.1'
+    compile "org.json:json:20160810"
 
     compile project(":jwiki-extras")
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '3.2'
+    gradleVersion = '3.2.1'
 }
 
 jar {

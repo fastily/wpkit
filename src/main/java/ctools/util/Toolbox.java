@@ -16,7 +16,7 @@ import java.util.stream.Stream;
 import fastily.jwiki.core.ColorLog;
 import fastily.jwiki.core.Wiki;
 import fastily.jwiki.util.FL;
-import fastily.jwikix.core.WikiGen;
+import fastily.jwiki.util.WikiGen;
 import fastily.jwikix.util.StrTool;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;

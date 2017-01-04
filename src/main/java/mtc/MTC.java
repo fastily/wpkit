@@ -8,13 +8,13 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import ctools.tplate.Template;
+import ctools.util.TParse;
 import ctools.util.Toolbox;
 import fastily.jwiki.core.MQuery;
 import fastily.jwiki.core.NS;
 import fastily.jwiki.core.Wiki;
 import fastily.jwiki.util.FError;
 import fastily.jwiki.util.FL;
-import fastily.jwikix.core.TParse;
 
 /**
  * Business Logic for MTC. Contains shared methods, constants, and Objects.

@@ -2,13 +2,13 @@ package enwp.bots;
 
 import java.util.Map;
 
+import ctools.util.TParse;
 import ctools.util.Toolbox;
 import fastily.jwiki.core.MQuery;
 import fastily.jwiki.core.NS;
 import fastily.jwiki.core.Wiki;
 import fastily.jwiki.util.FL;
 import fastily.jwiki.util.GroupQueue;
-import fastily.jwikix.core.TParse;
 
 /**
  * Reomves {{Orphan image}} from freely licensed files which contain file links in the main space.

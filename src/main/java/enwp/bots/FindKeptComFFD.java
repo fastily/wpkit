@@ -1,11 +1,11 @@
 package enwp.bots;
 
+import ctools.util.MQueryX;
+import ctools.util.TParse;
 import ctools.util.Toolbox;
 import fastily.jwiki.core.NS;
 import fastily.jwiki.core.Wiki;
 import fastily.jwiki.util.FL;
-import fastily.jwikix.core.MQueryX;
-import fastily.jwikix.core.TParse;
 
 /**
  * Finds local enwp files which were nominated for deletion on Commons but kept.

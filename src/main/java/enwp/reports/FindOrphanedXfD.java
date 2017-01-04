@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import ctools.util.StrTool;
 import ctools.util.Toolbox;
 import enwp.WPStrings;
 import fastily.jwiki.core.NS;
@@ -12,7 +13,6 @@ import fastily.jwiki.core.Wiki;
 import fastily.jwiki.util.FL;
 import fastily.jwiki.util.Triple;
 import fastily.jwiki.core.MQuery;
-import fastily.jwikix.util.StrTool;
 
 /**
  * Looks for pages nominated for XfD with no corresponding XfD page/entry.

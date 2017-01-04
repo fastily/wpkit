@@ -3,9 +3,9 @@ package enwp;
 import java.util.ArrayList;
 import java.util.HashSet;
 
+import ctools.util.TParse;
 import fastily.jwiki.core.NS;
 import fastily.jwiki.core.Wiki;
-import fastily.jwikix.core.TParse;
 
 /**
  * Lists commonly used templates and contains methods to get regexes and transclusions for them.

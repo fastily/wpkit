@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import ctools.util.Toolbox;
+import ctools.util.WikiX;
 import enwp.WPStrings;
 import enwp.WTP;
 import fastily.jwiki.core.NS;
@@ -20,7 +21,6 @@ import fastily.jwiki.core.Wiki;
 import fastily.jwiki.util.FL;
 import fastily.jwiki.util.MapList;
 import fastily.jwiki.util.Tuple;
-import fastily.jwikix.core.WikiX;
 
 /**
  * Checks daily deletion categories on enwp and notifies users if they have not been notified.

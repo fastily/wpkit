@@ -5,13 +5,13 @@ import java.util.HashMap;
 import java.util.regex.Pattern;
 
 import ctools.tplate.ParsedItem;
+import ctools.util.TParse;
 import ctools.util.Toolbox;
 import fastily.jwiki.core.MQuery;
 import fastily.jwiki.core.NS;
 import fastily.jwiki.core.Wiki;
 import fastily.jwiki.util.FL;
 import fastily.jwiki.util.Tuple;
-import fastily.jwikix.core.TParse;
 
 /**
  * Finds local enwp files transferred to Commons which have then been deleted on Commons.

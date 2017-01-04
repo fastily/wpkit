@@ -3,12 +3,12 @@ package enwp.bots;
 import java.util.ArrayList;
 import java.util.HashSet;
 
+import ctools.util.MQueryX;
+import ctools.util.TParse;
 import ctools.util.Toolbox;
 import fastily.jwiki.core.NS;
 import fastily.jwiki.core.Wiki;
 import fastily.jwiki.util.FL;
-import fastily.jwikix.core.MQueryX;
-import fastily.jwikix.core.TParse;
 
 /**
  * Finds files on enwp nominated for deletion on Commons and flags the local file.

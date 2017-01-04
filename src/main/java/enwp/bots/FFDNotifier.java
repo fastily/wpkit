@@ -18,7 +18,7 @@ import fastily.jwiki.core.Wiki;
 import fastily.jwiki.util.FL;
 import fastily.jwiki.util.MapList;
 import fastily.jwiki.util.Tuple;
-import fastily.jwikix.core.WikiX;
+import ctools.util.WikiX;
 
 /**
  * Leaves courtesy notifications (where possible) for users whose files were nominated at FfD.

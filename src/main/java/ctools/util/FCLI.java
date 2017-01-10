@@ -1,13 +1,13 @@
 package ctools.util;
 
-import fastily.jwiki.util.FError;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
+
+import fastily.jwiki.util.FSystem;
 
 /**
  * Static methods to assist with CLI.
@@ -82,7 +82,7 @@ public final class FCLI
 		}
 		catch (Throwable e)
 		{
-			FError.errAndExit(e, null);
+			FSystem.errAndExit(e, null);
 			return null; // dead code to shut up compiler.
 		}
 	}

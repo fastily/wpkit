@@ -7,7 +7,6 @@ This repository is also the home to
 
 ### Dependencies
 * [jwiki](https://github.com/fastily/jwiki)
-* [jwiki-extras](https://github.com/fastily/jwiki-extras)
 
 ### Minimum System Requirements
 * JDK/JRE ≥ 8u40

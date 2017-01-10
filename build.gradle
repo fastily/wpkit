@@ -19,11 +19,10 @@ dependencies {
     compile "org.json:json:20160810"
 
     compile project(":jwiki")
-    //compile project(":jwiki-extras")
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '3.2.1'
+    gradleVersion = '3.3'
 }
 
 jar {

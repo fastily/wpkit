@@ -13,8 +13,8 @@ import ctools.util.Toolbox;
 import fastily.jwiki.core.MQuery;
 import fastily.jwiki.core.NS;
 import fastily.jwiki.core.Wiki;
-import fastily.jwiki.util.FError;
 import fastily.jwiki.util.FL;
+import fastily.jwiki.util.FSystem;
 
 /**
  * Business Logic for MTC. Contains shared methods, constants, and Objects.
@@ -75,7 +75,7 @@ public final class MTC
 	{
 		// Generate download directory
 		if (Files.isRegularFile(Config.fdPath))
-			FError.errAndExit(Config.fdump + " is file, please remove it so MTC can continue");
+			FSystem.errAndExit(Config.fdump + " is file, please remove it so MTC can continue");
 		else if (!Files.isDirectory(Config.fdPath))
 			Files.createDirectory(Config.fdPath);
 

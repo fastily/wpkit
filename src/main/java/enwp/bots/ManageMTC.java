@@ -5,8 +5,8 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 
-import ctools.util.MQueryX;
 import ctools.util.Toolbox;
+import ctools.util.WikiX;
 import enwp.WTP;
 import fastily.jwiki.core.NS;
 import fastily.jwiki.core.Wiki;
@@ -58,7 +58,7 @@ public final class ManageMTC
 		GroupQueue<String> l = new GroupQueue<>(wiki.whatTranscludesHere(WTP.mtc.title), 50);
 
 		while (l.has())
-			for (Tuple<String, String> e : FL.mapToList(MQueryX.getFirstOnlySharedDuplicate(wiki, l.poll())))
+			for (Tuple<String, String> e : FL.mapToList(WikiX.getFirstOnlySharedDuplicate(wiki, l.poll())))
 				if (nobots.contains(e.x))
 					continue;
 				else if (nowCommons.contains(e.x))

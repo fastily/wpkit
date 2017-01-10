@@ -16,6 +16,7 @@ import java.util.stream.Stream;
 import fastily.jwiki.core.ColorLog;
 import fastily.jwiki.core.Wiki;
 import fastily.jwiki.util.FL;
+import fastily.jwiki.util.FSystem;
 import fastily.jwiki.util.WikiGen;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -211,7 +212,7 @@ public final class Toolbox
 	 */
 	public static String listify(String header, Collection<String> titles, boolean doEscape)
 	{
-		String fmtStr = "* [[" + (doEscape ? ":" : "") + "%s]]\n";
+		String fmtStr = "* [[" + (doEscape ? ":" : "") + "%s]]" + FSystem.lsep;
 
 		String x = "" + header;
 		for (String s : titles)

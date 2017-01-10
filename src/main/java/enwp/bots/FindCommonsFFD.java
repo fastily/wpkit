@@ -3,9 +3,9 @@ package enwp.bots;
 import java.util.ArrayList;
 import java.util.HashSet;
 
-import ctools.util.MQueryX;
 import ctools.util.TParse;
 import ctools.util.Toolbox;
+import ctools.util.WikiX;
 import fastily.jwiki.core.NS;
 import fastily.jwiki.core.Wiki;
 import fastily.jwiki.util.FL;
@@ -56,7 +56,7 @@ public class FindCommonsFFD
 	 */
 	private static void procCat(String cat)
 	{
-		MQueryX.getFirstOnlySharedDuplicate(enwp, enwp.getCategoryMembers(cat, NS.FILE)).entrySet().stream()
+		WikiX.getFirstOnlySharedDuplicate(enwp, enwp.getCategoryMembers(cat, NS.FILE)).entrySet().stream()
 				.filter(e -> ffdCom.contains(e.getValue())).forEach(e -> enwp.replaceText(e.getKey(), ncRegex,
 						String.format(nfdc, enwp.nss(e.getValue())), "BOT: Flag transfered file that is up for deletion on Commons"));
 	}

@@ -1,7 +1,7 @@
 package ctools.ui;
 
 import fastily.jwiki.core.Wiki;
-import fastily.jwiki.util.FError;
+import fastily.jwiki.util.FSystem;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -64,7 +64,7 @@ public class LoginController
 	protected void tryLogin(ActionEvent e)
 	{
 		if (callback == null)
-			FError.errAndExit("You need to specify a callback in setOnLoginSuccess before using this method!");
+			FSystem.errAndExit("You need to specify a callback in setOnLoginSuccess before using this method!");
 
 		FXTool.runAsyncTask(() -> {
 			try
@@ -105,7 +105,7 @@ public class LoginController
 		}
 		catch (Throwable e)
 		{
-			FError.errAndExit(e, "Should never reach this point; Login.fxml is missing?");
+			FSystem.errAndExit(e, "Should never reach this point; Login.fxml is missing?");
 		}
 
 		lc.callback = r;

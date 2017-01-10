@@ -20,8 +20,8 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.Clipboard;
 import fastily.jwiki.core.NS;
 import fastily.jwiki.core.Wiki;
-import fastily.jwiki.util.FError;
 import fastily.jwiki.util.FL;
+import fastily.jwiki.util.FSystem;
 import ctools.ui.FXTool;
 
 /**
@@ -118,7 +118,7 @@ public class MTCController
 		catch (Throwable e)
 		{
 			FXTool.warnUser("Should never reach this point; MTC.fxml is missing?");
-			FError.errAndExit(e, null);
+			FSystem.errAndExit(e, null);
 		}
 
 		MTCController mc = fl.getController();
@@ -138,7 +138,7 @@ public class MTCController
 		catch (Throwable e)
 		{
 			FXTool.warnUser("Are you missing filesystem Read/Write Permissions?");
-			FError.errAndExit(e, null);
+			FSystem.errAndExit(e, null);
 		}
 
 		return mc;

@@ -3,6 +3,7 @@ package enwp.bots;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashSet;
 
 import ctools.util.Toolbox;
@@ -10,9 +11,7 @@ import ctools.util.WikiX;
 import enwp.WTP;
 import fastily.jwiki.core.NS;
 import fastily.jwiki.core.Wiki;
-import fastily.jwiki.util.FL;
 import fastily.jwiki.util.GroupQueue;
-import fastily.jwiki.util.Tuple;
 
 /**
  * Bot which finds files on enwp which have been copied to Commons and tags them for human review.
@@ -38,11 +37,6 @@ public final class ManageMTC
 	private static final HashSet<String> nowCommons = WTP.ncd.getTransclusionSet(wiki, NS.FILE);
 
 	/**
-	 * The list of pages for bots to avoid
-	 */
-	private static final HashSet<String> nobots = WTP.nobots.getTransclusionSet(wiki, NS.FILE);
-	
-	/**
 	 * The ncd template to fill out
 	 */
 	protected static final String ncd = String.format("{{Now Commons|%%s|date=%s|bot=%s}}%n",
@@ -55,16 +49,18 @@ public final class ManageMTC
 	 */
 	public static void main(String[] args)
 	{
-		GroupQueue<String> l = new GroupQueue<>(wiki.whatTranscludesHere(WTP.mtc.title), 50);
-
+		ArrayList<String> tl = wiki.whatTranscludesHere(WTP.mtc.title);
+		tl.removeAll(WTP.nobots.getTransclusionSet(wiki, NS.FILE));
+		
+		GroupQueue<String> l = new GroupQueue<>(tl, 50);
 		while (l.has())
-			for (Tuple<String, String> e : FL.mapToList(WikiX.getFirstOnlySharedDuplicate(wiki, l.poll())))
-				if (nobots.contains(e.x))
-					continue;
-				else if (nowCommons.contains(e.x))
-					wiki.replaceText(e.x, tRegex, "BOT: Remove redundant {{Copy to Wikimedia Commons}}");
+			WikiX.getFirstOnlySharedDuplicate(wiki, l.poll()).forEach((k,v) ->
+			{
+				if (nowCommons.contains(k))
+					wiki.replaceText(k, tRegex, "BOT: File has already been copied to Commons");
 				else
-					wiki.edit(e.x, String.format(ncd, e.y) + wiki.getPageText(e.x).replaceAll(tRegex, ""),
-							"BOT: Add {{Now Commons}}, file is available on Commons");
+					wiki.edit(k, String.format(ncd, v) + wiki.getPageText(k).replaceAll(tRegex, ""),
+							"BOT: File is available on Commons");
+			});
 	}
 }

@@ -19,7 +19,7 @@ import enwp.WTP;
 import fastily.jwiki.core.NS;
 import fastily.jwiki.core.Wiki;
 import fastily.jwiki.util.FL;
-import fastily.jwiki.util.MapList;
+import fastily.jwiki.util.MultiMap;
 import fastily.jwiki.util.Tuple;
 
 /**
@@ -92,7 +92,7 @@ public class DDNotifier
 		if (!cat.isPresent())
 			return;
 
-		MapList<String, String> ml = new MapList<>();
+		MultiMap<String, String> ml = new MultiMap<>();
 		for (String s : wiki.getCategoryMembers(cat.get(), NS.FILE))
 			if (!idkL.contains(s))
 				ml.put(WikiX.getPageAuthor(wiki, s), s); // null keys allowed

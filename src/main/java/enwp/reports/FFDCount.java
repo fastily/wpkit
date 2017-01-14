@@ -24,6 +24,26 @@ import fastily.jwiki.util.FL;
 public class FFDCount
 {
 	/**
+	 * The Wiki to use
+	 */
+	private static Wiki wiki = Toolbox.getFastilyBot();
+
+	/**
+	 * Location of {@code ffd-count.txt} for storage of results.
+	 */
+	private static Path graphData = Paths.get("ffd-count.txt");
+
+	/**
+	 * Stores the datasets to work with. {@code xl} is the x-axis (dates), and {@code yl} is the y-axis (ffd count)
+	 */
+	private static ArrayList<String> xl, yl;
+
+	/**
+	 * The maximum number of data points to graph.
+	 */
+	private static int maxSize = 31;
+
+	/**
 	 * Main driver
 	 * 
 	 * @param args Program args
@@ -31,19 +51,17 @@ public class FFDCount
 	 */
 	public static void main(String[] args) throws Throwable
 	{
-		Wiki wiki = Toolbox.getFastilyBot();
-		Path graphData = Paths.get("ffd-count.txt");
-		ArrayList<String> xl = new ArrayList<>(), yl = new ArrayList<>();
-
 		// Read in data
 		if (Files.exists(graphData))
 		{
 			List<String> l = Files.readAllLines(graphData);
-			if (l.size() >= 2)
-			{
-				getGraphData(xl, l.get(0));
-				getGraphData(yl, l.get(1));
-			}
+			xl = new ArrayList<>(Arrays.asList(l.get(0).split(",")));
+			yl = new ArrayList<>(Arrays.asList(l.get(1).split(",")));
+		}
+		else
+		{
+			xl = new ArrayList<>();
+			yl = new ArrayList<>();
 		}
 
 		// Calculate today's FfD total
@@ -55,21 +73,19 @@ public class FFDCount
 			String t = m.group();
 			total += Integer.parseInt(t.substring(t.indexOf('-') + 1, t.indexOf("remaining")).trim());
 		}
-
 		yl.add("" + total);
 
 		// Get and use today's date
 		LocalDate ld = LocalDate.now();
 		xl.add(String.format("%d/%d", ld.getMonthValue(), ld.getDayOfMonth()));
 
-		// Truncate to most recent 30 results
-		
-		xl = xl.size() > 30 ? new ArrayList<>(xl.subList(0, 30)) : xl;
-		yl = yl.size() > 30 ? new ArrayList<>(yl.subList(0, 30)) : yl;
+		// Truncate to most recent (maxSize) results
+		xl = truncateRS(xl);
+		yl = truncateRS(yl);
 
 		// Edit
 		String x = String.join(",", xl), y = String.join(",", yl);
-		wiki.edit(String.format("User:%s/FFDCount", wiki.whoami()),
+		wiki.edit(String.format("User:%s/FFDCountDUMMY", wiki.whoami()),
 				String.format(
 						"{{Graph:Chart|width=1200|height=400|type=line|xAxisTitle=Date|yAxisTitle=Open FfDs|x=%s|y=%s}}%nUpdated ~~~~~", x,
 						y),
@@ -81,13 +97,14 @@ public class FFDCount
 	}
 
 	/**
-	 * Parses an axis of raw graph data
+	 * Returns, at most, the last {@code maxSize} elements of {@code l}.
 	 * 
-	 * @param l The ArrayList to load parsed values into
-	 * @param raw The raw, unparsed axis retrieved from the graph data
+	 * @param l The List to work with
+	 * @return A List with the last, at most, {@code maxSize} elements.
 	 */
-	private static void getGraphData(ArrayList<String> l, String raw)
+	private static ArrayList<String> truncateRS(ArrayList<String> l)
 	{
-		l.addAll(Arrays.asList(raw.split(",")));
+		int length = l.size();
+		return length > maxSize ? new ArrayList<>(l.subList(Math.max(length - maxSize, 0), length)) : l;
 	}
 }

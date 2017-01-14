@@ -15,7 +15,7 @@ import fastily.jwiki.util.GSONP;
  * @author Fastily
  *
  */
-public final class TUtils
+final class TUtils
 {
 	/**
 	 * Constructors disallowed

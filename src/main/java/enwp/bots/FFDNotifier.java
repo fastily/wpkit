@@ -16,7 +16,7 @@ import enwp.WTP;
 import fastily.jwiki.core.NS;
 import fastily.jwiki.core.Wiki;
 import fastily.jwiki.util.FL;
-import fastily.jwiki.util.MapList;
+import fastily.jwiki.util.MultiMap;
 import fastily.jwiki.util.Tuple;
 import ctools.util.WikiX;
 
@@ -61,7 +61,7 @@ public final class FFDNotifier
 	 */
 	public static void main(String[] args)
 	{
-		MapList<String, String> l = new MapList<>();
+		MultiMap<String, String> l = new MultiMap<>();
 		wiki.getSectionHeaders(targetFFD).stream().filter(t -> t.x == 4 && wiki.whichNS(t.y).equals(NS.FILE))
 				.forEach(t -> l.put(WikiX.getPageAuthor(wiki, t.y), t.y));
 

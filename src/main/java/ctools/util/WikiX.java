@@ -3,7 +3,6 @@ package ctools.util;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 
 import fastily.jwiki.core.MQuery;
 import fastily.jwiki.core.NS;
@@ -111,7 +110,16 @@ public final class WikiX
 	 */
 	public static HashMap<String, String> getFirstOnlySharedDuplicate(Wiki wiki, ArrayList<String> titles)
 	{
-		return FL.toHM(MQuery.getSharedDuplicatesOf(wiki, titles).entrySet().stream().filter(e -> !e.getValue().isEmpty()),
-				Map.Entry::getKey, e -> e.getValue().get(0));
+		HashMap<String, String> l = new HashMap<>();
+		MQuery.getSharedDuplicatesOf(wiki, titles).forEach((k,v) ->
+		{
+			if(!v.isEmpty())
+				l.put(k, v.get(0));
+		});
+		
+		return l;
+		
+		/*return FL.toHM(MQuery.getSharedDuplicatesOf(wiki, titles).entrySet().stream().filter(e -> !e.getValue().isEmpty()),
+				Map.Entry::getKey, e -> e.getValue().get(0));*/
 	}
 }

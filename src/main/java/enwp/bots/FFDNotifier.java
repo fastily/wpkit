@@ -15,9 +15,7 @@ import enwp.WPStrings;
 import enwp.WTP;
 import fastily.jwiki.core.NS;
 import fastily.jwiki.core.Wiki;
-import fastily.jwiki.util.FL;
 import fastily.jwiki.util.MultiMap;
-import fastily.jwiki.util.Tuple;
 import ctools.util.WikiX;
 
 /**
@@ -50,7 +48,7 @@ public final class FFDNotifier
 			today.getMonth().getDisplayName(TextStyle.FULL, Locale.US), today.getDayOfMonth());
 
 	/**
-	 * The list of pages transcluding {{Bots}}. These are avoided.
+	 * List of users which do {@code nobots}. These are avoided.
 	 */
 	private static final HashSet<String> noBots = WTP.nobots.getTransclusionSet(wiki, NS.USER_TALK);
 
@@ -62,23 +60,21 @@ public final class FFDNotifier
 	public static void main(String[] args)
 	{
 		MultiMap<String, String> l = new MultiMap<>();
-		wiki.getSectionHeaders(targetFFD).stream().filter(t -> t.x == 4 && wiki.whichNS(t.y).equals(NS.FILE))
-				.forEach(t -> l.put(WikiX.getPageAuthor(wiki, t.y), t.y));
+		wiki.getSectionHeaders(targetFFD).stream().filter(t -> t.x == 4 && wiki.whichNS(t.y).equals(NS.FILE)).forEach(t -> {
+			String author = WikiX.getPageAuthor(wiki, t.y);
+			if (author != null && !noBots.contains(author = wiki.convertIfNotInNS(author, NS.USER_TALK)))
+				l.put(author, t.y);
+		});
 
-		for (Tuple<String, ArrayList<String>> e : FL.mapToList(l.l))
-		{
-			String tp = "User talk:" + e.x;
-			if (noBots.contains(tp))
-				continue;
-
-			ArrayList<String> rl = Toolbox.detLinksInHist(wiki, tp, e.y, start, end);
+		l.l.forEach((k, v) -> {
+			ArrayList<String> rl = Toolbox.detLinksInHist(wiki, k, v, start, end);
 			if (rl.isEmpty())
-				continue;
+				return;
 
 			String x = String.format("%n{{subst:User:FastilyBot/Task12Note|%s|%s}}", rl.get(0), targetFFD);
 			if (rl.size() > 1)
 				x += Toolbox.listify("\nAlso:\n", rl.subList(1, rl.size()), true);
-			wiki.addText(tp, x + WPStrings.botNote, "BOT: Notify user of FfD", false);
-		}
+			wiki.addText(k, x + WPStrings.botNote, "BOT: Notify user of FfD", false);
+		});
 	}
 }

@@ -118,8 +118,5 @@ public final class WikiX
 		});
 		
 		return l;
-		
-		/*return FL.toHM(MQuery.getSharedDuplicatesOf(wiki, titles).entrySet().stream().filter(e -> !e.getValue().isEmpty()),
-				Map.Entry::getKey, e -> e.getValue().get(0));*/
 	}
 }

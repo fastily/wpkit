@@ -85,7 +85,7 @@ public class FFDCount
 
 		// Edit
 		String x = String.join(",", xl), y = String.join(",", yl);
-		wiki.edit(String.format("User:%s/FFDCountDUMMY", wiki.whoami()),
+		wiki.edit(String.format("User:%s/FFDCount", wiki.whoami()),
 				String.format(
 						"{{Graph:Chart|width=1200|height=400|type=line|xAxisTitle=Date|yAxisTitle=Open FfDs|x=%s|y=%s}}%nUpdated ~~~~~", x,
 						y),

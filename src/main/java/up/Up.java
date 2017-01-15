@@ -23,14 +23,9 @@ import fastily.jwiki.util.WikiGen;
 public final class Up
 {
 	/**
-	 * The user to login as
-	 */
-	private static final String user = "Fastily";
-
-	/**
 	 * The Wiki object to use
 	 */
-	private static final Wiki wiki = WikiGen.wg.get(user, "commons.wikimedia.org");
+	private static final Wiki wiki = WikiGen.wg.get("Fastily", "commons.wikimedia.org");
 
 	/**
 	 * The regex matching file extensions which can be uploaded to Commons
@@ -44,7 +39,7 @@ public final class Up
 			+ "author=~~~\n|permission=\n|other versions=\n}}\n\n=={{int:license-header}}==\n{{Self|Cc-by-sa-4.0}}\n\n[[Category:%s]]\n[[Category:Files by %s]]";
 
 	/**
-	 * The formatter to use for <code>date=</code> dates
+	 * The formatter to use for {@code date=} dates
 	 */
 	private static final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
@@ -66,36 +61,31 @@ public final class Up
 	 */
 	public static void main(String[] args) throws Throwable
 	{
-		for (Path d : FL.toAL(Stream.of(args).map(Paths::get).filter(Files::isDirectory)))
-			procDir(d);
+		Stream.of(args).map(Paths::get).filter(Files::isDirectory).forEach(d -> {
+			int i = 0;
+			String name = d.getFileName().toString();
+
+			try
+			{
+				for (Path f : FL.toSet(Files.list(d).filter(f -> Files.isRegularFile(f) && f.toString().matches(extRegex))))
+					if (!wiki.upload(f, String.format(fnBase, name, ++i, getExt(f)),
+							String.format(infoT, name,
+									dtf.format(LocalDateTime.ofInstant(Files.getLastModifiedTime(f).toInstant(), ZoneId.of("UTC"))), name,
+									wiki.whoami()),
+							""))
+						fails.add(f.toString());
+			}
+			catch (Throwable e)
+			{
+				e.printStackTrace();
+			}
+		});
 
 		if (!fails.isEmpty())
 		{
 			System.out.println("Failed on:");
 			for (String s : fails)
 				System.out.println("\t* " + s);
-		}
-	}
-
-	/**
-	 * Looks for files in a directory to upload
-	 * 
-	 * @param d The directory to look at
-	 * @throws Throwable I/O Error
-	 */
-	private static void procDir(Path d) throws Throwable
-	{
-		int i = 0;
-		String name = d.getFileName().toString();
-
-		for (Path f : FL.toSet(Files.list(d).filter(f -> Files.isRegularFile(f) && f.toString().matches(extRegex))))
-		{
-			String text = String.format(infoT, name,
-					dtf.format(LocalDateTime.ofInstant(Files.getLastModifiedTime(f).toInstant(), ZoneId.of("UTC"))), name, user);
-			String fn = String.format(fnBase, name, ++i, getExt(f));
-
-			if (!wiki.upload(f, fn, text, ""))
-				fails.add(f.toString());
 		}
 	}
 

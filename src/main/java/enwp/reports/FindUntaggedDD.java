@@ -52,9 +52,9 @@ public final class FindUntaggedDD
 	private static final Path wpddfiles = Paths.get("WPDDFiles.txt");
 
 	/**
-	 * The maximum number of old reports to keep on the <code>reportPage</code>.
+	 * The maximum number of old reports to keep on {@code reportPage}.
 	 */
-	private static final int maxOldReports = 13;
+	private static final int maxOldReports = 25;
 
 	/**
 	 * Main driver
@@ -76,7 +76,7 @@ public final class FindUntaggedDD
 		String text = wiki.getPageText(reportPage);
 		ArrayList<Triple<Integer, String, Integer>> sections = wiki.getSectionHeaders(reportPage);
 		if (sections.size() > maxOldReports)
-			text = text.substring(0, sections.get(sections.size() - 1).z);
+			text = text.substring(0, sections.get(maxOldReports).z);
 
 		wiki.edit(reportPage, Toolbox.listify("== ~~~~~ ==\n", MQuery.exists(wiki, true, new ArrayList<>(cacheList)), true) + text,
 				"Updating report");

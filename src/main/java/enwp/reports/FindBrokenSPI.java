@@ -2,7 +2,6 @@ package enwp.reports;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Map;
 
 import ctools.util.Toolbox;
 import enwp.WPStrings;
@@ -32,7 +31,7 @@ public final class FindBrokenSPI
 	/**
 	 * Main driver
 	 * 
-	 * @param args No args, not used.
+	 * @param args N/A
 	 */
 	public static void main(String[] args)
 	{
@@ -43,9 +42,13 @@ public final class FindBrokenSPI
 		spiCases.removeAll(wiki.whatTranscludesHere("Template:SPI archive notice", NS.PROJECT));
 		spiCases.removeAll(wiki.getLinksOnPage(report + "/Ignore"));
 
-		wiki.edit(report,
-				Toolbox.listify("{{/Header}}\n" + WPStrings.updatedAt, MQuery.resolveRedirects(wiki, new ArrayList<>(spiCases))
-						.entrySet().stream().filter(e -> e.getKey().equals(e.getValue())).map(Map.Entry::getValue), false),
-				"BOT: Update list");
+		ArrayList<String> l = new ArrayList<>();
+		MQuery.resolveRedirects(wiki, new ArrayList<>(spiCases)).forEach((k, v) -> {
+			if (k.equals(v)) // filter redirects
+				l.add(v);
+		});
+
+		wiki.edit(report, Toolbox.listify("{{/Header}}\n" + WPStrings.updatedAt, l, false),
+				String.format("BOT: Update list (%d items)", l.size()));
 	}
 }

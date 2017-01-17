@@ -17,7 +17,7 @@ import enwp.bots.UnflagOI;
 import enwp.reports.CalcMTCRegex;
 import enwp.reports.FFDCount;
 import enwp.reports.FindBrokenSPI;
-import enwp.reports.FindOrphanedXfD;
+import enwp.reports.FindOrphanedFfD;
 import enwp.reports.FindUntaggedDD;
 import enwp.reports.TallyLics;
 import ctools.util.FCLI;
@@ -95,7 +95,7 @@ public final class BMgr
 					FindUntaggedDD.main(pArgs);
 					break;
 				case 2:
-					FindOrphanedXfD.main(pArgs);
+					FindOrphanedFfD.main(pArgs);
 					break;
 				case 3:
 					TallyLics.main(pArgs);

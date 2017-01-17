@@ -81,11 +81,11 @@ public final class WikiX
 	}
 
 	/**
-	 * Get the page author of a title. This is based on the first available public revision to a page.
+	 * Get the page author of a page. This is based on the first available public revision to a page.
 	 * 
 	 * @param wiki The Wiki object to use
 	 * @param title The title to query
-	 * @return The page author (without the "User:" prefix), or null on error.
+	 * @return The page author, without the {@code User:} prefix, or null on error.
 	 */
 	public static String getPageAuthor(Wiki wiki, String title)
 	{
@@ -100,6 +100,26 @@ public final class WikiX
 		}
 	}
 
+	/**
+	 * Get the most recent editor of a page.
+	 * @param wiki The Wiki object to use
+	 * @param title The title to query
+	 * @return  The most recent editor to a page, without the {@code User:} prefix, or null on error. 
+	 */
+	public static String getLastEditor(Wiki wiki, String title)
+	{
+		try
+		{
+			return wiki.getRevisions(title, 1, false, null, null).get(0).user;
+		}
+		catch(Throwable e)
+		{
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	
 	/**
 	 * Gets the first shared (non-local) duplicate for each file with a duplicate. Filters out files which do not have
 	 * duplicates.

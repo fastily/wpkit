@@ -1,15 +1,15 @@
 package enwp.reports;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
 
 import ctools.util.Toolbox;
 import enwp.WPStrings;
 import fastily.jwiki.core.MQuery;
 import fastily.jwiki.core.NS;
 import fastily.jwiki.core.Wiki;
+import fastily.jwiki.util.FL;
 
 /**
  * Counts up free license tags and checks if a Commons counterpart exists.
@@ -22,24 +22,28 @@ public class TallyLics
 	/**
 	 * The Wiki objects to use
 	 */
-	private static final Wiki enwp = Toolbox.getFastilyBot(), com = enwp.getWiki("commons.wikimedia.org");
+	private static Wiki enwp = Toolbox.getFastilyBot(), com = enwp.getWiki("commons.wikimedia.org");
 
+	/**
+	 * The title to post the report to.
+	 */
+	private static String reportPage = String.format("User:%s/Free License Tags", enwp.whoami());
+	
 	/**
 	 * The blacklist of pages to omit from the final report
 	 */
-	private static ArrayList<String> bl = enwp.getLinksOnPage("User:FastilyBot/Free License Tags/Ignore", NS.TEMPLATE);
+	private static ArrayList<String> bl = enwp.getLinksOnPage(reportPage + "/Ignore", NS.TEMPLATE);
 
 	/**
 	 * A list of en.wikipedia free license templates
 	 */
-	protected static TreeSet<String> enwptpl = enwp.getLinksOnPage("User:FastilyBot/Free License Tags/Sources", NS.CATEGORY).stream()
-			.flatMap(cat -> enwp.getCategoryMembers(cat, NS.TEMPLATE).stream()).filter(s -> !bl.contains(s) && !s.endsWith("/sandbox"))
-			.collect(Collectors.toCollection(TreeSet::new));
+	protected static ArrayList<String> enwptpl = FL.toAL(enwp.getLinksOnPage(reportPage + "/Sources", NS.CATEGORY).stream()
+			.flatMap(cat -> enwp.getCategoryMembers(cat, NS.TEMPLATE).stream()).filter(s -> !bl.contains(s) && !s.endsWith("/sandbox")));
 
 	/**
 	 * The list of Commons templates with the same name as the enwp templates.
 	 */
-	protected static HashSet<String> comtpl = new HashSet<>(MQuery.exists(com, true, new ArrayList<>(enwptpl)));
+	protected static HashSet<String> comtpl = new HashSet<>(MQuery.exists(com, true, enwptpl));
 
 	/**
 	 * Main driver
@@ -48,13 +52,16 @@ public class TallyLics
 	 */
 	public static void main(String[] args)
 	{
+		Collections.sort(enwptpl);
+		
 		String dump = WPStrings.updatedAt + "\n{| class=\"wikitable sortable\" style=\"margin-left: auto; margin-right: auto;width:100%;\" \n! # !! Name !! Commons? \n";
+		
 		int i = 0;
 		for (String s : enwptpl)
-			dump += String.format("|-%n|%d ||{{Tlx|%s}} ||[[c:%s|%b]] %n", i++, enwp.nss(s), s, comtpl.contains(s));
+			dump += String.format("|-%n|%d ||{{Tlx|%s}} ||[[c:%s|%b]] %n", ++i, enwp.nss(s), s, comtpl.contains(s));
 
 		dump += "|}";
 
-		enwp.edit("User:FastilyBot/Free License Tags", dump, "Updating report");
+		enwp.edit(reportPage, dump, "Updating report");
 	}
 }

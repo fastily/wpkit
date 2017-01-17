@@ -49,17 +49,16 @@ public final class StrTool
 	{
 		return new StringBuffer(s).insert(index, insert).toString();
 	}
-
+	
 	/**
-	 * Determines if a List contains a String with at least one of the specified prefixes.
-	 * 
-	 * @param l The List of Strings to check for a String with a given prefix
-	 * @param prefixes The prefixes to look for in the list
-	 * @return True if the List contains a String that starts with one of the specified prefixes.
+	 * Determines if a List of String contains an element prefixed by {@code prefix}.
+	 * @param l The List of String to check.
+	 * @param prefix The prefix to look for.
+	 * @return True if {@code l} has at least one String prefixed by {@code prefix}.
 	 */
-	public static boolean hasStrWithPrefix(ArrayList<String> l, Collection<String> prefixes)
+	public static boolean hasStrWithPrefix(ArrayList<String> l, String prefix)
 	{
-		return l.stream().anyMatch(s -> prefixes.stream().anyMatch(s::startsWith));
+		return l.stream().anyMatch(s -> s.startsWith(prefix));
 	}
 
 	/**

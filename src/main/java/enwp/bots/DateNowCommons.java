@@ -2,9 +2,9 @@ package enwp.bots;
 
 import java.util.ArrayList;
 
-import ctools.util.TParse;
 import ctools.util.Toolbox;
 import ctools.util.WikiX;
+import enwp.WTP;
 import fastily.jwiki.core.NS;
 import fastily.jwiki.core.Wiki;
 
@@ -20,12 +20,12 @@ public class DateNowCommons
 	/**
 	 * The Wiki Object to use
 	 */
-	private static final Wiki wiki = Toolbox.getFastilyBot();
+	private static Wiki wiki = Toolbox.getFastilyBot();
 
 	/**
 	 * Matches {{Now Commons}} templates
 	 */
-	private static final String ncRegex = TParse.makeTemplateRegex(wiki, "Template:Now Commons");
+	private static String ncRegex = WTP.ncd.getRegex(wiki);
 
 	/**
 	 * Main driver

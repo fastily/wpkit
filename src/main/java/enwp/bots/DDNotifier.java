@@ -9,7 +9,6 @@ import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Optional;
 
 import ctools.util.Toolbox;
@@ -20,7 +19,6 @@ import fastily.jwiki.core.NS;
 import fastily.jwiki.core.Wiki;
 import fastily.jwiki.util.FL;
 import fastily.jwiki.util.MultiMap;
-import fastily.jwiki.util.Tuple;
 
 /**
  * Checks daily deletion categories on enwp and notifies users if they have not been notified.
@@ -33,18 +31,18 @@ public class DDNotifier
 	/**
 	 * The Wiki object to use
 	 */
-	private static final Wiki wiki = Toolbox.getFastilyBot();
+	private static Wiki wiki = Toolbox.getFastilyBot();
 
 	/**
-	 * A list of categories to check if users have been notified.
+	 * The root configuration page.
 	 */
-	private static final ArrayList<Tuple<String, String>> rules = FL
-			.mapToList(Toolbox.fetchPairedConfig(wiki, "User:FastilyBot/Task6Rules"));
-
+	private static String baseConfig = String.format("User:%s/Task6/", wiki.whoami());
+	
 	/**
 	 * The start of today, and the start of yesterday (target date)
 	 */
-	private static final ZonedDateTime targetDT = ZonedDateTime.of(LocalDate.now(ZoneOffset.UTC), LocalTime.of(0, 0), ZoneOffset.UTC).minusDays(1);
+	private static final ZonedDateTime targetDT = ZonedDateTime.of(LocalDate.now(ZoneOffset.UTC), LocalTime.of(0, 0), ZoneOffset.UTC)
+			.minusDays(1);
 
 	/**
 	 * Time stamps, used to select talk page revisions which were made in the past day only.
@@ -65,9 +63,8 @@ public class DDNotifier
 	/**
 	 * The list of files with templates that trigger the bot unnecessarily.
 	 */
-	private static final HashSet<String> idkL = FL
-			.toSet(FL.toSAL("Template:Don't know", "Template:Somewebsite", "Template:Untagged", "Template:No copyright holder",
-					"Template:No copyright information").stream().flatMap(s -> wiki.whatTranscludesHere(s).stream()));
+	private static final HashSet<String> idkL = FL.toSet(wiki.getLinksOnPage(baseConfig + "Ignore", NS.TEMPLATE).stream()
+			.flatMap(s -> wiki.whatTranscludesHere(s, NS.FILE).stream()));
 
 	/**
 	 * Main driver
@@ -76,8 +73,7 @@ public class DDNotifier
 	 */
 	public static void main(String[] args)
 	{
-		for (Tuple<String, String> t : rules)
-			procPair(t.x, t.y);
+		Toolbox.fetchPairedConfig(wiki, baseConfig + "Rules").forEach((k, v) -> procPair(k, v));
 	}
 
 	/**
@@ -87,31 +83,34 @@ public class DDNotifier
 	 * @param templ The Template which will be used to notify users.
 	 */
 	private static void procPair(String rootCat, String templ)
-	{
+	{		
 		Optional<String> cat = wiki.getCategoryMembers(rootCat, NS.CATEGORY).stream().filter(s -> s.endsWith(targetDateStr)).findAny();
 		if (!cat.isPresent())
 			return;
 
 		MultiMap<String, String> ml = new MultiMap<>();
-		for (String s : wiki.getCategoryMembers(cat.get(), NS.FILE))
-			if (!idkL.contains(s))
-				ml.put(WikiX.getPageAuthor(wiki, s), s); // null keys allowed
+		wiki.getCategoryMembers(cat.get(), NS.FILE).forEach(s -> {
+			if (idkL.contains(s))
+				return;
+			
+			String author = WikiX.getPageAuthor(wiki, s);
+			if(author != null)
+				ml.put(wiki.convertIfNotInNS(author, NS.USER_TALK), s);
+		});
+		
+		ml.l.forEach((k, v) -> {
+			if (talkPageBL.contains(k))
+				return;
 
-		for (Map.Entry<String, ArrayList<String>> e : ml.l.entrySet())
-		{
-			String tp = "User talk:" + e.getKey();
-			if (talkPageBL.contains(tp))
-				continue;
-
-			ArrayList<String> notifyList = Toolbox.detLinksInHist(wiki, tp, e.getValue(), start, end);
+			ArrayList<String> notifyList = Toolbox.detLinksInHist(wiki, k, v, start, end);
 			if (notifyList.isEmpty())
-				continue;
+				return;
 
 			String x = String.format("%n{{subst:%s|1=%s}}%n", templ, notifyList.get(0));
 			if (notifyList.size() > 1)
 				x += Toolbox.listify("\nAlso:\n", notifyList.subList(1, notifyList.size()), true);
-			
-			wiki.addText(tp, x + WPStrings.botNote, "BOT: Notify user of possible file issue(s)", false);
-		}
+
+			wiki.addText(k, x + WPStrings.botNote, "BOT: Notify user of possible file issue(s)", false);
+		});
 	}
 }

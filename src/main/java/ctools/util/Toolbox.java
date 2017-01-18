@@ -87,6 +87,16 @@ public final class Toolbox
 	}
 
 	/**
+	 * Derives a Wiki from {@code wiki} with the domain set to {@code commons.wikimedia.org}.
+	 * @param wiki The Wiki object to derive a new Commons Wiki from.
+	 * @return A Wiki pointing to Commons, or null on error.
+	 */
+	public static Wiki getCommons(Wiki wiki)
+	{
+		return wiki.getWiki("commons.wikimedia.org");
+	}
+	
+	/**
 	 * Fetches the contents of a page, splits them by new line, and strips empty Strings and Strings starting with '&gt;'
 	 * 
 	 * @param wiki The Wiki object to use
@@ -190,7 +200,7 @@ public final class Toolbox
 	}
 
 	/**
-	 * Permutes a filename by adding a random number to the end before the file extension. PRECONDITION: <code>fn</code>
+	 * Permutes a filename by adding a random number to the end before the file extension. PRECONDITION: {@code fn}
 	 * is a valid filename with an extension, of the format (e.g. blahblah.jpg)
 	 * 
 	 * @param fn The base filename to permute

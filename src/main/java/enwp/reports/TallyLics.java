@@ -22,7 +22,7 @@ public class TallyLics
 	/**
 	 * The Wiki objects to use
 	 */
-	private static Wiki enwp = Toolbox.getFastilyBot(), com = enwp.getWiki("commons.wikimedia.org");
+	private static Wiki enwp = Toolbox.getFastilyBot(), com = Toolbox.getCommons(enwp);
 
 	/**
 	 * The title to post the report to.

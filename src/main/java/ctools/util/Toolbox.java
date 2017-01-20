@@ -161,21 +161,6 @@ public final class Toolbox
 		}
 		
 		return false;
-		
-
-		/*int read;
-		try (InputStream in = Req.genericGET(u, null); OutputStream out = Files.newOutputStream(Paths.get(localpath)))
-		{
-			while ((read = in.read(bf)) > -1)
-				out.write(bf, 0, read);
-
-			return true;
-		}
-		catch (Throwable e)
-		{
-			e.printStackTrace();
-			return false;
-		}*/
 	}
 
 	/**

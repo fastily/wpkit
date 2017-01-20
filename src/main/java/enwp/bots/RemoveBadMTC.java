@@ -2,15 +2,14 @@ package enwp.bots;
 
 import java.util.HashSet;
 
-import ctools.util.TParse;
 import ctools.util.Toolbox;
 import ctools.util.WikiX;
+import enwp.WTP;
 import fastily.jwiki.core.NS;
 import fastily.jwiki.core.Wiki;
-import fastily.jwiki.util.FL;
 
 /**
- * Removes Copy to Wikimedia Commons on enwp files that may be ineligible for transfer to Commons.
+ * Untags non-eligible files for Commons.
  * 
  * @author Fastily
  *
@@ -23,27 +22,23 @@ public final class RemoveBadMTC
 	private static final Wiki wiki = Toolbox.getFastilyBot();
 
 	/**
-	 * The Copy to Wikimedia Commons template title
+	 * Regular expression matching {@code Template:Copy to Wikimedia Commons}
 	 */
-	private static final String mtc = "Template:Copy to Wikimedia Commons";
-	
-	/**
-	 * Creates the regular expression matching Copy to Wikimedia Commons
-	 */
-	private static final String tRegex = TParse.makeTemplateRegex(wiki, mtc);
+	private static final String tRegex = WTP.mtc.getRegex(wiki);
 
 	/**
 	 * Main driver
 	 * 
-	 * @param args No args, not used.
+	 * @param args None, n/a
 	 */
 	public static void main(String[] args) throws Throwable
 	{
-		HashSet<String> mtcFiles = new HashSet<>(wiki.filterByNS(wiki.whatTranscludesHere(mtc), NS.FILE));
-		mtcFiles.removeAll(WikiX.getCategoryMembersR(wiki, "Category:Copy to Wikimedia Commons reviewed by a human").y); //ignore reviewed files
+		HashSet<String> mtcFiles = WTP.mtc.getTransclusionSet(wiki, NS.FILE);
+		mtcFiles.removeAll(WikiX.getCategoryMembersR(wiki, "Category:Copy to Wikimedia Commons reviewed by a human").y);
+		mtcFiles.removeAll(wiki.getCategoryMembers("Category:Copy to Wikimedia Commons (inline-identified)"));
 		
-		for (String blt : wiki.getLinksOnPage("User:FastilyBot/Task2Blacklist"))
-			for (String x : FL.toAL(wiki.getCategoryMembers(blt, NS.FILE).stream().filter(mtcFiles::contains)))
-				wiki.replaceText(x, tRegex, "", "BOT: Remove {{Copy to Wikimedia Commons}}; the file may not be eligible for Commons");
+		for (String blt : wiki.getLinksOnPage(String.format("User:%s/Task2/Blacklist", wiki.whoami())))
+			wiki.getCategoryMembers(blt, NS.FILE).stream().filter(mtcFiles::contains)
+					.forEach(s -> wiki.replaceText(s, tRegex, "BOT: file may not be eligible for Commons"));
 	}
 }

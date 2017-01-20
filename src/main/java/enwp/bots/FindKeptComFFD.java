@@ -1,11 +1,12 @@
 package enwp.bots;
 
-import ctools.util.TParse;
+import java.util.HashSet;
+
 import ctools.util.Toolbox;
 import ctools.util.WikiX;
+import enwp.WTP;
 import fastily.jwiki.core.NS;
 import fastily.jwiki.core.Wiki;
-import fastily.jwiki.util.FL;
 
 /**
  * Finds local enwp files which were nominated for deletion on Commons but kept.
@@ -23,7 +24,7 @@ public final class FindKeptComFFD
 	/**
 	 * The regex matching Template:Nominated for deletion on Commons.
 	 */
-	private static final String nfdcRegex = TParse.makeTemplateRegex(wiki, "Template:Nominated for deletion on Commons");
+	private static final String nfdcRegex = WTP.nomDelOnCom.getRegex(wiki);
 
 	/**
 	 * Main driver
@@ -32,9 +33,12 @@ public final class FindKeptComFFD
 	 */
 	public static void main(String[] args)
 	{
-		FL.mapToList(WikiX.getFirstOnlySharedDuplicate(wiki,
-				wiki.getCategoryMembers("Category:Files nominated for deletion on Wikimedia Commons", NS.FILE))).stream()
-				.filter(t -> !FindCommonsFFD.ffdCom.contains(t.y)).forEach(t -> wiki.replaceText(t.x, nfdcRegex,
-						String.format(ManageMTC.ncd, t.y), "BOT: File is no longer nominated for deletion on Commons"));
+		HashSet<String> cffdl = FindCommonsFFD.findComFFD();
+
+		WikiX.getFirstOnlySharedDuplicate(wiki,
+				wiki.getCategoryMembers("Category:Files nominated for deletion on Wikimedia Commons", NS.FILE)).forEach((k, v) -> {
+					if (!cffdl.contains(wiki.convertIfNotInNS(v, NS.FILE)))
+						wiki.replaceText(k, nfdcRegex, String.format(ManageMTC.ncd, v), "BOT: File is not up for deletion on Commons");
+				});
 	}
 }

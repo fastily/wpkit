@@ -16,22 +16,27 @@ import fastily.jwiki.core.Wiki;
 public final class WTP
 {
 	/**
-	 * Wraps <code>{{Copy to Wikimedia Commons}}</code>
+	 * Wraps {@code Template:Copy to Wikimedia Commons}
 	 */
 	public static final WTP mtc = new WTP("Template:Copy to Wikimedia Commons");
 
 	/**
-	 * Wraps <code>{{Bots}}</code>
+	 * Wraps {@code Template:Nominated for deletion on Commons}
+	 */
+	public static final WTP nomDelOnCom = new WTP("Template:Nominated for deletion on Commons");
+	
+	/**
+	 * Wraps {@code Template:Bots}
 	 */
 	public static final WTP nobots = new WTP("Template:Bots");
 
 	/**
-	 * Wraps <code>{{Now Commons}}</code>
+	 * Wraps {@code Template:Now Commons}
 	 */
 	public static final WTP ncd = new WTP("Template:Now Commons");
 
 	/**
-	 * Wraps <code>{{Orphan image}}</code>
+	 * Wraps {@code Template:Orphan image}
 	 */
 	public static final WTP orphan = new WTP("Template:Orphan image");
 

@@ -2,10 +2,11 @@ package enwp.bots;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.stream.Stream;
 
-import ctools.util.TParse;
 import ctools.util.Toolbox;
 import ctools.util.WikiX;
+import enwp.WTP;
 import fastily.jwiki.core.NS;
 import fastily.jwiki.core.Wiki;
 import fastily.jwiki.util.FL;
@@ -19,24 +20,14 @@ import fastily.jwiki.util.FL;
 public class FindCommonsFFD
 {
 	/**
-	 * The Wiki objects to use
+	 * The Wiki object to use
 	 */
-	private static final Wiki enwp = Toolbox.getFastilyBot(), com = enwp.getWiki("commons.wikimedia.org");
-
-	/**
-	 * A Set of files nominated for deletion on Commons
-	 */
-	protected static final HashSet<String> ffdCom = initComFFD();
+	private static Wiki enwp = Toolbox.getFastilyBot();
 
 	/**
 	 * Matches wikitext usages of Template:Now Commons
 	 */
-	private static final String ncRegex = TParse.makeTemplateRegex(enwp, "Template:Now Commons");
-
-	/**
-	 * The template String for Template:Nominated for deletion on Commons
-	 */
-	private static final String nfdc = "{{Nominated for deletion on Commons|%s}}";
+	private static final String ncRegex = WTP.ncd.getRegex(enwp);
 
 	/**
 	 * Main driver
@@ -45,36 +36,31 @@ public class FindCommonsFFD
 	 */
 	public static void main(String[] args)
 	{
-		procCat("Category:All Wikipedia files with the same name on Wikimedia Commons");
-		procCat("Category:All Wikipedia files with a different name on Wikimedia Commons");
+		HashSet<String> fl = findComFFD();
+
+		WikiX.getFirstOnlySharedDuplicate(enwp, enwp.whatTranscludesHere(WTP.ncd.title, NS.FILE)).forEach((k, v) -> {
+			if (fl.contains(enwp.convertIfNotInNS(v, NS.FILE)))
+				enwp.replaceText(k, ncRegex, String.format("{{Nominated for deletion on Commons|%s}}", enwp.nss(v)),
+						"BOT: File is up for deletion on Commons");
+		});
 	}
 
 	/**
-	 * Inspect elements a specified category for files which are nominated for deletion on Commons
+	 * Fetches the Set of files currently nominated for deletion on Commons
 	 * 
-	 * @param cat The Category to check.
+	 * @return The Set of files nominated for deletion on Commons.
 	 */
-	private static void procCat(String cat)
+	protected static HashSet<String> findComFFD()
 	{
-		WikiX.getFirstOnlySharedDuplicate(enwp, enwp.getCategoryMembers(cat, NS.FILE)).entrySet().stream()
-				.filter(e -> ffdCom.contains(e.getValue())).forEach(e -> enwp.replaceText(e.getKey(), ncRegex,
-						String.format(nfdc, enwp.nss(e.getValue())), "BOT: Flag transfered file that is up for deletion on Commons"));
-	}
+		Wiki wiki = new Wiki("commons.wikimedia.org");
 
-	/**
-	 * Compiles the Set of files nominated for deletion on Commons
-	 * 
-	 * @return The Set of files currently nominated for deletion on Commons
-	 */
-	private static HashSet<String> initComFFD()
-	{
 		ArrayList<String> cats = FL.toSAL("Category:Copyright violations", "Category:Other speedy deletions");
 		cats.addAll(FL
-				.toAL(FL.toSAL("Category:Media missing permission", "Category:Media without a license", "Category:Media without a source")
-						.stream().flatMap(c -> com.getCategoryMembers(c, NS.CATEGORY).stream()).filter(s -> s.matches(".+?\\d{4}"))));
+				.toAL(Stream.of("Category:Media missing permission", "Category:Media without a license", "Category:Media without a source")
+						.flatMap(c -> wiki.getCategoryMembers(c, NS.CATEGORY).stream()).filter(s -> s.matches(".+?\\d{4}"))));
 
-		HashSet<String> l = new HashSet<>(FL.toAL(cats.stream().flatMap(c -> com.getCategoryMembers(c, NS.FILE).stream())));
-		l.addAll(com.whatTranscludesHere("Template:Delete"));
+		HashSet<String> l = FL.toSet(cats.stream().flatMap(c -> wiki.getCategoryMembers(c, NS.FILE).stream()));
+		l.addAll(wiki.whatTranscludesHere("Template:Delete"));
 
 		return l;
 	}

@@ -2,16 +2,17 @@ package enwp.bots;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 
 import ctools.tplate.ParsedItem;
 import ctools.util.TParse;
 import ctools.util.Toolbox;
+import enwp.WTP;
 import fastily.jwiki.core.MQuery;
 import fastily.jwiki.core.NS;
 import fastily.jwiki.core.Wiki;
 import fastily.jwiki.util.FL;
-import fastily.jwiki.util.Tuple;
 
 /**
  * Finds local enwp files transferred to Commons which have then been deleted on Commons.
@@ -24,32 +25,18 @@ public final class FindDelComFFD
 	/**
 	 * The Wiki objects to use
 	 */
-	private static final Wiki enwp = Toolbox.getFastilyBot(), com = enwp.getWiki("commons.wikimedia.org");
+	private static Wiki enwp = Toolbox.getFastilyBot(), com = Toolbox.getCommons(enwp);
 
 	/**
-	 * Nominated for deletion on Commons Template title
+	 * A Pattern representation of {@code Template:Nominated for deletion on Commons}
 	 */
-	private static final String nomDelTempl = "Template:Nominated for deletion on Commons";
-
-	/**
-	 * Nominated for deletion on Commons template-matching String regex
-	 */
-	private static final String nomDelTemplRegex = TParse.makeTemplateRegex(enwp, nomDelTempl);
-
-	/**
-	 * A Pattern representation of <code>nomDelTemplRegex</code>
-	 */
-	private static final Pattern nomDelTemplPattern = Pattern.compile(TParse.makeTemplateRegex(enwp, nomDelTempl));
+	private static final Pattern nomDelTemplPattern = Pattern.compile(WTP.nomDelOnCom.getRegex(enwp));
 
 	/**
 	 * The Map of file names and page texts on enwp to work with.
 	 */
-	private static final HashMap<String, String> pageTexts = MQuery.getPageText(enwp, enwp.whatTranscludesHere(nomDelTempl, NS.FILE));
-
-	/**
-	 * Template String for template to be applied to files which have been deleted on Commons
-	 */
-	private static final String delOnCom = "{{Deleted on Commons|%s}}";
+	private static final HashMap<String, String> pageTexts = MQuery.getPageText(enwp,
+			enwp.whatTranscludesHere(WTP.nomDelOnCom.title, NS.FILE));
 
 	/**
 	 * Main driver
@@ -59,29 +46,24 @@ public final class FindDelComFFD
 	public static void main(String[] args)
 	{
 		HashMap<String, String> comPairs = new HashMap<>();
-
-		String comFile;
-		for (Tuple<String, String> e : FL.mapToList(pageTexts))
+		pageTexts.forEach((k, v) -> {
 			try
 			{
-				comFile = ParsedItem.parse(enwp, e.x, TParse.extractTemplate(nomDelTemplPattern, e.y)).tplates.get(0).get("1").getString();
-				if (comFile == null)
-					continue;
-
-				comPairs.put(e.x, enwp.convertIfNotInNS(comFile, NS.FILE));
+				String comFile = ParsedItem.parse(enwp, k, TParse.extractTemplate(nomDelTemplPattern, v)).tplates.get(0).get("1")
+						.getString();
+				if (comFile != null)
+					comPairs.put(k, enwp.convertIfNotInNS(comFile, NS.FILE));
 			}
-			catch (Throwable t)
+			catch (Throwable e)
 			{
-				t.printStackTrace();
+				e.printStackTrace();
 			}
+		});
 
-		HashMap<String, String> comDeletedPairs = new HashMap<>();
-		for (String s : MQuery.exists(com, false, new ArrayList<>(comPairs.keySet())))
-			if (!com.getLogs(comPairs.get(s), null, "delete", 1).isEmpty())
-				comDeletedPairs.put(s, comPairs.get(s));
-
-		for (Tuple<String, String> t : FL.mapToList(comDeletedPairs))
-			enwp.edit(t.x, pageTexts.get(t.x).replaceAll(nomDelTemplRegex, String.format(delOnCom, enwp.nss(t.y))),
-				"BOT: Adding note that file has been deleted on Commons");
+		FL.toHM(MQuery.exists(com, false, new ArrayList<>(comPairs.keySet())).stream()
+				.filter(s -> !com.getLogs(comPairs.get(s), null, "delete", 1).isEmpty()), Function.identity(), comPairs::get)
+				.forEach((k, v) -> enwp.edit(k,
+						pageTexts.get(k).replaceAll(WTP.nomDelOnCom.getRegex(enwp), String.format("{{Deleted on Commons|%s}}", enwp.nss(v))),
+						"BOT: Adding note that file has been deleted on Commons"));
 	}
 }

@@ -1,4 +1,4 @@
-package enwp.analysis;
+package mtc;
 
 import java.util.ArrayList;
 
@@ -9,7 +9,6 @@ import enwp.WTP;
 import fastily.jwiki.core.MQuery;
 import fastily.jwiki.core.NS;
 import fastily.jwiki.core.Wiki;
-import mtc.MTC;
 import ctools.util.FCLI;
 import ctools.util.Toolbox;
 import ctools.util.WikiX;

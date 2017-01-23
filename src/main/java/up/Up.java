@@ -10,9 +10,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.stream.Stream;
 
+import ctools.util.Toolbox;
 import fastily.jwiki.core.Wiki;
 import fastily.jwiki.util.FL;
-import fastily.jwiki.util.WikiGen;
 
 /**
  * Simple Wikimedia Commons Uploader
@@ -25,7 +25,7 @@ public final class Up
 	/**
 	 * The Wiki object to use
 	 */
-	private static final Wiki wiki = WikiGen.wg.get("Fastily", "commons.wikimedia.org");
+	private static final Wiki wiki = Toolbox.getFastily();
 
 	/**
 	 * The regex matching file extensions which can be uploaded to Commons

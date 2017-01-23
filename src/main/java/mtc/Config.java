@@ -3,8 +3,8 @@ package mtc;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import fastily.jwiki.core.Wiki;
 import fastily.jwiki.util.FSystem;
-
 
 /**
  * Configurable, frequently used constant Strings for MTC.
@@ -30,19 +30,9 @@ public class Config
 	protected static final String fdump = "mtcfiles" + FSystem.psep;
 
 	/**
-	 * The Path object pointing to <code>fdump</code>.
+	 * The Path object pointing to {@code fdump}
 	 */
 	protected static final Path fdPath = Paths.get(fdump);
-
-	/**
-	 * The URL to post to.
-	 */
-	protected static final String chURL = "http://tools.wmflabs.org/commonshelper/index.php";
-
-	/**
-	 * The template text to post to the wmflabs tool.
-	 */
-	protected static final String chPOSTfmt = "language=en&project=wikipedia&image=%s&newname=&ignorewarnings=1&doit=Get+text&test=%%2F";
 
 	/**
 	 * Basic wikitext link to MTC!. For use in edit summaries.
@@ -63,11 +53,11 @@ public class Config
 	 * Edit summary for files transferred to Commons on enwp
 	 */
 	protected static final String tTo = String.format("Transferred to Commons (%s)", mtcLink);
-
+	
 	/**
 	 * Constructors disallowed.
 	 */
-	private Config()
+	private Config(Wiki enwp)
 	{
 
 	}

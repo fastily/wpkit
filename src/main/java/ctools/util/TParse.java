@@ -29,17 +29,6 @@ public class TParse
 	}
 
 	/**
-	 * Makes a regex which matches a title on a page. Converts regex operators to their escaped counterparts.
-	 * 
-	 * @param title The title to convert into a regex.
-	 * @return The regex.
-	 */
-	public static String makePageTitleRegex(String title)
-	{
-		return String.format("(?si)(%s)", TParse.escapeRegexChars(title).replaceAll("( |_)", "( |_)"));
-	}
-
-	/**
 	 * Escapes reserved regex characters of the Java Pattern API in a String.
 	 * 
 	 * @param s The String to escape regex chars from

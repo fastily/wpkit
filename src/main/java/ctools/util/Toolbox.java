@@ -10,7 +10,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Random;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import fastily.jwiki.core.ColorLog;
@@ -110,7 +109,7 @@ public final class Toolbox
 
 	/**
 	 * Parses a config page with key-value pairs. Empty lines and lines starting with '&gt;' are ignored. Key-value pairs
-	 * should be split by <code>;</code>, one pair per line.
+	 * should be split by {@code ;}, one pair per line.
 	 * 
 	 * @param wiki The Wiki object to use
 	 * @param title The title of the config page to parse
@@ -118,8 +117,11 @@ public final class Toolbox
 	 */
 	public static HashMap<String, String> fetchPairedConfig(Wiki wiki, String title)
 	{
-		return new HashMap<>(Stream.of(wiki.getPageText(title).split("\n")).filter(s -> !s.startsWith("<") && !s.isEmpty())
-				.map(s -> s.split(";", 2)).collect(Collectors.toMap(a -> a[0], a -> a[1])));
+		return FL.toHM(Stream.of(wiki.getPageText(title).split("\n")).filter(s -> !s.startsWith("<") && !s.isEmpty())
+				.map(s -> s.split(";", 2)), a -> a[0], a -> a[1]);
+		
+		/*return new HashMap<>(Stream.of(wiki.getPageText(title).split("\n")).filter(s -> !s.startsWith("<") && !s.isEmpty())
+				.map(s -> s.split(";", 2)).collect(Collectors.toMap(a -> a[0], a -> a[1])));*/
 	}
 
 	/**
@@ -193,9 +195,23 @@ public final class Toolbox
 	 */
 	public static String permuteFileName(String fn)
 	{
-		return StrTool.insertAt(fn, " " + rand.nextInt(), fn.lastIndexOf('.'));
+		return insertAt(fn, " " + rand.nextInt(), fn.lastIndexOf('.'));
 	}
 
+	/**
+	 * Inserts a String into a String. PRECONDITION: {@code index} is a valid index for {@code s}
+	 * 
+	 * @param s The string to insert into
+	 * @param insert The String to be inserted
+	 * @param index The index to insert {@code insert} at. The original character at this index will be shifted down
+	 *           one slot to make room for {@code insert}
+	 * @return The modified String.
+	 */
+	public static String insertAt(String s, String insert, int index)
+	{
+		return new StringBuffer(s).insert(index, insert).toString();
+	}
+	
 	/**
 	 * Generates a Wiki-text ready, wiki-linked, unordered list from a list of titles.
 	 * 
@@ -214,20 +230,6 @@ public final class Toolbox
 			x += String.format(fmtStr, s);
 
 		return x;
-	}
-
-	/**
-	 * Generates a Wiki-text ready, wiki-linked, unordered list from a list of titles.
-	 * 
-	 * @param header A header/lead string to apply at the beginning of the returned String.
-	 * @param titles The titles to use
-	 * @param doEscape Set as true to escape titles. i.e. adds a <code>:</code> before each link so that files and
-	 *           categories are properly escaped and appear as links.
-	 * @return A String with the titles as a linked, unordered list, in Wiki-text.
-	 */
-	public static String listify(String header, Stream<String> titles, boolean doEscape)
-	{
-		return listify(header, FL.toAL(titles), doEscape);
 	}
 
 	/**

@@ -154,6 +154,7 @@ public class TransferFile
 		// Filter Templates which are not on Commons
 		HashSet<String> ncomT = FL
 				.toSet(MQuery.exists(com, false, FL.toAL(tpl.stream().map(t -> "Template:" + t.title))).stream().map(com::nss));
+		
 		for (Template t : new ArrayList<>(tpl))
 			if (ncomT.contains(t.title))
 				tpl.remove(t.drop());
@@ -167,6 +168,7 @@ public class TransferFile
 					info = t;
 					tpl.remove(t.drop());
 					break;
+				case "Multilicense replacing placeholder new":
 				case "Self":
 					if (!t.has("author"))
 						t.put("author", String.format("{{User at project|%s|w|en}}", uploader));

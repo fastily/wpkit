@@ -4,12 +4,11 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.TreeMap;
 
 import ctools.tplate.Template;
-import ctools.util.TParse;
 import ctools.util.Toolbox;
+import enwp.WTP;
 import fastily.jwiki.core.MQuery;
 import fastily.jwiki.core.NS;
 import fastily.jwiki.core.Wiki;
@@ -25,25 +24,10 @@ import fastily.jwiki.util.FSystem;
 public final class MTC
 {
 	/**
-	 * Files with these categories should not be transferred.
-	 */
-	private final HashSet<String> blacklist;
-
-	/**
-	 * Files must be members of at least one of the following categories to be eligible for transfer.
-	 */
-	private final HashSet<String> whitelist;
-	
-	/**
-	 * The Wiki objects to use
-	 */
-	protected final Wiki enwp, com;
-
-	/**
 	 * Regex matching Copy to Commons templates.
 	 */
 	protected final String mtcRegex;
-	
+
 	/**
 	 * Flag indicating whether this is a debug-mode/dry run (do not perform transfers)
 	 */
@@ -58,46 +42,60 @@ public final class MTC
 	 * Flag indicating whether the Commons category tracking transfers should be used.
 	 */
 	protected boolean useTrackingCat = true;
-	
+
 	/**
 	 * Contains data for license tags
 	 */
 	protected TreeMap<String, String> tpMap = new TreeMap<>(new Template.TValueCmp());
 
 	/**
+	 * Files with these categories should not be transferred.
+	 */
+	protected HashSet<String> blacklist;
+
+	/**
+	 * Files must be members of at least one of the following categories to be eligible for transfer.
+	 */
+	protected HashSet<String> whitelist;
+
+	/**
+	 * The Wiki objects to use
+	 */
+	protected Wiki enwp, com;
+
+	/**
 	 * Initializes the Wiki objects and download folders for MTC.
 	 * 
-	 * @param wiki A logged-in Wiki object
+	 * @param enwp A logged-in Wiki object, set to {@code en.wikipedia.org}
 	 * 
 	 * @throws Throwable On IO error
 	 */
-	public MTC(Wiki wiki) throws Throwable
+	public MTC(Wiki enwp) throws Throwable
 	{
-		// Generate download directory
-		if (Files.isRegularFile(Config.fdPath))
-			FSystem.errAndExit(Config.fdump + " is file, please remove it so MTC can continue");
-		else if (!Files.isDirectory(Config.fdPath))
-			Files.createDirectory(Config.fdPath);
-
 		// Initialize Wiki objects
-		com = wiki.getWiki("commons.wikimedia.org");
-		enwp = wiki.getWiki("en.wikipedia.org");
-
-		mtcRegex = TParse.makeTemplateRegex(enwp, "Template:Copy to Wikimedia Commons");
-		
-		// Process template data
-		for (Map.Entry<String, String> e : Toolbox.fetchPairedConfig(enwp, Config.fullname + "/Regexes").entrySet())
-		{
-			String t = wiki.nss(e.getKey());
-			for (String s : e.getValue().split("\\|"))
-				tpMap.put(s, t);
-		}
+		this.enwp = enwp;
+		com = Toolbox.getCommons(enwp);
 
 		// Generate whitelist & blacklist
 		HashMap<String, ArrayList<String>> l = MQuery.getLinksOnPage(enwp,
 				FL.toSAL(Config.fullname + "/Blacklist", Config.fullname + "/Whitelist"), NS.CATEGORY);
 		blacklist = new HashSet<>(l.get(Config.fullname + "/Blacklist"));
 		whitelist = new HashSet<>(l.get(Config.fullname + "/Whitelist"));
+
+		// Generate download directory
+		if (Files.isRegularFile(Config.fdPath))
+			FSystem.errAndExit(Config.fdump + " is file, please remove it so MTC can continue");
+		else if (!Files.isDirectory(Config.fdPath))
+			Files.createDirectory(Config.fdPath);
+
+		mtcRegex = WTP.mtc.getRegex(enwp);
+
+		// Process template data
+		Toolbox.fetchPairedConfig(enwp, Config.fullname + "/Regexes").forEach((k, v) -> {
+			String t = enwp.nss(k);
+			for (String s : v.split("\\|"))
+				tpMap.put(s, t);
+		});
 	}
 
 	/**
@@ -108,8 +106,9 @@ public final class MTC
 	 */
 	protected ArrayList<TransferFile> filterAndResolve(ArrayList<String> titles)
 	{
-		return FL.toAL(resolveFileNames(!ignoreFilter ? canTransfer(titles) : titles).entrySet().stream()
-				.map(e -> new TransferFile(e.getKey(), e.getValue(), this)));
+		ArrayList<TransferFile> l = new ArrayList<>();
+		resolveFileNames(!ignoreFilter ? canTransfer(titles) : titles).forEach((k, v) -> l.add(new TransferFile(k, v, this)));
+		return l;
 	}
 
 	/**
@@ -122,23 +121,20 @@ public final class MTC
 	private HashMap<String, String> resolveFileNames(ArrayList<String> l)
 	{
 		HashMap<String, String> m = new HashMap<>();
-		for (Map.Entry<String, Boolean> e : MQuery.exists(com, l).entrySet())
-		{
-			String title = e.getKey();
-
-			if (!e.getValue())
-				m.put(title, title);
+		MQuery.exists(com, l).forEach((k, v) -> {
+			if (!v)
+				m.put(k, k);
 			else
 			{
 				String comFN;
 				do
 				{
-					comFN = Toolbox.permuteFileName(enwp.nss(title));
+					comFN = Toolbox.permuteFileName(k);
 				} while (com.exists(comFN)); // loop until available filename is found
 
-				m.put(title, comFN);
+				m.put(k, comFN);
 			}
-		}
+		});
 
 		return m;
 	}
@@ -151,11 +147,18 @@ public final class MTC
 	 */
 	public ArrayList<String> canTransfer(ArrayList<String> titles)
 	{
-		ArrayList<String> l = FL.toAL(MQuery.getSharedDuplicatesOf(enwp, titles).entrySet().stream()
-				.filter(e -> e.getValue().size() == 0).map(Map.Entry::getKey));
-		return l.isEmpty() ? l
-				: FL.toAL(MQuery.getCategoriesOnPage(enwp, l).entrySet().stream().filter(
-						e -> !e.getValue().stream().anyMatch(blacklist::contains) && e.getValue().stream().anyMatch(whitelist::contains))
-						.map(Map.Entry::getKey));
+		ArrayList<String> l = new ArrayList<>();
+		MQuery.getSharedDuplicatesOf(enwp, titles).forEach((k, v) -> {
+			if (v.size() == 0)
+				l.add(k);
+		});
+
+		ArrayList<String> rl = new ArrayList<>();
+		MQuery.getCategoriesOnPage(enwp, l).forEach((k, v) -> {
+			if (!v.stream().anyMatch(blacklist::contains) && v.stream().anyMatch(whitelist::contains))
+				rl.add(k);
+		});
+
+		return rl;
 	}
 }

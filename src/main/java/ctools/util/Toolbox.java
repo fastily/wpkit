@@ -119,9 +119,6 @@ public final class Toolbox
 	{
 		return FL.toHM(Stream.of(wiki.getPageText(title).split("\n")).filter(s -> !s.startsWith("<") && !s.isEmpty())
 				.map(s -> s.split(";", 2)), a -> a[0], a -> a[1]);
-		
-		/*return new HashMap<>(Stream.of(wiki.getPageText(title).split("\n")).filter(s -> !s.startsWith("<") && !s.isEmpty())
-				.map(s -> s.split(";", 2)).collect(Collectors.toMap(a -> a[0], a -> a[1])));*/
 	}
 
 	/**

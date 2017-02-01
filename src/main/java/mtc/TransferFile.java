@@ -232,7 +232,7 @@ public class TransferFile
 		t.put("Date", info.has("Date") ? info.get("Date") : "");
 		t.put("Source", info.has("Source") ? info.get("Source")
 				: String.format("{{Transferred from|en.wikipedia|%s|%s}}", enwp.whoami(), Config.mtcComLink));
-		t.put("Author", info.has("Author") ? info.get("Author") : "See below");
+		t.put("Author", info.has("Author") ? info.get("Author") : "");
 		t.put("Permission", info.has("Permission") ? info.get("Permission") : "");
 		t.put("other versions", info.has("other versions") ? info.get("other versions") : "");
 

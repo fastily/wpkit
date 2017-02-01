@@ -1,5 +1,6 @@
 package ctools.util;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -167,5 +168,47 @@ public final class WikiX
 		results.add(new Triple<>(curr.x, curr.y, text.substring(curr.z)));
 
 		return results;
+	}
+
+	/**
+	 * Determine if a set of link(s) has existed on a page over a given time period.
+	 * 
+	 * @param wiki The Wiki object to use
+	 * @param title The title to query
+	 * @param l The list of link(s) to look for in the history of <code>title</code>.
+	 * @param start The time to start looking at (inclusive). Optional - set null to disable.
+	 * @param end The time to stop the search at (exclusive). Optional - set null to disable.
+	 * @return A list of link(s) that were found at some point in the page's history.
+	 */
+	public static ArrayList<String> detLinksInHist(Wiki wiki, String title, ArrayList<String> l, Instant start, Instant end)
+	{
+		ArrayList<String> texts = FL.toAL(wiki.getRevisions(title, -1, false, start, end).stream().map(r -> r.text));
+		return FL.toAL(l.stream().filter(s -> texts.stream().noneMatch(t -> t.matches("(?si).*?\\[\\[:??(\\Q" + s + "\\E)\\]\\].*?"))));
+	}
+
+	/**
+	 * Deletes pages in {@code l} on {@code wiki} with {@code reason} if the last editor of that page was {@code user}
+	 * 
+	 * @param wiki The Wiki object to use
+	 * @param user Pages with this user (without the {@code User:} prefix) as the top editor will be deleted.
+	 * @param reason The reason to use in the deletion log.
+	 * @param l The List of pages to work with.
+	 */
+	public static void deleteByLastEditor(Wiki wiki, String user, String reason, ArrayList<String> l)
+	{
+		l.parallelStream().filter(s -> user.equals(getLastEditor(wiki, s))).forEach(s -> wiki.delete(s, reason));
+	}
+
+	/**
+	 * Deletes pages in {@code cat} on {@code wiki} with {@code reason} if the last editor of that page was {@code user}.
+	 * 
+	 * @param wiki The Wiki object to use
+	 * @param user Pages with this user (without the {@code User:} prefix) as the top editor will be deleted.
+	 * @param reason The reason to use in the deletion log.
+	 * @param cat The category to use, including the {@code Category:} prefix.
+	 */
+	public static void deleteByLastEditorInCat(Wiki wiki, String user, String reason, String cat)
+	{
+		deleteByLastEditor(wiki, user, reason, wiki.getCategoryMembers(cat));
 	}
 }

@@ -1,6 +1,5 @@
 package ctools.tplate;
 
-import java.util.Comparator;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -8,6 +7,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
+import ctools.util.WikiX;
 import fastily.jwiki.util.FL;
 import fastily.jwiki.util.GSONP;
 
@@ -33,7 +33,7 @@ public class Template
 	/**
 	 * This Template's parameters.
 	 */
-	protected final TreeMap<String, TValue> params = new TreeMap<>(new TValueCmp());
+	protected final TreeMap<String, TValue> params = new TreeMap<>(WikiX.tpParamCmp);
 
 	/**
 	 * Creates a new Template Object with the given Reply.
@@ -230,7 +230,7 @@ public class Template
 
 			if (o instanceof JsonObject)
 				pVal = new ParsedItem((JsonObject) o);
-			else if(o instanceof JsonPrimitive)
+			else if (o instanceof JsonPrimitive)
 			{
 				JsonPrimitive p = (JsonPrimitive) o;
 				sVal = p.isString() ? p.getAsString() : p.toString();
@@ -285,25 +285,6 @@ public class Template
 		public String toString()
 		{
 			return sVal == null ? pVal.toString() : sVal;
-		}
-	}
-
-	/**
-	 * A Comparator for Template titles or Template <code>params</code> keys.
-	 * 
-	 * @author Fastily
-	 *
-	 */
-	public static class TValueCmp implements Comparator<String>
-	{
-		/**
-		 * Does a compareIgnoreCase, but also a compareIgnoreCase where underscores for both inputs are substituted for
-		 * spaces.
-		 */
-		public int compare(String o1, String o2)
-		{
-			int r1 = o1.compareToIgnoreCase(o2);
-			return r1 == 0 ? r1 : o1.replace('_', ' ').compareToIgnoreCase(o2.replace('_', ' '));
 		}
 	}
 }

@@ -1,5 +1,6 @@
 package enwp.tools;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -34,13 +35,16 @@ public class SimpleFFD
 	/**
 	 * String format to use for the deletion reason
 	 */
-	private static final String ffdLinkTP = String.format("[[%s%%s#%%s]]", ffdPrefix);
+	private static final String ffdLinkTP = "[[%s#%s]]";
 
 	/**
 	 * Matches the tail end of a user's time-stamped signature
 	 */
 	private static final Pattern tsRegex = Pattern.compile("\\d{4} \\(UTC\\)");
 
+	
+	private static ZonedDateTime zdt = Toolbox.getUTCofNow().minusDays(8);
+	
 	/**
 	 * Main driver.
 	 * 
@@ -48,15 +52,19 @@ public class SimpleFFD
 	 */
 	public static void main(String[] args)
 	{
-		String targetPage = ffdPrefix + args[0];
-
+		String targetPage;
+		if(args.length > 0)
+			 targetPage = ffdPrefix + args[0];
+		else
+			targetPage = ffdPrefix + Toolbox.dateAsYMD(zdt);
+		
 		ArrayList<Triple<Integer, String, Integer>> l = wiki.getSectionHeaders(targetPage);
 		l.removeIf(t -> t.x != 4);
 
 		MQuery.exists(wiki, true,
 				FL.toAL(WikiX.listPageSections(l, wiki.getPageText(targetPage)).stream()
 						.filter(t -> checkText(t.z) && wiki.whichNS(t.y).equals(NS.FILE)).map(t -> t.y)))
-				.stream().forEach(s -> wiki.delete(s, String.format(ffdLinkTP, args[0], s)));
+				.stream().forEach(s -> wiki.delete(s, String.format(ffdLinkTP, targetPage, s)));
 	}
 
 	/**

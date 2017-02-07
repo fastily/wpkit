@@ -266,7 +266,7 @@ public class TransferFile
 		
 		for (ImageInfo ii : imgInfoL)
 			t += String.format(uLFmt, dtf.format(LocalDateTime.ofInstant(ii.timestamp, ZoneOffset.UTC)), ii.dimensions.x, ii.dimensions.y,
-					ii.user, ii.user, ii.summary.replace("\n", " "));
+					ii.user, ii.user, ii.summary.replace("\n", " ").replace("  ", " "));
 		t += "|}\n\n{{Subst:Unc}}";
 
 		if(mtc.useTrackingCat)

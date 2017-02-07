@@ -2,6 +2,7 @@ package ctools.util;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -20,6 +21,11 @@ import fastily.jwiki.util.Tuple;
  */
 public final class WikiX
 {
+	/**
+	 * Template title and parameter comparator.  Useful when storing data about templates in Collections.
+	 */
+	public static final Comparator<String> tpParamCmp = (o1, o2) -> o1.replace('_', ' ').compareToIgnoreCase(o2.replace('_', ' '));
+	
 	/**
 	 * Constructors disallowed
 	 */

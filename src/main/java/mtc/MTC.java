@@ -6,8 +6,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.TreeMap;
 
-import ctools.tplate.Template;
 import ctools.util.Toolbox;
+import ctools.util.WikiX;
 import enwp.WTP;
 import fastily.jwiki.core.MQuery;
 import fastily.jwiki.core.NS;
@@ -46,7 +46,7 @@ public final class MTC
 	/**
 	 * Contains data for license tags
 	 */
-	protected TreeMap<String, String> tpMap = new TreeMap<>(new Template.TValueCmp());
+	protected TreeMap<String, String> tpMap = new TreeMap<>(WikiX.tpParamCmp);
 
 	/**
 	 * Files with these categories should not be transferred.

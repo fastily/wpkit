@@ -11,7 +11,7 @@ import enwp.bots.FindDelComFFD;
 import enwp.bots.FindKeptComFFD;
 import enwp.bots.FindLicConflict;
 import enwp.bots.FlagOI;
-import enwp.bots.ManageMTC;
+import enwp.bots.MTCHelper;
 import enwp.bots.RemoveBadMTC;
 import enwp.bots.UnflagOI;
 import enwp.reports.CalcMTCRegex;
@@ -50,7 +50,7 @@ public final class BMgr
 			switch (Integer.parseInt(cl.getOptionValue('b')))
 			{
 				case 1:
-					ManageMTC.main(pArgs);
+					MTCHelper.main(pArgs);
 					break;
 				case 2:
 					RemoveBadMTC.main(pArgs);

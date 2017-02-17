@@ -1,6 +1,5 @@
 package enwp.tools;
 
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -41,9 +40,6 @@ public class SimpleFFD
 	 * Matches the tail end of a user's time-stamped signature
 	 */
 	private static final Pattern tsRegex = Pattern.compile("\\d{4} \\(UTC\\)");
-
-	
-	private static ZonedDateTime zdt = Toolbox.getUTCofNow().minusDays(8);
 	
 	/**
 	 * Main driver.
@@ -56,7 +52,7 @@ public class SimpleFFD
 		if(args.length > 0)
 			 targetPage = ffdPrefix + args[0];
 		else
-			targetPage = ffdPrefix + Toolbox.dateAsYMD(zdt);
+			targetPage = ffdPrefix + Toolbox.dateAsYMD(Toolbox.getUTCofNow().minusDays(8));
 		
 		ArrayList<Triple<Integer, String, Integer>> l = wiki.getSectionHeaders(targetPage);
 		l.removeIf(t -> t.x != 4);

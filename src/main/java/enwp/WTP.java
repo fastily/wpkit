@@ -24,7 +24,7 @@ public final class WTP
 	 * Wraps {@code Template:Nominated for deletion on Commons}
 	 */
 	public static final WTP nomDelOnCom = new WTP("Template:Nominated for deletion on Commons");
-	
+
 	/**
 	 * Wraps {@code Template:Bots}
 	 */
@@ -39,6 +39,11 @@ public final class WTP
 	 * Wraps {@code Template:Orphan image}
 	 */
 	public static final WTP orphan = new WTP("Template:Orphan image");
+
+	/**
+	 * Wraps {@code Template:Keep local}
+	 */
+	public static final WTP keeplocal = new WTP("Template:Keep local");
 
 	/**
 	 * The template title, including namespace

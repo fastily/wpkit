@@ -35,7 +35,7 @@ public class TransferFile
 	/**
 	 * The format String for a row in the Upload Log section.
 	 */
-	private static final String uLFmt = "| %s || %d× %d× || [[w:User:%s|%s]] || ''<nowiki>%s</nowiki>''%n|-%n";
+	private static final String uLFmt = "| %s || %d × %d || [[w:User:%s|%s]] || ''<nowiki>%s</nowiki>''%n|-%n";
 
 	/**
 	 * A date formatter for UTC times.

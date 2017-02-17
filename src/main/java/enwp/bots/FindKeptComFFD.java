@@ -4,6 +4,7 @@ import java.util.HashSet;
 
 import ctools.util.Toolbox;
 import ctools.util.WikiX;
+import enwp.WPStrings;
 import enwp.WTP;
 import fastily.jwiki.core.NS;
 import fastily.jwiki.core.Wiki;
@@ -27,6 +28,11 @@ public final class FindKeptComFFD
 	private static final String nfdcRegex = WTP.nomDelOnCom.getRegex(wiki);
 
 	/**
+	 * The ncd template to fill out
+	 */
+	private static final String ncd = WPStrings.makeNCDBotTemlpate(wiki.whoami());
+	
+	/**
 	 * Main driver
 	 * 
 	 * @param args Program arguments, not used.
@@ -38,7 +44,7 @@ public final class FindKeptComFFD
 		WikiX.getFirstOnlySharedDuplicate(wiki,
 				wiki.getCategoryMembers("Category:Files nominated for deletion on Wikimedia Commons", NS.FILE)).forEach((k, v) -> {
 					if (!cffdl.contains(wiki.convertIfNotInNS(v, NS.FILE)))
-						wiki.replaceText(k, nfdcRegex, String.format(ManageMTC.ncd, v), "BOT: File is not up for deletion on Commons");
+						wiki.replaceText(k, nfdcRegex, String.format(ncd, v), "BOT: File is not up for deletion on Commons");
 				});
 	}
 }

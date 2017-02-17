@@ -70,6 +70,9 @@ public final class DumpFD
 			case 2: // user
 				l = wiki.getUserUploads(fileSource);
 				break;
+			case 10:
+				l = wiki.whatTranscludesHere(fileSource, NS.FILE);
+				break;
 			case 14: // category members
 				l = wiki.getCategoryMembers(fileSource, max, NS.FILE);
 				break;

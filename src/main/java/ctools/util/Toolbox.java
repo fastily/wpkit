@@ -282,7 +282,7 @@ public final class Toolbox
 	}
 
 	/**
-	 * Fetch a simple report from fatilybot's toollabs dumps.
+	 * Fetch a simple report from fastilybot's toollabs dumps.
 	 * 
 	 * @param wiki The Wiki object to use
 	 * @param report The name of the report, without the {@code .txt} extension.
@@ -306,10 +306,17 @@ public final class Toolbox
 
 		return new String[0];
 	}
-	
-	
+
+	/**
+	 * Fetch a simple report from fastilybot's toollabs dumps. Auto-formats each item in the report by adding a
+	 * {@code File:} prefix and by replacing underscores with spaces.
+	 * 
+	 * @param wiki The Wiki object to use
+	 * @param report The name of the report, without the {@code .txt} extension.
+	 * @return A String HashSet with each item in the report, or the empty HashSet if something went wrong.
+	 */
 	public static HashSet<String> fetchLabsReportListAsFiles(Wiki wiki, String report)
-	{		
+	{
 		return FL.toSet(Arrays.stream(fetchLabsReportList(wiki, report)).map(s -> "File:" + s.replace('_', ' ')));
 	}
 }

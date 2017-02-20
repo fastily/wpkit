@@ -1,8 +1,8 @@
 package enwp;
 
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+
+import ctools.util.Toolbox;
 
 /**
  * Common, shared static Strings.
@@ -44,6 +44,6 @@ public final class WPStrings
 	public static String makeNCDBotTemlpate(String user)
 	{
 		return String.format("{{Now Commons|%%s|date=%s|bot=%s}}%n",
-				DateTimeFormatter.ISO_LOCAL_DATE.format(ZonedDateTime.now(ZoneOffset.UTC)), user);
+				DateTimeFormatter.ISO_LOCAL_DATE.format(Toolbox.getUTCofNow()), user);
 	}
 }

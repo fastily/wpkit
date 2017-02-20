@@ -16,27 +16,27 @@ import fastily.jwiki.core.Wiki;
  * @author Fastily
  *
  */
-public class MTCHelper
+public final class MTCHelper
 {
 	/**
 	 * The Wiki to use
 	 */
-	private static final Wiki wiki = Toolbox.getFastilyBot();
+	private static Wiki wiki = Toolbox.getFastilyBot();
 
 	/**
 	 * Creates the regular expression matching Copy to Wikimedia Commons
 	 */
-	private static final String tRegex = WTP.mtc.getRegex(wiki);
+	private static String tRegex = WTP.mtc.getRegex(wiki);
 
 	/**
 	 * The list of pages transcluding {@code Template:Now Commons}
 	 */
-	private static final HashSet<String> nowCommons = WTP.ncd.getTransclusionSet(wiki, NS.FILE);
+	private static HashSet<String> nowCommons = WTP.ncd.getTransclusionSet(wiki, NS.FILE);
 
 	/**
 	 * The ncd template to fill out
 	 */
-	private static final String ncd = WPStrings.makeNCDBotTemlpate(wiki.whoami());
+	private static String ncdT = WPStrings.makeNCDBotTemlpate(wiki.whoami());
 
 	/**
 	 * Main driver
@@ -46,8 +46,8 @@ public class MTCHelper
 	public static void main(String[] args)
 	{
 		HashSet<String> l = Toolbox.fetchLabsReportListAsFiles(wiki, "wpDupes");
-		l.retainAll(WTP.mtc.getTransclusionSet(wiki, NS.FILE)); // TODO: use toollabs as caching to speed this up
-		l.removeAll(WTP.keeplocal.getTransclusionList(wiki, NS.FILE));
+		l.retainAll(WTP.mtc.getTransclusionSet(wiki, NS.FILE));
+		l.removeAll(WTP.keeplocal.getTransclusionList(wiki, NS.FILE)); // lots of in-line tags
 
 		WikiX.getFirstOnlySharedDuplicate(wiki, new ArrayList<>(l)).forEach((k, v) -> {
 			if (nowCommons.contains(k))
@@ -56,10 +56,10 @@ public class MTCHelper
 			{
 				String o_text = wiki.getPageText(k);
 				String n_text = o_text.replaceAll(tRegex, "");
-				if (o_text.equals(n_text))
+				if (o_text.equals(n_text)) // avoid in-line tags
 					return;
 
-				wiki.edit(k, String.format(ncd, v) + n_text, "BOT: File is available on Commons");
+				wiki.edit(k, String.format(ncdT, v) + n_text, "BOT: File is available on Commons");
 			}
 		});
 	}

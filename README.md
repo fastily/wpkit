@@ -10,3 +10,6 @@ This repository is also the home to
 
 ### Minimum System Requirements
 * JDK/JRE ≥ 8u40
+
+### See Also
+* [toollabs reports](https://tools.wmflabs.org/fastilybot/)

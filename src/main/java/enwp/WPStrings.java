@@ -36,7 +36,7 @@ public final class WPStrings
 	public static final String botNote = "\n{{subst:User:FastilyBot/BotNote}}";
 
 	/**
-	 * Generates an {@code Template:Ncd}} template for a bot user.
+	 * Generates an {@code Template:Ncd} template for a bot user.
 	 * 
 	 * @param wiki The bot username to use
 	 * @return The template.

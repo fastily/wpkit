@@ -10,7 +10,6 @@ import ctools.util.Toolbox;
 import ctools.util.WikiX;
 import enwp.WTP;
 import fastily.jwiki.core.MQuery;
-import fastily.jwiki.core.NS;
 import fastily.jwiki.core.Wiki;
 import fastily.jwiki.util.FL;
 import fastily.jwiki.util.FSystem;
@@ -59,6 +58,11 @@ public final class MTC
 	protected HashSet<String> whitelist;
 
 	/**
+	 * Templates which indicate that a file is own work.
+	 */
+	protected HashSet<String> selflist;
+	
+	/**
 	 * The Wiki objects to use
 	 */
 	protected Wiki enwp, com;
@@ -78,9 +82,10 @@ public final class MTC
 
 		// Generate whitelist & blacklist
 		HashMap<String, ArrayList<String>> l = MQuery.getLinksOnPage(enwp,
-				FL.toSAL(Config.fullname + "/Blacklist", Config.fullname + "/Whitelist"), NS.CATEGORY);
+				FL.toSAL(Config.fullname + "/Blacklist", Config.fullname + "/Whitelist", Config.fullname + "/Self"));
 		blacklist = new HashSet<>(l.get(Config.fullname + "/Blacklist"));
 		whitelist = new HashSet<>(l.get(Config.fullname + "/Whitelist"));
+		selflist = FL.toSet(l.get(Config.fullname + "/Self").stream().map(s -> enwp.nss(s)));
 
 		// Generate download directory
 		if (Files.isRegularFile(Config.fdPath))

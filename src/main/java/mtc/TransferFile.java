@@ -83,6 +83,11 @@ public class TransferFile
 	private String uploader;
 
 	/**
+	 * Flag indicating if this file contains own work templates.
+	 */
+	private boolean isOwnWork;
+
+	/**
 	 * Constructor, creates a TransferObject
 	 * 
 	 * @param wpFN The enwp title to transfer
@@ -124,7 +129,8 @@ public class TransferFile
 			}
 			else if (t != null && Toolbox.downloadFile(enwp.apiclient.client, imgInfoL.get(0).url.toString(), localFN)
 					&& com.upload(Paths.get(localFN), comFN, t, String.format(Config.tFrom, wpFN)))
-				return enwp.edit(wpFN, String.format("{{subst:ncd|%s|reviewer=%s}}%n", comFN, enwp.whoami()) + enwp.getPageText(wpFN).replaceAll(mtc.mtcRegex, ""), Config.tTo);
+				return enwp.edit(wpFN, String.format("{{subst:ncd|%s|reviewer=%s}}%n", comFN, enwp.whoami())
+						+ enwp.getPageText(wpFN).replaceAll(mtc.mtcRegex, ""), Config.tTo);
 		}
 		catch (Throwable e)
 		{
@@ -144,17 +150,20 @@ public class TransferFile
 		// Normalize license and special template titles
 		for (Template t : masterTPL)
 		{
-			String tp = enwp.whichNS(t.title).equals(NS.TEMPLATE) ? enwp.nss(t.title): t.title;
+			String tp = enwp.whichNS(t.title).equals(NS.TEMPLATE) ? enwp.nss(t.title) : t.title;
 			if (mtc.tpMap.containsKey(tp))
 				t.title = mtc.tpMap.get(tp);
 		}
+
+		// Check for self-work claim.
+		isOwnWork = masterTPL.stream().anyMatch(t -> mtc.selflist.contains(t.title));
 
 		ArrayList<Template> tpl = new ArrayList<>(masterTPL);
 
 		// Filter Templates which are not on Commons
 		HashSet<String> ncomT = FL
 				.toSet(MQuery.exists(com, false, FL.toAL(tpl.stream().map(t -> "Template:" + t.title))).stream().map(com::nss));
-		
+
 		for (Template t : new ArrayList<>(tpl))
 			if (ncomT.contains(t.title))
 				tpl.remove(t.drop());
@@ -168,6 +177,7 @@ public class TransferFile
 					info = t;
 					tpl.remove(t.drop());
 					break;
+				case "Multilicense replacing placeholder":
 				case "Multilicense replacing placeholder new":
 				case "Self":
 					if (!t.has("author"))
@@ -228,15 +238,41 @@ public class TransferFile
 	{
 		Template t = new Template("Information");
 
-		t.put("Description", info.has("Description") ? info.get("Description") : "");
-		t.put("Date", info.has("Date") ? info.get("Date") : "");
-		t.put("Source", info.has("Source") ? info.get("Source")
-				: String.format("{{Transferred from|en.wikipedia|%s|%s}}", enwp.whoami(), Config.mtcComLink));
-		t.put("Author", info.has("Author") ? info.get("Author") : "");
-		t.put("Permission", info.has("Permission") ? info.get("Permission") : "");
-		t.put("other versions", info.has("other versions") ? info.get("other versions") : "");
+		fillTemplateInfo(t, info, "Description");
+		fillTemplateInfo(t, info, "Date");
+		fillTemplateInfo(t, info, "Source");
+		fillTemplateInfo(t, info, "Author");
+
+		// Optional Parameters
+		if (info.has("Permission"))
+			t.put("Permission", info.get("Permission"));
+		if (info.has("other versions"))
+			t.put("other versions", info.get("other versions"));
+
+		// Fill in source and author if needed.
+		if (isOwnWork)
+		{
+			if (t.get("Source").getString().isEmpty())
+				t.put("Source", "{{Own work by original uploader}}");
+
+			if (t.get("Author").getString().isEmpty())
+				t.put("Author", String.format("[[User:%s|%s]]", uploader, uploader));
+		}
 
 		return t;
+	}
+
+	/**
+	 * Copies a parameter from {@code source} to {@code target} if it exists. Fills in the empty String in {@code target}
+	 * if {@code param} did not exist in {@code source}
+	 * 
+	 * @param target The Template which will have {@code param} copied to it from {@code source}
+	 * @param source The Template which will have {@code param} copied from it to {@code target}
+	 * @param param The parameter to copy from {@code source} into {@code target}
+	 */
+	private void fillTemplateInfo(Template target, Template source, String param)
+	{
+		target.put(param, source.has(param) ? source.get(param) : "");
 	}
 
 	/**
@@ -254,24 +290,24 @@ public class TransferFile
 		// Generate Upload Log Section
 		try
 		{
-		t += "\n== {{Original upload log}} ==\n"
-				+ String.format("{{Original description page|en.wikipedia|%s}}%n", URLEncoder.encode(enwp.nss(wpFN), "UTF-8"))
-				+ "{| class=\"wikitable\"\n! {{int:filehist-datetime}} !! {{int:filehist-dimensions}} !! {{int:filehist-user}} "
-				+ "!! {{int:filehist-comment}}\n|-\n";
+			t += "\n== {{Original upload log}} ==\n"
+					+ String.format("{{Original description page|en.wikipedia|%s}}%n", URLEncoder.encode(enwp.nss(wpFN), "UTF-8"))
+					+ "{| class=\"wikitable\"\n! {{int:filehist-datetime}} !! {{int:filehist-dimensions}} !! {{int:filehist-user}} "
+					+ "!! {{int:filehist-comment}}\n|-\n";
 		}
-		catch(Throwable e)
+		catch (Throwable e)
 		{
 			e.printStackTrace();
 		}
-		
+
 		for (ImageInfo ii : imgInfoL)
 			t += String.format(uLFmt, dtf.format(LocalDateTime.ofInstant(ii.timestamp, ZoneOffset.UTC)), ii.dimensions.x, ii.dimensions.y,
 					ii.user, ii.user, ii.summary.replace("\n", " ").replace("  ", " "));
 		t += "|}\n\n{{Subst:Unc}}";
 
-		if(mtc.useTrackingCat)
+		if (mtc.useTrackingCat)
 			t += "\n[[Category:Uploaded with MTC!]]";
-		
+
 		return t;
 	}
 }

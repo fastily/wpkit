@@ -85,7 +85,7 @@ public final class MTC
 				FL.toSAL(Config.fullname + "/Blacklist", Config.fullname + "/Whitelist", Config.fullname + "/Self"));
 		blacklist = new HashSet<>(l.get(Config.fullname + "/Blacklist"));
 		whitelist = new HashSet<>(l.get(Config.fullname + "/Whitelist"));
-		selflist = FL.toSet(l.get(Config.fullname + "/Self").stream().map(s -> enwp.nss(s)));
+		selflist = FL.toSet(l.get(Config.fullname + "/Self").stream().map(enwp::nss));
 
 		// Generate download directory
 		if (Files.isRegularFile(Config.fdPath))

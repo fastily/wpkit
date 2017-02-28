@@ -89,7 +89,10 @@ public class TallyLics
 									.newBuilder().addQueryParameter("name", tp).build()).get().build())
 							.execute().body().string());
 			if (m.find())
-				return Integer.parseInt(m.group());
+			{
+				int cnt = Integer.parseInt(m.group());				
+				return 0 < cnt && cnt < 20 ? enwp.whatTranscludesHere(enwp.convertIfNotInNS(tp, NS.TEMPLATE), NS.FILE).size() : cnt;
+			}
 		}
 		catch (Throwable e)
 		{

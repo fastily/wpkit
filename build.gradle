@@ -37,5 +37,5 @@ jar {
     attributes 'Main-Class': 'mtc.MTCui'
   }
   
-  exclude "**/test/**", "bots/**", "reports/**", "tools/**", "up/**", "**/README.md", "**/ToDo.md"
+  exclude "**/test/**", "**/bots/**", "**/reports/**", "**/tools/**", "up/**", "**/README.md", "**/ToDo.md"
 }

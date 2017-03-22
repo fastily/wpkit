@@ -33,7 +33,7 @@ public final class FindLicConflict
 	 */
 	public static void main(String[] args) throws Throwable
 	{
-		HashSet<String> fl = Toolbox.fetchLabsReportListAsFiles(wiki, "licConflict");
+		HashSet<String> fl = Toolbox.fetchLabsReportListAsFiles(wiki, "report2");
 		wiki.getLinksOnPage(ignorePage).stream().forEach(s -> fl.removeAll(wiki.whatTranscludesHere(s, NS.FILE)));
 
 		for (String s : MQuery.exists(wiki, true, new ArrayList<>(fl)))

@@ -293,7 +293,7 @@ public final class Toolbox
 		try
 		{
 			Response r = wiki.apiclient.client.newCall(
-					new Request.Builder().url(String.format("https://tools.wmflabs.org/fastilybot/reports/%s.txt", report)).get().build())
+					new Request.Builder().url(String.format("https://tools.wmflabs.org/fastilybot/r/%s.txt", report)).get().build())
 					.execute();
 
 			if (r.isSuccessful())

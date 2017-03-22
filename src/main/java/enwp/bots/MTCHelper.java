@@ -45,7 +45,7 @@ public final class MTCHelper
 	 */
 	public static void main(String[] args)
 	{
-		HashSet<String> l = Toolbox.fetchLabsReportListAsFiles(wiki, "wpDupes");
+		HashSet<String> l = Toolbox.fetchLabsReportListAsFiles(wiki, "report1");
 		l.retainAll(WTP.mtc.getTransclusionSet(wiki, NS.FILE));
 		l.removeAll(WTP.keeplocal.getTransclusionList(wiki, NS.FILE)); // lots of in-line tags
 

@@ -3,13 +3,11 @@ package enwp.bots;
 import java.util.ArrayList;
 import java.util.HashSet;
 
-import ctools.util.StrTool;
 import ctools.util.Toolbox;
+import enwp.WTP;
 import fastily.jwiki.core.MQuery;
 import fastily.jwiki.core.NS;
 import fastily.jwiki.core.Wiki;
-import fastily.jwiki.util.FL;
-import fastily.jwiki.util.GroupQueue;
 
 /**
  * Finds and flags orphaned free media files on enwp.
@@ -25,26 +23,18 @@ public class FlagOI
 	private static final Wiki wiki = Toolbox.getFastilyBot();
 
 	/**
-	 * Files linked to pages with the specified title prefixes will be ignored. In other words, the are not counted as a
-	 * file use
-	 */
-	private static final HashSet<String> ignorePrefixes = Toolbox.fetchSimpleConfig(wiki, "User:FastilyBot/Task10Ignore");
-
-	/**
 	 * Main driver
 	 * 
 	 * @param args Program arguments, not used.
 	 */
 	public static void main(String[] args)
 	{
-		HashSet<String> l = new HashSet<>(wiki.getCategoryMembers("Category:All free media", NS.FILE));
-		l.removeAll(new HashSet<>(wiki.getCategoryMembers("Category:Wikipedia orphaned files", NS.FILE)));
-		l.removeAll(wiki.allPages(null, false, true, -1, NS.FILE)); // avoid these because they often have many usages
-		l.removeAll(wiki.whatTranscludesHere("Template:Bots", NS.FILE));
+		HashSet<String> l = Toolbox.fetchLabsReportListAsFiles(wiki, "report3");
+		l.removeAll(WTP.orphan.getTransclusionSet(wiki, NS.FILE));
+		l.removeAll(WTP.nobots.getTransclusionSet(wiki, NS.FILE));
+		l.removeAll(Toolbox.fetchLabsReportListAsFiles(wiki, "report4"));
+		l.removeAll(new HashSet<>(MQuery.exists(wiki, false, new ArrayList<>(l))));
 		
-		GroupQueue<String> gq = new GroupQueue<>(new ArrayList<>(l), 50);
-		while (gq.has())
-			FL.mapToList(MQuery.fileUsage(wiki, gq.poll())).stream().filter(t -> StrTool.omitStrWithPrefix(t.y, ignorePrefixes).isEmpty())
-					.forEach(t -> wiki.addText(t.x, "\n{{Orphan image}}", "BOT: Noting that file has no inbound file usage", false));
+		l.forEach(s -> wiki.addText(s, "\n{{Orphan image}}", "BOT: Noting that file has no inbound file usage", false));
 	}
 }

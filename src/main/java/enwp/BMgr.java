@@ -19,6 +19,7 @@ import enwp.reports.FFDCount;
 import enwp.reports.FindBrokenSPI;
 import enwp.reports.FindOrphanedFfD;
 import enwp.reports.FindUntaggedDD;
+import enwp.reports.OrphanedKL;
 import enwp.reports.TallyLics;
 import ctools.util.FCLI;
 
@@ -105,6 +106,9 @@ public final class BMgr
 					break;
 				case 5:
 					FFDCount.main(pArgs);
+					break;
+				case 6:
+					OrphanedKL.main(pArgs);
 					break;
 				default:
 					System.err.printf(badNumberFmt, cl.getOptionValue('r'), "report");

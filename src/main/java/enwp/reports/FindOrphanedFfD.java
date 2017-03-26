@@ -2,7 +2,6 @@ package enwp.reports;
 
 import java.util.ArrayList;
 
-import ctools.util.StrTool;
 import ctools.util.Toolbox;
 import enwp.WPStrings;
 import fastily.jwiki.core.NS;
@@ -36,7 +35,7 @@ public class FindOrphanedFfD
 	{
 		ArrayList<String> l = new ArrayList<>();
 		MQuery.linksHere(wiki, false, wiki.whatTranscludesHere("Template:Ffd", NS.FILE)).forEach((k, v) -> {
-			if (!StrTool.hasStrWithPrefix(v, "Wikipedia:Files for discussion"))
+			if (!v.stream().anyMatch(s -> s.startsWith("Wikipedia:Files for discussion")))
 				l.add(k);
 		});
 

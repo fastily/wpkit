@@ -14,6 +14,7 @@ import enwp.bots.FlagOI;
 import enwp.bots.MTCHelper;
 import enwp.bots.RemoveBadMTC;
 import enwp.bots.UnflagOI;
+import enwp.reports.BigMTC;
 import enwp.reports.CalcMTCRegex;
 import enwp.reports.FFDCount;
 import enwp.reports.FindBrokenSPI;
@@ -109,6 +110,9 @@ public final class BMgr
 					break;
 				case 6:
 					OrphanedKL.main(pArgs);
+					break;
+				case 7:
+					BigMTC.main(pArgs);
 					break;
 				default:
 					System.err.printf(badNumberFmt, cl.getOptionValue('r'), "report");

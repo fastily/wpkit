@@ -217,4 +217,14 @@ public final class WikiX
 	{
 		deleteByLastEditor(wiki, user, reason, wiki.getCategoryMembers(cat));
 	}
+	
+	/**
+	 * Generate a regex matching filenames of files that may be uploaded to {@code wiki}.  WARNING: this method is not cached, so save the result!
+	 * @param wiki The Wiki object to use
+	 * @return The regex.
+	 */
+	public static String allowedFileExtsRegex(Wiki wiki)
+	{
+		return "(?i).+?\\.(" + FL.pipeFence(wiki.getAllowedFileExts()) + ")";
+	}
 }

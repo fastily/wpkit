@@ -86,7 +86,7 @@ public final class CMTC
 	/**
 	 * Makes the list of CLI options.
 	 * 
-	 * @return The list of Command line options.
+	 * @return The list of CommandLine options.
 	 */
 	private static Options makeOptList()
 	{

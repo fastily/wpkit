@@ -1,4 +1,4 @@
-package up;
+package enwp.tools;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.stream.Stream;
 
 import ctools.util.Toolbox;
+import ctools.util.WikiX;
 import fastily.jwiki.core.Wiki;
 import fastily.jwiki.util.FL;
 
@@ -25,12 +26,12 @@ public final class Up
 	/**
 	 * The Wiki object to use
 	 */
-	private static final Wiki wiki = Toolbox.getCommons(Toolbox.getFastily());
+	private static Wiki wiki = Toolbox.getCommons(Toolbox.getFastily());
 
 	/**
 	 * The regex matching file extensions which can be uploaded to Commons
 	 */
-	private static final String extRegex = "(?i).+?\\.(" + FL.pipeFence(wiki.getAllowedFileExts()) + ")";
+	private static String extRegex = WikiX.allowedFileExtsRegex(wiki);
 
 	/**
 	 * The String template for file description pages
@@ -46,12 +47,12 @@ public final class Up
 	/**
 	 * The template String for on-Wiki file names
 	 */
-	private static final String fnBase = String.format("File:%%s %%d %s.%%s", DateTimeFormatter.ISO_DATE.format(LocalDate.now()));
+	private static String fnBase = String.format("File:%%s %%d %s.%%s", DateTimeFormatter.ISO_DATE.format(LocalDate.now()));
 
 	/**
 	 * Logs failed uploads
 	 */
-	private static final HashSet<String> fails = new HashSet<>();
+	private static HashSet<String> fails = new HashSet<>();
 
 	/**
 	 * Main driver

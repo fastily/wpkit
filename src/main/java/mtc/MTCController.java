@@ -34,7 +34,7 @@ public class MTCController
 {
 	@FXML
 	protected TextArea console;
-	
+
 	/**
 	 * The ProgressBar for the UI
 	 */
@@ -54,17 +54,17 @@ public class MTCController
 	protected TextField textInput;
 
 	/**
-	 * UI component toggling the smart filter 
+	 * UI component toggling the smart filter
 	 */
 	@FXML
 	protected CheckMenuItem filterToggle;
-	
+
 	/**
 	 * UI component toggling the post-transfer delete function
 	 */
 	@FXML
 	protected CheckMenuItem deleteToggle;
-	
+
 	/**
 	 * The transfer Button
 	 */
@@ -93,14 +93,13 @@ public class MTCController
 	 */
 	private Wiki wiki;
 
-//	private boolean canCont = false;
-	
+	// private boolean canCont = false;
+
 	/**
 	 * The MTC instance for this Controller.
 	 */
 	private static MTC mtc;
 
-	
 	/**
 	 * The OS clipboard
 	 */
@@ -109,8 +108,8 @@ public class MTCController
 	/**
 	 * Date format for prefixing output.
 	 */
-	private static final DateTimeFormatter df = DateTimeFormatter.ofPattern("MMM dd, yyyy hh:mm:ss a");
-	
+	private static DateTimeFormatter df = DateTimeFormatter.ofPattern("MMM dd, yyyy hh:mm:ss a");
+
 	/**
 	 * The MTCController
 	 * 
@@ -138,8 +137,8 @@ public class MTCController
 		mc.wiki = wiki;
 
 		// Initialize dynamic data for Nodes
-		mc.userLabel.setText("Hello" + mc.wiki.whoami());
-		mc.modeSelect.getItems().addAll("File", "User", "FileUsage", "Links", "Category", "Template"); //TODO: enum these
+		mc.userLabel.setText("Hello, " + mc.wiki.whoami());
+		mc.modeSelect.getItems().addAll("File", "User", "FileUsage", "Links", "Category", "Template"); // TODO: enum these
 
 		// Initalize MTC base
 		try
@@ -167,12 +166,12 @@ public class MTCController
 			FXTool.warnUser("Please select a transfer mode and specify a File, Category, Username, or Template to continue.");
 			return;
 		}
-		
+
 		mtc.ignoreFilter = filterToggle.isSelected();
 		pb.setProgress(0);
 		console.clear();
-		transferButton.setDisable(true); //TODO: add abort logic
-		
+		transferButton.setDisable(true); // TODO: add abort logic
+
 		printToConsole("Hold tight, querying server...");
 		FXTool.runAsyncTask(() -> runTransfer(mode, text));
 	}
@@ -183,7 +182,7 @@ public class MTCController
 	@FXML
 	protected void doPaste()
 	{
-		if(clipboard.hasString())
+		if (clipboard.hasString())
 			textInput.setText(clipboard.getString());
 	}
 
@@ -223,16 +222,18 @@ public class MTCController
 
 		AtomicInteger success = new AtomicInteger();
 		ArrayList<String> fails = new ArrayList<>();
-		
+
 		ArrayList<TransferFile> tol = mtc.filterAndResolve(fl);
 		int tolSize = tol.size();
-		
-		printToConsole(String.format("Analysis complete -> (Total/Filtered/Eligible): (%d/%d/%d)%n", fl.size(), fl.size() - tolSize, tolSize));
-		
+
+		printToConsole(
+				String.format("Analysis complete -> (Total/Filtered/Eligible): (%d/%d/%d)%n", fl.size(), fl.size() - tolSize, tolSize));
+
 		if (tol.isEmpty())
 		{
 			Platform.runLater(() -> {
-				printToConsole("I did not find any file(s) matching your request.  Please verify that your input is correct or disable the smart filter.");
+				printToConsole(
+						"I did not find any file(s) matching your request.  Please verify that your input is correct or disable the smart filter.");
 				transferButton.setDisable(false);
 			});
 
@@ -241,12 +242,12 @@ public class MTCController
 
 		AtomicInteger cnt = new AtomicInteger();
 		tol.stream().forEach(to -> {
-			
+
 			Platform.runLater(() -> {
 				pb.setProgress(((double) cnt.getAndIncrement()) / tolSize);
 				printToConsole(String.format("Transferring (%d/%d): %s", cnt.get(), tolSize, to.wpFN));
 			});
-			
+
 			if (to.doTransfer())
 				success.incrementAndGet();
 			else
@@ -260,17 +261,16 @@ public class MTCController
 		Platform.runLater(() -> {
 			printToConsole(String.format("Done, completed %d transfer(s)", success.get()));
 			pb.setProgress(1);
-			
+
 			transferButton.setDisable(false);
 		});
 	}
 
-	
 	private void printToConsole(String msg)
 	{
 		console.appendText(String.format("(%s): %s%n", LocalDateTime.now().format(df), msg));
 	}
-	
+
 	/**
 	 * Gets this controller's root Node
 	 * 

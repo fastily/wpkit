@@ -14,12 +14,12 @@ import ctools.ui.LoginController;
  * 
  * @author Fastily
  */
-public class MTCui extends Application
+public class App extends Application
 {
 	/**
 	 * Version number
 	 */
-	protected static final String version = "0.1.1";
+	protected static final String version = "1.0.0";
 	
 	/**
 	 * The title of the page with the minimum version number
@@ -60,12 +60,12 @@ public class MTCui extends Application
 		String minVersion =  wiki.getPageText(serverVersionPage).trim();
 		if(!Toolbox.versionCheck(version, minVersion))
 		{
-			FXTool.warnUser(String.format("Your version of MTC (%s) is outdated.  The new version is (%s).  Please download the newest version.", version, minVersion)); 
+			FXTool.warnUser(String.format("Your version of %s (%s) is outdated.  The new version is (%s).  Please download the newest version.", Config.name, version, minVersion)); 
 			getHostServices().showDocument("https://en.wikipedia.org/wiki/" + Config.fullname);
 
 			Platform.exit();
 		}
 		
-		FXTool.setupAndShowStage(new Stage(), "MTC!", new Scene(MTCController.load(wiki).getRoot()));
+		FXTool.setupAndShowStage(new Stage(), Config.name, new Scene(MTCController.load(wiki).getRoot()));
 	}
 }

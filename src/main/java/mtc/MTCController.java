@@ -1,9 +1,8 @@
 package mtc;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -12,10 +11,11 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
+import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.input.Clipboard;
 import fastily.jwiki.core.NS;
@@ -30,9 +30,11 @@ import ctools.ui.FXTool;
  * @author Fastily
  *
  */
-
 public class MTCController
 {
+	@FXML
+	protected TextArea console;
+	
 	/**
 	 * The ProgressBar for the UI
 	 */
@@ -43,14 +45,26 @@ public class MTCController
 	 * The ComboBox for mode selection
 	 */
 	@FXML
-	protected ComboBox<String> cb;
+	protected ComboBox<String> modeSelect;
 
 	/**
 	 * The TextField for user input
 	 */
 	@FXML
-	protected TextField tf;
+	protected TextField textInput;
 
+	/**
+	 * UI component toggling the smart filter 
+	 */
+	@FXML
+	protected CheckMenuItem filterToggle;
+	
+	/**
+	 * UI component toggling the post-transfer delete function
+	 */
+	@FXML
+	protected CheckMenuItem deleteToggle;
+	
 	/**
 	 * The transfer Button
 	 */
@@ -64,16 +78,10 @@ public class MTCController
 	protected Button pasteButton;
 
 	/**
-	 * The CheckBox to disable the NFC filter.
-	 */
-	@FXML
-	protected CheckBox disableFilterBox;
-
-	/**
 	 * The user Label and ProgressBar
 	 */
 	@FXML
-	protected Label userLabel, cntLabel, pbLabel;
+	protected Label userLabel;
 
 	/**
 	 * The root Node object for the UI
@@ -85,21 +93,24 @@ public class MTCController
 	 */
 	private Wiki wiki;
 
-	/**
-	 * The master HashSet of successfully transferred items
-	 */
-	private HashSet<String> tfl = new HashSet<>();
+//	private boolean canCont = false;
 	
 	/**
 	 * The MTC instance for this Controller.
 	 */
 	private static MTC mtc;
 
+	
 	/**
 	 * The OS clipboard
 	 */
-	private static final Clipboard clipboard = Clipboard.getSystemClipboard();
+	private static Clipboard clipboard = Clipboard.getSystemClipboard();
 
+	/**
+	 * Date format for prefixing output.
+	 */
+	private static final DateTimeFormatter df = DateTimeFormatter.ofPattern("MMM dd, yyyy hh:mm:ss a");
+	
 	/**
 	 * The MTCController
 	 * 
@@ -124,11 +135,11 @@ public class MTCController
 		MTCController mc = fl.getController();
 
 		mc.root = root;
-		mc.wiki = wiki.getWiki("en.wikipedia.org");
+		mc.wiki = wiki;
 
 		// Initialize dynamic data for Nodes
-		mc.userLabel.setText(mc.wiki.whoami() + " ->");
-		mc.cb.getItems().addAll("File", "User", "Category", "Template");
+		mc.userLabel.setText("Hello" + mc.wiki.whoami());
+		mc.modeSelect.getItems().addAll("File", "User", "FileUsage", "Links", "Category", "Template"); //TODO: enum these
 
 		// Initalize MTC base
 		try
@@ -150,30 +161,30 @@ public class MTCController
 	@FXML
 	protected void startTransfer()
 	{
-		String text = tf.getText().trim(), mode = cb.getSelectionModel().getSelectedItem();
+		String text = textInput.getText().trim(), mode = modeSelect.getSelectionModel().getSelectedItem();
 		if (text.isEmpty() || mode == null)
 		{
 			FXTool.warnUser("Please select a transfer mode and specify a File, Category, Username, or Template to continue.");
 			return;
 		}
-
-		// Initialize and grab values from Nodes
-		mtc.ignoreFilter = disableFilterBox.isSelected();
-		updatePB(0, "Hold tight, querying server...");
-		transferButton.setDisable(true);
-
+		
+		mtc.ignoreFilter = filterToggle.isSelected();
+		pb.setProgress(0);
+		console.clear();
+		transferButton.setDisable(true); //TODO: add abort logic
+		
+		printToConsole("Hold tight, querying server...");
 		FXTool.runAsyncTask(() -> runTransfer(mode, text));
 	}
 
 	/**
-	 * Pastes a String (if possible) from the OS clipboard into <code>tf</code>.
+	 * Pastes a String (if available) from the OS clipboard into {@code textInput}.
 	 */
 	@FXML
 	protected void doPaste()
 	{
-		String text = clipboard.getString();
-		if (text != null)
-			tf.setText(text);
+		if(clipboard.hasString())
+			textInput.setText(clipboard.getString());
 	}
 
 	/**
@@ -199,34 +210,45 @@ public class MTCController
 			case "Template":
 				fl = wiki.whatTranscludesHere(wiki.convertIfNotInNS(text, NS.TEMPLATE), NS.FILE);
 				break;
+			case "FileUsage":
+				fl = wiki.fileUsage(text);
+				break;
+			case "Links":
+				fl = wiki.getLinksOnPage(true, text, NS.FILE);
+				break;
 			default:
 				fl = new ArrayList<>();
 				break;
 		}
 
-		Set<String> fails = Collections.synchronizedSet(new HashSet<>()), success = Collections.synchronizedSet(new HashSet<>());
-
+		AtomicInteger success = new AtomicInteger();
+		ArrayList<String> fails = new ArrayList<>();
+		
 		ArrayList<TransferFile> tol = mtc.filterAndResolve(fl);
+		int tolSize = tol.size();
+		
+		printToConsole(String.format("Analysis complete -> (Total/Filtered/Eligible): (%d/%d/%d)%n", fl.size(), fl.size() - tolSize, tolSize));
+		
 		if (tol.isEmpty())
 		{
 			Platform.runLater(() -> {
-				updatePB(0, "No matching files found! :(");
-				FXTool.warnUser("I couldn't find any file(s) matching your query; please verify that your input is correct");
+				printToConsole("I did not find any file(s) matching your request.  Please verify that your input is correct or disable the smart filter.");
 				transferButton.setDisable(false);
 			});
 
 			return;
 		}
 
-		int total = tol.size();
-		double denom = (double) total;
-		AtomicInteger i = new AtomicInteger();
-
+		AtomicInteger cnt = new AtomicInteger();
 		tol.stream().forEach(to -> {
-			Platform.runLater(() -> updatePB(((double) i.getAndIncrement()) / denom,
-					String.format("Transferring (%d/%d): %s", i.get(), total, to.wpFN)));
+			
+			Platform.runLater(() -> {
+				pb.setProgress(((double) cnt.getAndIncrement()) / tolSize);
+				printToConsole(String.format("Transferring (%d/%d): %s", cnt.get(), tolSize, to.wpFN));
+			});
+			
 			if (to.doTransfer())
-				success.add(to.wpFN);
+				success.incrementAndGet();
 			else
 				fails.add(to.wpFN);
 		});
@@ -235,26 +257,20 @@ public class MTCController
 			Platform.runLater(() -> FXTool
 					.warnUser(String.format("Task complete, with %d failures:%n%n%s", fails.stream().collect(Collectors.joining("\n")))));
 
-		tfl.addAll(success);
 		Platform.runLater(() -> {
-			updatePB(1, String.format("OK: Completed %d transfer(s)", success.size()));
-			cntLabel.setText("" + tfl.size());
+			printToConsole(String.format("Done, completed %d transfer(s)", success.get()));
+			pb.setProgress(1);
+			
 			transferButton.setDisable(false);
 		});
 	}
 
-	/**
-	 * Updates the ProgressBar and its Label.
-	 * 
-	 * @param pos The percentage to set the ProgressBar to
-	 * @param msg The message to display above the ProgressBar
-	 */
-	private void updatePB(double pos, String msg)
+	
+	private void printToConsole(String msg)
 	{
-		pb.setProgress(pos);
-		pbLabel.setText(msg);
+		console.appendText(String.format("(%s): %s%n", LocalDateTime.now().format(df), msg));
 	}
-
+	
 	/**
 	 * Gets this controller's root Node
 	 * 

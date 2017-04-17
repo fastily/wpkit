@@ -17,6 +17,7 @@ import enwp.bots.UnflagOI;
 import enwp.reports.BigMTC;
 import enwp.reports.CalcMTCRegex;
 import enwp.reports.FFDCount;
+import enwp.reports.FilePRODSum;
 import enwp.reports.FindBrokenSPI;
 import enwp.reports.FindOrphanedFfD;
 import enwp.reports.FindUntaggedDD;
@@ -113,6 +114,9 @@ public final class BMgr
 					break;
 				case 7:
 					BigMTC.main(pArgs);
+					break;
+				case 8:
+					FilePRODSum.main(pArgs);
 					break;
 				default:
 					System.err.printf(badNumberFmt, cl.getOptionValue('r'), "report");

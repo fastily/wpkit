@@ -3,10 +3,8 @@ package mtc;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
-import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -45,7 +43,7 @@ public class MTCController
 	 * The ComboBox for mode selection
 	 */
 	@FXML
-	protected ComboBox<String> modeSelect;
+	protected ComboBox<MTC.TransferMode> modeSelect;
 
 	/**
 	 * The TextField for user input
@@ -93,7 +91,10 @@ public class MTCController
 	 */
 	private Wiki wiki;
 
-	// private boolean canCont = false;
+	/**
+	 * The most recently created TransferTask. This may or may not be running.
+	 */
+	private TransferTask currTask = null;
 
 	/**
 	 * The MTC instance for this Controller.
@@ -138,7 +139,7 @@ public class MTCController
 
 		// Initialize dynamic data for Nodes
 		mc.userLabel.setText("Hello, " + mc.wiki.whoami());
-		mc.modeSelect.getItems().addAll("File", "User", "FileUsage", "Links", "Category", "Template"); // TODO: enum these
+		mc.modeSelect.getItems().addAll(MTC.TransferMode.values());
 
 		// Initalize MTC base
 		try
@@ -150,30 +151,8 @@ public class MTCController
 			FXTool.warnUser("Are you missing filesystem Read/Write Permissions?");
 			FSystem.errAndExit(e, null);
 		}
-
+		
 		return mc;
-	}
-
-	/**
-	 * Transfers files to Commons as per user input.
-	 */
-	@FXML
-	protected void startTransfer()
-	{
-		String text = textInput.getText().trim(), mode = modeSelect.getSelectionModel().getSelectedItem();
-		if (text.isEmpty() || mode == null)
-		{
-			FXTool.warnUser("Please select a transfer mode and specify a File, Category, Username, or Template to continue.");
-			return;
-		}
-
-		mtc.ignoreFilter = filterToggle.isSelected();
-		pb.setProgress(0);
-		console.clear();
-		transferButton.setDisable(true); // TODO: add abort logic
-
-		printToConsole("Hold tight, querying server...");
-		FXTool.runAsyncTask(() -> runTransfer(mode, text));
 	}
 
 	/**
@@ -187,85 +166,30 @@ public class MTCController
 	}
 
 	/**
-	 * Performs a transfer with the given transfer mode and text.
-	 * 
-	 * @param mode The mode of transfer
-	 * @param text The input text by the user.
+	 * Transfers files to Commons as per user input.
 	 */
-	private void runTransfer(String mode, String text)
+	@FXML
+	protected void triggerAction()
 	{
-		ArrayList<String> fl;
-		switch (mode)
+		if (currTask == null || currTask.isDone())
 		{
-			case "File":
-				fl = FL.toSAL(wiki.convertIfNotInNS(text, NS.FILE));
-				break;
-			case "Category":
-				fl = wiki.getCategoryMembers(wiki.convertIfNotInNS(text, NS.CATEGORY), NS.FILE);
-				break;
-			case "User":
-				fl = wiki.getUserUploads(wiki.nss(text));
-				break;
-			case "Template":
-				fl = wiki.whatTranscludesHere(wiki.convertIfNotInNS(text, NS.TEMPLATE), NS.FILE);
-				break;
-			case "FileUsage":
-				fl = wiki.fileUsage(text);
-				break;
-			case "Links":
-				fl = wiki.getLinksOnPage(true, text, NS.FILE);
-				break;
-			default:
-				fl = new ArrayList<>();
-				break;
-		}
+			String text = textInput.getText().trim();
+			MTC.TransferMode mode = modeSelect.getSelectionModel().getSelectedItem();
 
-		AtomicInteger success = new AtomicInteger();
-		ArrayList<String> fails = new ArrayList<>();
-
-		ArrayList<TransferFile> tol = mtc.filterAndResolve(fl);
-		int tolSize = tol.size();
-
-		printToConsole(
-				String.format("Analysis complete -> (Total/Filtered/Eligible): (%d/%d/%d)%n", fl.size(), fl.size() - tolSize, tolSize));
-
-		if (tol.isEmpty())
-		{
-			Platform.runLater(() -> {
-				printToConsole(
-						"I did not find any file(s) matching your request.  Please verify that your input is correct or disable the smart filter.");
-				transferButton.setDisable(false);
-			});
-
-			return;
-		}
-
-		AtomicInteger cnt = new AtomicInteger();
-		tol.stream().forEach(to -> {
-
-			Platform.runLater(() -> {
-				pb.setProgress(((double) cnt.getAndIncrement()) / tolSize);
-				printToConsole(String.format("Transferring (%d/%d): %s", cnt.get(), tolSize, to.wpFN));
-			});
-
-			if (to.doTransfer())
-				success.incrementAndGet();
+			if (text.isEmpty() || mode == null)
+				FXTool.warnUser("Please select a transfer mode and specify a File, Category, Username, or Template to continue.");
 			else
-				fails.add(to.wpFN);
-		});
-
-		if (!fails.isEmpty())
-			Platform.runLater(() -> FXTool
-					.warnUser(String.format("Task complete, with %d failures:%n%n%s", fails.stream().collect(Collectors.joining("\n")))));
-
-		Platform.runLater(() -> {
-			printToConsole(String.format("Done, completed %d transfer(s)", success.get()));
-			pb.setProgress(1);
-
-			transferButton.setDisable(false);
-		});
+				new Thread(currTask = new TransferTask(mode, text)).start();
+		}
+		else if (currTask.isRunning())
+			currTask.cancel(false);
 	}
 
+	/**
+	 * Adds a time-stamped message to the {@code console} TextArea.
+	 * 
+	 * @param msg The new message to add.
+	 */
 	private void printToConsole(String msg)
 	{
 		console.appendText(String.format("(%s): %s%n", LocalDateTime.now().format(df), msg));
@@ -279,5 +203,132 @@ public class MTCController
 	public Parent getRoot()
 	{
 		return root;
+	}
+
+	/**
+	 * Business logic for transferring a set of file(s) to Commons.
+	 * 
+	 * @author Fastily
+	 *
+	 */
+	private class TransferTask extends Task<Void>
+	{
+		/**
+		 * The mode of transfer to attempt.
+		 */
+		private MTC.TransferMode mode;
+
+		/**
+		 * The text collected from user input.
+		 */
+		private String text;
+
+		/**
+		 * Titles of all files which could not be transferred.
+		 */
+		private ArrayList<String> fails = new ArrayList<>();
+
+		/**
+		 * Constructor, creates a new TransferTask.
+		 * 
+		 * @param mode The TransferMode to use.
+		 * @param text The text input from the user.
+		 */
+		private TransferTask(MTC.TransferMode mode, String text)
+		{
+			this.mode = mode;
+			this.text = text;
+
+			mtc.ignoreFilter = filterToggle.isSelected();
+
+			messageProperty().addListener((obv, o, n) -> printToConsole(n));
+			stateProperty().addListener((obv, o, n) -> {
+				switch (n)
+				{
+					case SCHEDULED:
+						console.clear();
+						transferButton.setText("Cancel");
+						updateProgress(0, 1);
+						break;
+					case CANCELLED:
+					case SUCCEEDED:
+					case FAILED:
+						transferButton.setText("Start");
+						updateProgress(1, 1);
+						break;
+
+					default:
+						break;
+				}
+			});
+
+			setOnCancelled(e -> updateMessage("You cancelled this transfer!"));
+			setOnFailed(e -> updateMessage("Something's not right.  Are you connected to the internet?"));
+			setOnSucceeded(e -> updateMessage(String.format("Task succeeded, with %d failures: %s", fails.size(), fails)));
+
+			pb.progressProperty().bind(progressProperty());
+		}
+
+		/**
+		 * Performs the actual file transfer(s).
+		 */
+		public Void call()
+		{
+			updateMessage("Please wait, querying server...");
+
+			ArrayList<String> fl;
+			switch (mode)
+			{
+				case FILE:
+					fl = FL.toSAL(wiki.convertIfNotInNS(text, NS.FILE));
+					break;
+				case CATEGORY:
+					fl = wiki.getCategoryMembers(wiki.convertIfNotInNS(text, NS.CATEGORY), NS.FILE);
+					break;
+				case USER:
+					fl = wiki.getUserUploads(wiki.nss(text));
+					break;
+				case TEMPLATE:
+					fl = wiki.whatTranscludesHere(wiki.convertIfNotInNS(text, NS.TEMPLATE), NS.FILE);
+					break;
+				case FILEUSAGE:
+					fl = wiki.fileUsage(text);
+					break;
+				case LINKS:
+					fl = wiki.getLinksOnPage(true, text, NS.FILE);
+					break;
+				default:
+					fl = new ArrayList<>();
+					break;
+			}
+
+			ArrayList<TransferFile> tol = mtc.filterAndResolve(fl);
+			int tolSize = tol.size();
+
+			// Checkpoint - kill Task now if cancelled
+			if (isCancelled())
+				return null;
+
+			updateMessage(String.format("[Total/Filtered/Eligible]: [%d/%d/%d]", fl.size(), fl.size() - tolSize, tolSize));
+
+			if (tol.isEmpty())
+			{
+				updateMessage("Found no file(s) matching your request; verify your input(s) and/or disable the smart filter.");
+				updateProgress(0, 1);
+			}
+			else
+				for (int i = 0; i < tol.size() && !isCancelled(); i++)
+				{
+					TransferFile to = tol.get(i);
+
+					updateProgress(i, tolSize);
+					updateMessage(String.format("Transfer [%d/%d]: %s", i, tolSize, to.wpFN));
+
+					if (!to.doTransfer())
+						fails.add(to.wpFN);
+				}
+
+			return null;
+		}
 	}
 }

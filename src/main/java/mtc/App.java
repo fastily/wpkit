@@ -19,12 +19,12 @@ public class App extends Application
 	/**
 	 * Version number
 	 */
-	protected static final String version = "1.0.0";
+	protected static final String version = "0.2.0";
 	
 	/**
 	 * The title of the page with the minimum version number
 	 */
-	private static final String serverVersionPage = Config.fullname + "/Version";
+	private static final String serverVersionPage = MStr.fullname + "/Version";
 	
 	/**
 	 * The LoginController for this Application
@@ -60,12 +60,12 @@ public class App extends Application
 		String minVersion =  wiki.getPageText(serverVersionPage).trim();
 		if(!Toolbox.versionCheck(version, minVersion))
 		{
-			FXTool.warnUser(String.format("Your version of %s (%s) is outdated.  The new version is (%s).  Please download the newest version.", Config.name, version, minVersion)); 
-			getHostServices().showDocument("https://en.wikipedia.org/wiki/" + Config.fullname);
+			FXTool.warnUser(String.format("Your version of %s (%s) is outdated.  The new version is (%s).  Please download the newest version.", MStr.name, version, minVersion)); 
+			getHostServices().showDocument("https://en.wikipedia.org/wiki/" + MStr.fullname);
 
 			Platform.exit();
 		}
 		
-		FXTool.setupAndShowStage(new Stage(), Config.name, new Scene(MTCController.load(wiki).getRoot()));
+		FXTool.setupAndShowStage(new Stage(), MStr.name, new Scene(MTCController.load(wiki).getRoot()));
 	}
 }

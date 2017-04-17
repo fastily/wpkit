@@ -102,7 +102,7 @@ public class TransferFile
 		this.mtc = mtc;
 
 		String baseFN = enwp.nss(wpFN);
-		localFN = Config.fdump + baseFN.hashCode() + baseFN.substring(baseFN.lastIndexOf('.'));
+		localFN = MStr.fdump + baseFN.hashCode() + baseFN.substring(baseFN.lastIndexOf('.'));
 	}
 
 	/**
@@ -128,9 +128,9 @@ public class TransferFile
 				return true;
 			}
 			else if (t != null && Toolbox.downloadFile(enwp.apiclient.client, imgInfoL.get(0).url.toString(), localFN)
-					&& com.upload(Paths.get(localFN), comFN, t, String.format(Config.tFrom, wpFN)))
+					&& com.upload(Paths.get(localFN), comFN, t, String.format(MStr.tFrom, wpFN)))
 				return enwp.edit(wpFN, String.format("{{subst:ncd|%s|reviewer=%s}}%n", comFN, enwp.whoami())
-						+ enwp.getPageText(wpFN).replaceAll(mtc.mtcRegex, ""), Config.tTo);
+						+ enwp.getPageText(wpFN).replaceAll(mtc.mtcRegex, ""), MStr.tTo);
 		}
 		catch (Throwable e)
 		{

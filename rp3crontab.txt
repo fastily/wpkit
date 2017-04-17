@@ -6,7 +6,7 @@ BOTHOME="/home/pi/scripts"
 00 3 * * * cd "$BOTHOME" && java -jar BMgr.jar -b 6 > task6.txt 2>&1 # DDNotifier
 00 5 * * * cd "$BOTHOME" && java -jar BMgr.jar -b 7 > task7.txt 2>&1 # FindCommonsFFD
 00 7 * * * cd "$BOTHOME" && java -jar BMgr.jar -b 11 > task11.txt 2>&1 # DateNowCommons
-50 23 * * * cd "$BOTHOME" && java -jar BMgr.jar -b 12 > task12.txt 2>&1 # FFDNotifier
+55 23 * * * cd "$BOTHOME" && java -jar BMgr.jar -b 12 > task12.txt 2>&1 # FFDNotifier
 
 # Bi-Weekly
 00 2 * * 1,3,5 cd "$BOTHOME" && java -jar BMgr.jar -b 1 > task1.txt 2>&1 # MTCHelper
@@ -26,3 +26,5 @@ BOTHOME="/home/pi/scripts"
 45 21 * * 2 cd "$BOTHOME" && java -jar BMgr.jar -r 4 > report4.txt 2>&1 # CalcMTCRegex
 45 20 * * * cd "$BOTHOME" && java -jar BMgr.jar -r 5 > report5.txt 2>&1 # FFDCount
 45 19 * * 2 cd "$BOTHOME" && java -jar BMgr.jar -r 6 > report6.txt 2>&1 # OrphanedKL
+45 18 * * 2 cd "$BOTHOME" && java -jar BMgr.jar -r 7 > report7.txt 2>&1 # BigMTC
+50 0,6,12,18 * * * cd "$BOTHOME" && java -jar BMgr.jar -r 8 > report8.txt 2>&1 # FilePRODSum

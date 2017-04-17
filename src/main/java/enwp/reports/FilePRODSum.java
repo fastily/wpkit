@@ -62,7 +62,6 @@ public class FilePRODSum
 			try
 			{
 				Template t = ParsedItem.parse(wiki, k, TParse.extractTemplate(filePRODRegex, v)).tplates.get(0);
-
 				reportText += String.format("|-%n| %s%n| [[:%s]]%n| %s%n | %d%n",
 						dateOutFmt.format(ZonedDateTime.parse(t.get("timestamp").toString() + "UTC", dateInFmt)), k,
 						t.get("concern").toString(), counts.get(k));

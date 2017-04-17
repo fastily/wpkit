@@ -64,7 +64,7 @@
                   <Insets left="10.0" right="10.0" />
                </GridPane.margin>
                <children>
-                  <Button fx:id="transferButton" defaultButton="true" maxWidth="-Infinity" mnemonicParsing="false" onAction="#startTransfer" prefWidth="100.0" text="Transfer" />
+                  <Button fx:id="transferButton" defaultButton="true" maxWidth="-Infinity" mnemonicParsing="false" onAction="#triggerAction" prefWidth="100.0" text="Start" />
                </children>
             </HBox>
             <Label text="MTC! Transfer Tool" GridPane.columnSpan="3">

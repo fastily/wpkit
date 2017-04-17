@@ -82,21 +82,21 @@ public final class MTC
 
 		// Generate whitelist & blacklist
 		HashMap<String, ArrayList<String>> l = MQuery.getLinksOnPage(enwp,
-				FL.toSAL(Config.fullname + "/Blacklist", Config.fullname + "/Whitelist", Config.fullname + "/Self"));
-		blacklist = new HashSet<>(l.get(Config.fullname + "/Blacklist"));
-		whitelist = new HashSet<>(l.get(Config.fullname + "/Whitelist"));
-		selflist = FL.toSet(l.get(Config.fullname + "/Self").stream().map(enwp::nss));
+				FL.toSAL(MStr.fullname + "/Blacklist", MStr.fullname + "/Whitelist", MStr.fullname + "/Self"));
+		blacklist = new HashSet<>(l.get(MStr.fullname + "/Blacklist"));
+		whitelist = new HashSet<>(l.get(MStr.fullname + "/Whitelist"));
+		selflist = FL.toSet(l.get(MStr.fullname + "/Self").stream().map(enwp::nss));
 
 		// Generate download directory
-		if (Files.isRegularFile(Config.fdPath))
-			FSystem.errAndExit(Config.fdump + " is file, please remove it so MTC can continue");
-		else if (!Files.isDirectory(Config.fdPath))
-			Files.createDirectory(Config.fdPath);
+		if (Files.isRegularFile(MStr.fdPath))
+			FSystem.errAndExit(MStr.fdump + " is file, please remove it so MTC can continue");
+		else if (!Files.isDirectory(MStr.fdPath))
+			Files.createDirectory(MStr.fdPath);
 
 		mtcRegex = WTP.mtc.getRegex(enwp);
 
 		// Process template data
-		Toolbox.fetchPairedConfig(enwp, Config.fullname + "/Regexes").forEach((k, v) -> {
+		Toolbox.fetchPairedConfig(enwp, MStr.fullname + "/Regexes").forEach((k, v) -> {
 			String t = enwp.nss(k);
 			for (String s : v.split("\\|"))
 				tpMap.put(s, t);
@@ -165,5 +165,64 @@ public final class MTC
 		});
 
 		return rl;
+	}
+	
+	/**
+	 * Represents various supported file transfer modes.
+	 * @author Fastily
+	 *
+	 */
+	protected enum TransferMode {
+		/**
+		 * Represents the single file transfer mode.
+		 */
+		FILE("File"), 
+		
+		/**
+		 * Represents category mass-transfer mode.
+		 */
+		CATEGORY("Category"),
+		
+		/**
+		 * Represents user uploads mass-transfer mode.
+		 */
+		USER("User"), 
+		
+		/**
+		 * Represents template transclusions mass-transfer mode.
+		 */
+		TEMPLATE("Template"), 
+		
+		/**
+		 * Represents all fileusage on a page mass-transfer mode.
+		 */
+		FILEUSAGE("Fileusage"), 
+		
+		/**
+		 * Represents all file namespace links on a page mass-transfer mode.
+		 */
+		LINKS("Links");
+		
+		/**
+		 * Constructor, creates a new TransferMode.
+		 * @param name The user-suitable name to create this TransferMode with.
+		 */
+		private TransferMode(String name)
+		{
+			this.name = name;
+		}
+		
+		/**
+		 * The user-suitable name of this TransferMode.
+		 */
+		private String name;
+		
+		/**
+		 * Returns the user-suitable name of this TransferMode.
+		 */
+		public String toString()
+		{
+			return name;
+		}
 	}
 }

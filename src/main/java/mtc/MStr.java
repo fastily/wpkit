@@ -3,7 +3,6 @@ package mtc;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import fastily.jwiki.core.Wiki;
 import fastily.jwiki.util.FSystem;
 
 /**
@@ -12,7 +11,7 @@ import fastily.jwiki.util.FSystem;
  * @author Fastily
  *
  */
-public class Config
+public class MStr
 {
 	/**
 	 * Short name for MTC!
@@ -57,7 +56,7 @@ public class Config
 	/**
 	 * Constructors disallowed.
 	 */
-	private Config(Wiki enwp)
+	private MStr()
 	{
 
 	}

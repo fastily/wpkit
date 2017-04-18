@@ -2,10 +2,12 @@ package mtc;
 
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import ctools.util.Toolbox;
 import fastily.jwiki.core.Wiki;
+import fastily.jwiki.util.FSystem;
 import ctools.ui.FXTool;
 import ctools.ui.LoginController;
 
@@ -19,18 +21,18 @@ public class App extends Application
 	/**
 	 * Version number
 	 */
-	protected static final String version = "0.2.0";
+	protected static final String version = "1.0.0";
 	
 	/**
 	 * The title of the page with the minimum version number
 	 */
-	private static final String serverVersionPage = MStr.fullname + "/Version";
+	private static final String serverVersionPage = MStrings.fullname + "/Version";
 	
 	/**
-	 * The LoginController for this Application
+	 * The Wiki object to use.
 	 */
-	private static LoginController lc;
-
+	private Wiki wiki = new Wiki("en.wikipedia.org");
+		
 	/**
 	 * Main Driver
 	 * 
@@ -44,28 +46,54 @@ public class App extends Application
 	/**
 	 * Called when MTC first starts.
 	 */
-	public void start(Stage primaryStage) throws Exception
+	public void start(Stage stage) throws Exception
 	{
-		FXTool.setupAndShowStage(primaryStage, "MTC!",
-				new Scene((lc = LoginController.load(() -> createAndShowMTC(lc.getWiki()))).getRoot()));
+		// Check Version
+		String minVersion =  wiki.getPageText(serverVersionPage).trim();
+		if(!Toolbox.versionCheck(version, minVersion))
+		{
+			FXTool.warnUser(String.format("Your version of %s (%s) is outdated.  The current version is (%s), please download the newest version.", MStrings.name, version, minVersion)); 
+			FXTool.launchBrowser(this, MStrings.enwpURLBase + MStrings.fullname);
+
+			Platform.exit();
+		}
+		
+		// Start Login Window
+		FXMLLoader lcLoader = FXTool.makeNewLoader(LoginController.fxmlLoc, LoginController.class);
+		stage.setScene(new Scene(lcLoader.load()));
+		
+		LoginController lc = lcLoader.getController();
+		lc.wiki = wiki;
+		lc.callback = this::createAndShowMTC;
+		
+		stage.setTitle(MStrings.name);
+		stage.show();
 	}
-	
+		
 	/**
 	 * Creates and shows the main MTC UI.  Also checks the minimum allowed version.
 	 * 
 	 * @param wiki The Wiki object to use with the UI
 	 */
-	private void createAndShowMTC(Wiki wiki)
+	private void createAndShowMTC()
 	{
-		String minVersion =  wiki.getPageText(serverVersionPage).trim();
-		if(!Toolbox.versionCheck(version, minVersion))
-		{
-			FXTool.warnUser(String.format("Your version of %s (%s) is outdated.  The new version is (%s).  Please download the newest version.", MStr.name, version, minVersion)); 
-			getHostServices().showDocument("https://en.wikipedia.org/wiki/" + MStr.fullname);
-
-			Platform.exit();
-		}
+		FXMLLoader lcLoader = FXTool.makeNewLoader(MTCController.fxmlLoc, MTCController.class);
 		
-		FXTool.setupAndShowStage(new Stage(), MStr.name, new Scene(MTCController.load(wiki).getRoot()));
+      Stage stage = new Stage();	
+      
+      try
+      {
+      	stage.setScene(new Scene(lcLoader.load()));
+      }
+      catch(Throwable e)
+      {
+      	FSystem.errAndExit(e, "Should never reach here, is your FXML malformed or missing?");
+      }
+      
+      MTCController mtcC = lcLoader.getController();
+      mtcC.initData(wiki);
+      
+      stage.setTitle(MStrings.name);
+      stage.show();
 	}
 }

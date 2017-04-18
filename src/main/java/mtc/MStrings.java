@@ -11,7 +11,7 @@ import fastily.jwiki.util.FSystem;
  * @author Fastily
  *
  */
-public class MStr
+public class MStrings
 {
 	/**
 	 * Short name for MTC!
@@ -54,9 +54,14 @@ public class MStr
 	protected static final String tTo = String.format("Transferred to Commons (%s)", mtcLink);
 	
 	/**
+	 * The URL base for the English Wikipedia.
+	 */
+	protected static final String enwpURLBase = "https://en.wikipedia.org/wiki/";
+	
+	/**
 	 * Constructors disallowed.
 	 */
-	private MStr()
+	private MStrings()
 	{
 
 	}

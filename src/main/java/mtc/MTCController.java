@@ -4,14 +4,14 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
+import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
@@ -30,6 +30,21 @@ import ctools.ui.FXTool;
  */
 public class MTCController
 {
+	/**
+	 * The location of this controller's FXML.
+	 */
+	public static final String fxmlLoc = "MTC.fxml";
+	
+	/**
+	 * The OS clipboard
+	 */
+	private static Clipboard clipboard = Clipboard.getSystemClipboard();
+
+	/**
+	 * Date format for prefixing output.
+	 */
+	private static DateTimeFormatter df = DateTimeFormatter.ofPattern("MMM dd, yyyy hh:mm:ss a");
+
 	@FXML
 	protected TextArea console;
 
@@ -62,12 +77,18 @@ public class MTCController
 	 */
 	@FXML
 	protected CheckMenuItem deleteToggle;
-
+	
 	/**
-	 * The transfer Button
+	 * The exit button in the menu
 	 */
 	@FXML
-	protected Button transferButton;
+	protected MenuItem menuItemExit;
+	
+	/**
+	 * The start Button
+	 */
+	@FXML
+	protected Button startButton;
 
 	/**
 	 * The paste Button
@@ -76,85 +97,48 @@ public class MTCController
 	protected Button pasteButton;
 
 	/**
-	 * The user Label and ProgressBar
+	 * Displays username in the upper right screen corner
 	 */
 	@FXML
 	protected Label userLabel;
-
-	/**
-	 * The root Node object for the UI
-	 */
-	private Parent root;
-
+	
 	/**
 	 * The Wiki objects to use with MTC.
 	 */
 	private Wiki wiki;
 
 	/**
-	 * The most recently created TransferTask. This may or may not be running.
-	 */
-	private TransferTask currTask = null;
-
-	/**
 	 * The MTC instance for this Controller.
 	 */
-	private static MTC mtc;
+	private MTC mtc;
 
 	/**
-	 * The OS clipboard
+	 * The most recently created TransferTask. This may or may not be running.
 	 */
-	private static Clipboard clipboard = Clipboard.getSystemClipboard();
-
+	private TransferTask currTask = null;	
+	
 	/**
-	 * Date format for prefixing output.
+	 * Performs simple UI initialization using {@code wiki}
+	 * @param wiki The Wiki for this controller to use.
 	 */
-	private static DateTimeFormatter df = DateTimeFormatter.ofPattern("MMM dd, yyyy hh:mm:ss a");
-
-	/**
-	 * The MTCController
-	 * 
-	 * @param wiki The Wiki object to use
-	 * @return The MTC controller
-	 */
-	public static MTCController load(Wiki wiki)
+	protected void initData(Wiki wiki)
 	{
-		FXMLLoader fl = new FXMLLoader(MTCController.class.getResource("MTC.fxml"));
-
-		Parent root = null;
+		this.wiki = wiki;
+		
+		userLabel.setText("Hello, " + wiki.whoami());
+		modeSelect.getItems().addAll(MTC.TransferMode.values());
+		
 		try
 		{
-			root = fl.load();
-		}
-		catch (Throwable e)
-		{
-			FXTool.warnUser("Should never reach this point; MTC.fxml is missing?");
-			FSystem.errAndExit(e, null);
-		}
-
-		MTCController mc = fl.getController();
-
-		mc.root = root;
-		mc.wiki = wiki;
-
-		// Initialize dynamic data for Nodes
-		mc.userLabel.setText("Hello, " + mc.wiki.whoami());
-		mc.modeSelect.getItems().addAll(MTC.TransferMode.values());
-
-		// Initalize MTC base
-		try
-		{
-			mtc = new MTC(mc.wiki);
+			mtc = new MTC(wiki);
 		}
 		catch (Throwable e)
 		{
 			FXTool.warnUser("Are you missing filesystem Read/Write Permissions?");
 			FSystem.errAndExit(e, null);
 		}
-		
-		return mc;
 	}
-
+	
 	/**
 	 * Pastes a String (if available) from the OS clipboard into {@code textInput}.
 	 */
@@ -166,10 +150,19 @@ public class MTCController
 	}
 
 	/**
+	 * Exits the application
+	 */
+	@FXML
+	protected void onExitButtonPress()
+	{
+		Platform.exit();
+	}
+	
+	/**
 	 * Transfers files to Commons as per user input.
 	 */
 	@FXML
-	protected void triggerAction()
+	protected void onStartButtonClick()
 	{
 		if (currTask == null || currTask.isDone())
 		{
@@ -196,16 +189,6 @@ public class MTCController
 	}
 
 	/**
-	 * Gets this controller's root Node
-	 * 
-	 * @return The root Node.
-	 */
-	public Parent getRoot()
-	{
-		return root;
-	}
-
-	/**
 	 * Business logic for transferring a set of file(s) to Commons.
 	 * 
 	 * @author Fastily
@@ -221,7 +204,7 @@ public class MTCController
 		/**
 		 * The text collected from user input.
 		 */
-		private String text;
+		private String userInput;
 
 		/**
 		 * Titles of all files which could not be transferred.
@@ -232,12 +215,12 @@ public class MTCController
 		 * Constructor, creates a new TransferTask.
 		 * 
 		 * @param mode The TransferMode to use.
-		 * @param text The text input from the user.
+		 * @param userInput The text input from the user.
 		 */
-		private TransferTask(MTC.TransferMode mode, String text)
+		private TransferTask(MTC.TransferMode mode, String userInput)
 		{
 			this.mode = mode;
-			this.text = text;
+			this.userInput = userInput;
 
 			mtc.ignoreFilter = filterToggle.isSelected();
 
@@ -247,13 +230,13 @@ public class MTCController
 				{
 					case SCHEDULED:
 						console.clear();
-						transferButton.setText("Cancel");
+						startButton.setText("Cancel");
 						updateProgress(0, 1);
 						break;
 					case CANCELLED:
 					case SUCCEEDED:
 					case FAILED:
-						transferButton.setText("Start");
+						startButton.setText("Start");
 						updateProgress(1, 1);
 						break;
 
@@ -263,7 +246,7 @@ public class MTCController
 			});
 
 			setOnCancelled(e -> updateMessage("You cancelled this transfer!"));
-			setOnFailed(e -> updateMessage("Something's not right.  Are you connected to the internet?"));
+			setOnFailed(e -> updateMessage("Something's not right.  Are you still connected to the internet?"));
 			setOnSucceeded(e -> updateMessage(String.format("Task succeeded, with %d failures: %s", fails.size(), fails)));
 
 			pb.progressProperty().bind(progressProperty());
@@ -280,22 +263,22 @@ public class MTCController
 			switch (mode)
 			{
 				case FILE:
-					fl = FL.toSAL(wiki.convertIfNotInNS(text, NS.FILE));
+					fl = FL.toSAL(wiki.convertIfNotInNS(userInput, NS.FILE));
 					break;
 				case CATEGORY:
-					fl = wiki.getCategoryMembers(wiki.convertIfNotInNS(text, NS.CATEGORY), NS.FILE);
+					fl = wiki.getCategoryMembers(wiki.convertIfNotInNS(userInput, NS.CATEGORY), NS.FILE);
 					break;
 				case USER:
-					fl = wiki.getUserUploads(wiki.nss(text));
+					fl = wiki.getUserUploads(wiki.nss(userInput));
 					break;
 				case TEMPLATE:
-					fl = wiki.whatTranscludesHere(wiki.convertIfNotInNS(text, NS.TEMPLATE), NS.FILE);
+					fl = wiki.whatTranscludesHere(wiki.convertIfNotInNS(userInput, NS.TEMPLATE), NS.FILE);
 					break;
-				case FILEUSAGE:
-					fl = wiki.fileUsage(text);
+				case FILELINKS:
+					fl= wiki.getImagesOnPage(userInput);
 					break;
 				case LINKS:
-					fl = wiki.getLinksOnPage(true, text, NS.FILE);
+					fl = wiki.getLinksOnPage(true, userInput, NS.FILE);
 					break;
 				default:
 					fl = new ArrayList<>();

@@ -1,21 +1,19 @@
 package ctools.ui;
 
 import fastily.jwiki.core.Wiki;
-import fastily.jwiki.util.FSystem;
 import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
-import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Alert.AlertType;
 import javafx.stage.Stage;
 
 /**
- * Implements a basic login form
+ * Basic login form implementation
  * 
  * @author Fastily
  *
@@ -23,20 +21,20 @@ import javafx.stage.Stage;
 public class LoginController
 {
 	/**
-	 * The Wiki object which login will be attempted on.
+	 * The location of this controller's FXML.
 	 */
-	private Wiki wiki;
+	public static final String fxmlLoc = "Login.fxml";
+	
+	/**
+	 * The Wiki object which login will be attempted on. PRECONDITION: This must be set before using.
+	 */
+	public Wiki wiki;
 
 	/**
-	 * The root node of this LoginController.
+	 * The method to run on a successful login. PRECONDITION: This must be set before using.
 	 */
-	private Parent root;
-
-	/**
-	 * The method to run on a successful login.
-	 */
-	private Runnable callback;
-
+	public Runnable callback;
+	
 	/**
 	 * The username text field
 	 */
@@ -54,7 +52,7 @@ public class LoginController
 	 */
 	@FXML
 	protected Button loginButton;
-
+	
 	/**
 	 * Attempts login, instantiates this object's Wiki object on success. Shows error message on failure.
 	 * 
@@ -62,73 +60,60 @@ public class LoginController
 	 */
 	@FXML
 	protected void tryLogin(ActionEvent e)
+	{		
+		String user = userF.getText().trim(), px = pxF.getText();
+		
+		if(user.isEmpty() || px.isEmpty())
+			FXTool.alertUser("Username/Password cannot be empty!", AlertType.INFORMATION);
+		else
+			new Thread(new LoginTask(user, px)).start();
+	}
+	   
+   /**
+    * Represents a login attempt.
+    * @author Fastily
+    *
+    */
+	private class LoginTask extends Task<Boolean> 
 	{
-		if (callback == null)
-			FSystem.errAndExit("You need to specify a callback in setOnLoginSuccess before using this method!");
+		/**
+		 * The username and password to use
+		 */
+		private String user, px;
+		
+		/**
+		 * Constructor, creates a new LoginTask
+		 * @param user The username to login with
+		 * @param px The password to login with
+		 */
+		private LoginTask(String user, String px)
+		{
+			this.user = user;
+			this.px = px;
+			
+			loginButton.disableProperty().bind(runningProperty());
+		}
 
-		FXTool.runAsyncTask(() -> {
-			try
+		/**
+		 * Attempts to login
+		 */
+		public Boolean call()
+		{						
+			return wiki.login(user, px);
+		}
+		
+		/**
+		 * Displays error on login fail, or closes this window and run {@code callback}
+		 */
+		public void succeeded()
+		{
+			if(!getValue())
+				FXTool.alertUser("Could not login. Please re-enter your credentials and/or verify that you are connected to the internet.", Alert.AlertType.ERROR);
+			else
 			{
-				Platform.runLater(() -> loginButton.setDisable(true));
-				wiki = new Wiki(userF.getText().trim(), pxF.getCharacters().toString(), "en.wikipedia.org");
+				((Stage) loginButton.getScene().getWindow()).close();
 				Platform.runLater(callback);
-				Platform.runLater(() -> ((Stage) ((Node) e.getSource()).getScene().getWindow()).close());
 			}
-			catch (Throwable x)
-			{
-				Platform.runLater(() -> {
-					FXTool.alertUser("Login Failed!\n\n" + x.getMessage(), Alert.AlertType.ERROR);
-					pxF.clear();
-					loginButton.setDisable(false);
-				});
-			}
-		});
-	}
-
-	/**
-	 * Generates a LoginController. PRECONDITION: Login.fxml is in the same directory as this class.
-	 * 
-	 * @param r The action to perform on a successful user login
-	 * @return A new LoginController
-	 */
-	public static LoginController load(Runnable r)
-	{
-		FXMLLoader fl = new FXMLLoader(LoginController.class.getResource("Login.fxml"));
-
-		LoginController lc = null;
-
-		try
-		{
-			Parent root = fl.load();
-			lc = fl.getController();
-			lc.root = root;
 		}
-		catch (Throwable e)
-		{
-			FSystem.errAndExit(e, "Should never reach this point; Login.fxml is missing?");
-		}
-
-		lc.callback = r;
-		return lc;
-	}
-
-	/**
-	 * Gets this object's Wiki
-	 * 
-	 * @return The Wiki object to get
-	 */
-	public Wiki getWiki()
-	{
-		return wiki;
-	}
-
-	/**
-	 * Gets the root Node of the FXML map
-	 * 
-	 * @return The root Node.
-	 */
-	public Parent getRoot()
-	{
-		return root;
 	}
 }

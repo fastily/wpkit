@@ -82,21 +82,21 @@ public final class MTC
 
 		// Generate whitelist & blacklist
 		HashMap<String, ArrayList<String>> l = MQuery.getLinksOnPage(enwp,
-				FL.toSAL(MStr.fullname + "/Blacklist", MStr.fullname + "/Whitelist", MStr.fullname + "/Self"));
-		blacklist = new HashSet<>(l.get(MStr.fullname + "/Blacklist"));
-		whitelist = new HashSet<>(l.get(MStr.fullname + "/Whitelist"));
-		selflist = FL.toSet(l.get(MStr.fullname + "/Self").stream().map(enwp::nss));
+				FL.toSAL(MStrings.fullname + "/Blacklist", MStrings.fullname + "/Whitelist", MStrings.fullname + "/Self"));
+		blacklist = new HashSet<>(l.get(MStrings.fullname + "/Blacklist"));
+		whitelist = new HashSet<>(l.get(MStrings.fullname + "/Whitelist"));
+		selflist = FL.toSet(l.get(MStrings.fullname + "/Self").stream().map(enwp::nss));
 
 		// Generate download directory
-		if (Files.isRegularFile(MStr.fdPath))
-			FSystem.errAndExit(MStr.fdump + " is file, please remove it so MTC can continue");
-		else if (!Files.isDirectory(MStr.fdPath))
-			Files.createDirectory(MStr.fdPath);
+		if (Files.isRegularFile(MStrings.fdPath))
+			FSystem.errAndExit(MStrings.fdump + " is file, please remove it so MTC can continue");
+		else if (!Files.isDirectory(MStrings.fdPath))
+			Files.createDirectory(MStrings.fdPath);
 
 		mtcRegex = WTP.mtc.getRegex(enwp);
 
 		// Process template data
-		Toolbox.fetchPairedConfig(enwp, MStr.fullname + "/Regexes").forEach((k, v) -> {
+		Toolbox.fetchPairedConfig(enwp, MStrings.fullname + "/Regexes").forEach((k, v) -> {
 			String t = enwp.nss(k);
 			for (String s : v.split("\\|"))
 				tpMap.put(s, t);
@@ -148,7 +148,7 @@ public final class MTC
 	 * Performs checks to determine if a file can be transfered to Commons.
 	 * 
 	 * @param titles The title to check
-	 * @return True if the file can <ins>probably</ins> be transfered to Commons.
+	 * @return True if the file can <i>probably</i> be transfered to Commons.
 	 */
 	public ArrayList<String> canTransfer(ArrayList<String> titles)
 	{
@@ -194,9 +194,9 @@ public final class MTC
 		TEMPLATE("Template"), 
 		
 		/**
-		 * Represents all fileusage on a page mass-transfer mode.
+		 * Represents all file links on a page mass-transfer mode.
 		 */
-		FILEUSAGE("Fileusage"), 
+		FILELINKS("Filelinks"), 
 		
 		/**
 		 * Represents all file namespace links on a page mass-transfer mode.

@@ -1,10 +1,10 @@
 package ctools.ui;
 
-import javafx.concurrent.Task;
-import javafx.scene.Scene;
+import fastily.jwiki.util.FSystem;
+import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
-import javafx.stage.Stage;
 
 /**
  * Miscellaneous static JavaFX routines
@@ -21,40 +21,26 @@ public final class FXTool
 	{
 
 	}
-
+	
 	/**
-	 * Runs an asynchronous Task in a new thread.
-	 * 
-	 * @param r The task to run
+	 * Creates a new FXMLLoader for the specified class.
+	 * @param name The path (relative to classpath of {@code c}) of the FXML file.
+	 * @param c The Class to get a loader for.
+	 * @return The FXMLLoader.
 	 */
-	public static void runAsyncTask(Runnable r)
-	{
-		new Thread(new Task<Integer>() {
-			protected Integer call()
-			{
-				r.run();
-				return 0;
-			}
-		}).start();
-	}
-
-	/**
-	 * Sets some basic parameters and shows a Stage.
-	 * 
-	 * @param stg The Stage to show
-	 * @param title The Window title
-	 * @param sc The Scene to apply to the Stage
-	 * @return The stage, <code>stg</code>
-	 */
-	public static Stage setupAndShowStage(Stage stg, String title, Scene sc)
-	{
-		stg.setTitle(title);
-		stg.setScene(sc);
-		stg.show();
-
-		return stg;
-	}
-
+   public static <T> FXMLLoader makeNewLoader(String name, Class<T> c)
+   {
+   	try
+   	{
+   		return new FXMLLoader(c.getResource(name));
+   	}
+		catch (Throwable e)
+		{
+			FSystem.errAndExit(e, String.format("Should never reach this point; '%s' is missing?", name));
+	   	return null;
+		}
+   }
+	
 	/**
 	 * Shows an alert dialog warning the user.
 	 * 
@@ -73,5 +59,15 @@ public final class FXTool
 	public static void alertUser(String msg, Alert.AlertType type)
 	{
 		new Alert(type, msg, ButtonType.OK).showAndWait();
+	}
+	
+	/**
+	 * Launches system default web browser pointing to {@code url}
+	 * @param app The parent Application object
+	 * @param url The URL to visit.
+	 */
+	public static void launchBrowser(Application app, String url)
+	{
+		app.getHostServices().showDocument(url);
 	}
 }

@@ -64,7 +64,7 @@
                   <Insets left="10.0" right="10.0" />
                </GridPane.margin>
                <children>
-                  <Button fx:id="transferButton" defaultButton="true" maxWidth="-Infinity" mnemonicParsing="false" onAction="#triggerAction" prefWidth="100.0" text="Start" />
+                  <Button fx:id="startButton" defaultButton="true" maxWidth="-Infinity" mnemonicParsing="false" onAction="#onStartButtonClick" prefWidth="100.0" text="Start" />
                </children>
             </HBox>
             <Label text="MTC! Transfer Tool" GridPane.columnSpan="3">
@@ -102,18 +102,13 @@
         <menus>
           <Menu mnemonicParsing="false" text="File">
             <items>
-              <MenuItem mnemonicParsing="false" text="Exit" />
+              <MenuItem fx:id="menuItemExit" mnemonicParsing="false" onAction="#onExitButtonPress" text="Exit" />
             </items>
           </Menu>
           <Menu mnemonicParsing="false" text="Options">
             <items>
                   <CheckMenuItem fx:id="filterToggle" mnemonicParsing="false" text="Disable Smart Filter" />
                   <CheckMenuItem fx:id="deleteToggle" mnemonicParsing="false" text="Delete on Transfer" />
-            </items>
-          </Menu>
-          <Menu mnemonicParsing="false" text="Help">
-            <items>
-              <MenuItem mnemonicParsing="false" text="Documentation" />
             </items>
           </Menu>
         </menus>

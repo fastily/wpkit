@@ -34,7 +34,7 @@ public class MTCController
 	 * The location of this controller's FXML.
 	 */
 	public static final String fxmlLoc = "MTC.fxml";
-	
+
 	/**
 	 * The OS clipboard
 	 */
@@ -77,13 +77,13 @@ public class MTCController
 	 */
 	@FXML
 	protected CheckMenuItem deleteToggle;
-	
+
 	/**
 	 * The exit button in the menu
 	 */
 	@FXML
 	protected MenuItem menuItemExit;
-	
+
 	/**
 	 * The start Button
 	 */
@@ -101,7 +101,7 @@ public class MTCController
 	 */
 	@FXML
 	protected Label userLabel;
-	
+
 	/**
 	 * The Wiki objects to use with MTC.
 	 */
@@ -115,19 +115,22 @@ public class MTCController
 	/**
 	 * The most recently created TransferTask. This may or may not be running.
 	 */
-	private TransferTask currTask = null;	
-	
+	private TransferTask currTask = null;
+
 	/**
-	 * Performs simple UI initialization using {@code wiki}
+	 * Performs simple UI initialization using {@code wiki}. CAVEAT: This must be called before attempting to display the
+	 * MTC window.
+	 * 
 	 * @param wiki The Wiki for this controller to use.
 	 */
 	protected void initData(Wiki wiki)
 	{
 		this.wiki = wiki;
-		
+
 		userLabel.setText("Hello, " + wiki.whoami());
 		modeSelect.getItems().addAll(MTC.TransferMode.values());
-		
+		deleteToggle.setDisable(!wiki.listUserRights(wiki.whoami()).contains("sysop"));
+
 		try
 		{
 			mtc = new MTC(wiki);
@@ -138,7 +141,7 @@ public class MTCController
 			FSystem.errAndExit(e, null);
 		}
 	}
-	
+
 	/**
 	 * Pastes a String (if available) from the OS clipboard into {@code textInput}.
 	 */
@@ -157,7 +160,7 @@ public class MTCController
 	{
 		Platform.exit();
 	}
-	
+
 	/**
 	 * Transfers files to Commons as per user input.
 	 */
@@ -223,6 +226,7 @@ public class MTCController
 			this.userInput = userInput;
 
 			mtc.ignoreFilter = filterToggle.isSelected();
+			mtc.deleteOnTransfer = deleteToggle.isSelected();
 
 			messageProperty().addListener((obv, o, n) -> printToConsole(n));
 			stateProperty().addListener((obv, o, n) -> {
@@ -275,7 +279,7 @@ public class MTCController
 					fl = wiki.whatTranscludesHere(wiki.convertIfNotInNS(userInput, NS.TEMPLATE), NS.FILE);
 					break;
 				case FILELINKS:
-					fl= wiki.getImagesOnPage(userInput);
+					fl = wiki.getImagesOnPage(userInput);
 					break;
 				case LINKS:
 					fl = wiki.getLinksOnPage(true, userInput, NS.FILE);

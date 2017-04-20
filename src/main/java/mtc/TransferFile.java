@@ -127,17 +127,20 @@ public class TransferFile
 				System.out.println(t);
 				return true;
 			}
-			else if (t != null && Toolbox.downloadFile(enwp.apiclient.client, imgInfoL.get(0).url.toString(), localFN)
-					&& com.upload(Paths.get(localFN), comFN, t, String.format(MStrings.tFrom, wpFN)))
-				return enwp.edit(wpFN, String.format("{{subst:ncd|%s|reviewer=%s}}%n", comFN, enwp.whoami())
-						+ enwp.getPageText(wpFN).replaceAll(mtc.mtcRegex, ""), MStrings.tTo);
+
+			return t != null && Toolbox.downloadFile(enwp.apiclient.client, imgInfoL.get(0).url.toString(), localFN)
+					&& com.upload(Paths.get(localFN), comFN, t, String.format(MStrings.tFrom, wpFN))
+					&& enwp.edit(wpFN,
+							String.format("{{subst:ncd|%s|reviewer=%s}}%n", comFN, enwp.whoami())
+									+ enwp.getPageText(wpFN).replaceAll(mtc.mtcRegex, ""),
+							MStrings.tTo)
+					&& (mtc.deleteOnTransfer ? enwp.delete(wpFN, String.format(MStrings.f8Fmt, comFN)) : true);
 		}
 		catch (Throwable e)
 		{
 			e.printStackTrace();
+			return false;
 		}
-
-		return false;
 	}
 
 	/**

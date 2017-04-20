@@ -43,6 +43,11 @@ public final class MTC
 	protected boolean useTrackingCat = true;
 
 	/**
+	 * Flag indicating whether we should attempt deletion on successful transfer.
+	 */
+	protected boolean deleteOnTransfer = false;
+	
+	/**
 	 * Contains data for license tags
 	 */
 	protected TreeMap<String, String> tpMap = new TreeMap<>(WikiX.tpParamCmp);

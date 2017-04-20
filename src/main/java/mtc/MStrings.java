@@ -59,6 +59,11 @@ public class MStrings
 	protected static final String enwpURLBase = "https://en.wikipedia.org/wiki/";
 	
 	/**
+	 * Speedy deletion F8 reason format string.
+	 */
+	protected static final String f8Fmt = "[[WP:CSD#F8|F8]]: Media file available on Commons: [[:%s]]";
+	
+	/**
 	 * Constructors disallowed.
 	 */
 	private MStrings()

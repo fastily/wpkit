@@ -62,10 +62,8 @@ public class App extends Application
 		FXMLLoader lcLoader = FXTool.makeNewLoader(LoginController.fxmlLoc, LoginController.class);
 		stage.setScene(new Scene(lcLoader.load()));
 		
-		LoginController lc = lcLoader.getController();
-		lc.wiki = wiki;
-		lc.callback = this::createAndShowMTC;
-		
+		lcLoader.<LoginController>getController().initData(wiki, this::createAndShowMTC);
+				
 		stage.setTitle(MStrings.name);
 		stage.show();
 	}
@@ -90,9 +88,8 @@ public class App extends Application
       	FSystem.errAndExit(e, "Should never reach here, is your FXML malformed or missing?");
       }
       
-      MTCController mtcC = lcLoader.getController();
-      mtcC.initData(wiki);
-      
+      lcLoader.<MTCController>getController().initData(wiki);
+   
       stage.setTitle(MStrings.name);
       stage.show();
 	}

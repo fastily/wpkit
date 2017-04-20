@@ -24,17 +24,17 @@ public class LoginController
 	 * The location of this controller's FXML.
 	 */
 	public static final String fxmlLoc = "Login.fxml";
-	
+
 	/**
 	 * The Wiki object which login will be attempted on. PRECONDITION: This must be set before using.
 	 */
-	public Wiki wiki;
+	private Wiki wiki;
 
 	/**
 	 * The method to run on a successful login. PRECONDITION: This must be set before using.
 	 */
-	public Runnable callback;
-	
+	private Runnable callback;
+
 	/**
 	 * The username text field
 	 */
@@ -46,13 +46,26 @@ public class LoginController
 	 */
 	@FXML
 	protected PasswordField pxF;
-	
+
 	/**
 	 * The login Button
 	 */
 	@FXML
 	protected Button loginButton;
-	
+
+	/**
+	 * Initializes data fields with the specified values. CAVEAT: This MUST be called before displaying the Login
+	 * screen.
+	 * 
+	 * @param wiki The Wiki object to use
+	 * @param callback Will be executed on the FXML thread on successful login.
+	 */
+	public void initData(Wiki wiki, Runnable callback)
+	{
+		this.wiki = wiki;
+		this.callback = callback;
+	}
+
 	/**
 	 * Attempts login, instantiates this object's Wiki object on success. Shows error message on failure.
 	 * 
@@ -60,29 +73,31 @@ public class LoginController
 	 */
 	@FXML
 	protected void tryLogin(ActionEvent e)
-	{		
+	{
 		String user = userF.getText().trim(), px = pxF.getText();
-		
-		if(user.isEmpty() || px.isEmpty())
+
+		if (user.isEmpty() || px.isEmpty())
 			FXTool.alertUser("Username/Password cannot be empty!", AlertType.INFORMATION);
 		else
 			new Thread(new LoginTask(user, px)).start();
 	}
-	   
-   /**
-    * Represents a login attempt.
-    * @author Fastily
-    *
-    */
-	private class LoginTask extends Task<Boolean> 
+
+	/**
+	 * Represents a login attempt.
+	 * 
+	 * @author Fastily
+	 *
+	 */
+	private class LoginTask extends Task<Boolean>
 	{
 		/**
 		 * The username and password to use
 		 */
 		private String user, px;
-		
+
 		/**
 		 * Constructor, creates a new LoginTask
+		 * 
 		 * @param user The username to login with
 		 * @param px The password to login with
 		 */
@@ -90,7 +105,7 @@ public class LoginController
 		{
 			this.user = user;
 			this.px = px;
-			
+
 			loginButton.disableProperty().bind(runningProperty());
 		}
 
@@ -98,17 +113,18 @@ public class LoginController
 		 * Attempts to login
 		 */
 		public Boolean call()
-		{						
+		{
 			return wiki.login(user, px);
 		}
-		
+
 		/**
 		 * Displays error on login fail, or closes this window and run {@code callback}
 		 */
 		public void succeeded()
 		{
-			if(!getValue())
-				FXTool.alertUser("Could not login. Please re-enter your credentials and/or verify that you are connected to the internet.", Alert.AlertType.ERROR);
+			if (!getValue())
+				FXTool.alertUser("Could not login. Please re-enter your credentials and/or verify that you are connected to the internet.",
+						Alert.AlertType.ERROR);
 			else
 			{
 				((Stage) loginButton.getScene().getWindow()).close();

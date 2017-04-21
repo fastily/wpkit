@@ -14,6 +14,11 @@ import fastily.jwiki.util.FSystem;
 public class MStrings
 {
 	/**
+	 * Version number
+	 */
+	protected static final String version = "1.0.0";
+
+	/**
 	 * Short name for MTC!
 	 */
 	protected static final String name = "MTC!"; 
@@ -46,12 +51,12 @@ public class MStrings
 	/**
 	 * Format String edit summary for files uploaded to Commons for Commons
 	 */
-	protected static final String tFrom = String.format("Transferred from [[w:%%s|en.wikipedia]] (%s)", mtcComLink);
+	protected static final String tFrom = String.format("Transferred from [[w:%%s|en.wikipedia]] (%s) (%s)", mtcComLink, version);
 
 	/**
 	 * Edit summary for files transferred to Commons on enwp
 	 */
-	protected static final String tTo = String.format("Transferred to Commons (%s)", mtcLink);
+	protected static final String tTo = String.format("Transferred to Commons (%s) (%s)", mtcLink, version);
 	
 	/**
 	 * The URL base for the English Wikipedia.
@@ -62,7 +67,7 @@ public class MStrings
 	 * Speedy deletion F8 reason format string.
 	 */
 	protected static final String f8Fmt = "[[WP:CSD#F8|F8]]: Media file available on Commons: [[:%s]]";
-	
+
 	/**
 	 * Constructors disallowed.
 	 */

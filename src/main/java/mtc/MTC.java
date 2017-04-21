@@ -46,7 +46,7 @@ public final class MTC
 	 * Flag indicating whether we should attempt deletion on successful transfer.
 	 */
 	protected boolean deleteOnTransfer = false;
-	
+
 	/**
 	 * Contains data for license tags
 	 */
@@ -66,7 +66,7 @@ public final class MTC
 	 * Templates which indicate that a file is own work.
 	 */
 	protected HashSet<String> selflist;
-	
+
 	/**
 	 * The Wiki objects to use
 	 */
@@ -150,10 +150,9 @@ public final class MTC
 	}
 
 	/**
-	 * Performs checks to determine if a file can be transfered to Commons.
-	 * 
-	 * @param titles The title to check
-	 * @return True if the file can <i>probably</i> be transfered to Commons.
+	 * Filters files which obviously cannot be transferred to Commons.
+	 * @param titles The titles to check.
+	 * @return An ArrayList with files that are most likely eligible for Commons.
 	 */
 	public ArrayList<String> canTransfer(ArrayList<String> titles)
 	{
@@ -171,57 +170,60 @@ public final class MTC
 
 		return rl;
 	}
-	
+
 	/**
 	 * Represents various supported file transfer modes.
+	 * 
 	 * @author Fastily
 	 *
 	 */
-	protected enum TransferMode {
+	protected enum TransferMode
+	{
 		/**
 		 * Represents the single file transfer mode.
 		 */
-		FILE("File"), 
-		
+		FILE("File"),
+
 		/**
 		 * Represents category mass-transfer mode.
 		 */
 		CATEGORY("Category"),
-		
+
 		/**
 		 * Represents user uploads mass-transfer mode.
 		 */
-		USER("User"), 
-		
+		USER("User"),
+
 		/**
 		 * Represents template transclusions mass-transfer mode.
 		 */
-		TEMPLATE("Template"), 
-		
+		TEMPLATE("Template"),
+
 		/**
 		 * Represents all file links on a page mass-transfer mode.
 		 */
-		FILELINKS("Filelinks"), 
-		
+		FILELINKS("Filelinks"),
+
 		/**
 		 * Represents all file namespace links on a page mass-transfer mode.
 		 */
 		LINKS("Links");
-		
+
 		/**
 		 * Constructor, creates a new TransferMode.
+		 * 
 		 * @param name The user-suitable name to create this TransferMode with.
 		 */
 		private TransferMode(String name)
 		{
 			this.name = name;
 		}
-		
+
 		/**
 		 * The user-suitable name of this TransferMode.
 		 */
 		private String name;
-		
+
 		/**
 		 * Returns the user-suitable name of this TransferMode.
 		 */

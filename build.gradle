@@ -26,7 +26,7 @@ task wrapper(type: Wrapper) {
 }
 
 jar {
-  archiveName = "MTC-0.1.2.jar"
+  archiveName = "MTC-1.0.0.jar"
 
   from {
     configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
@@ -34,8 +34,8 @@ jar {
   }
     
   manifest {
-    attributes 'Main-Class': 'mtc.MTCui'
+    attributes 'Main-Class': 'mtc.App'
   }
   
-  exclude "**/test/**", "**/bots/**", "**/reports/**", "**/tools/**", "up/**", "**/README.md", "**/ToDo.md"
+  exclude "**/bots/**", "**/reports/**", "**/tools/**"
 }

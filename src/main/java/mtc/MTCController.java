@@ -250,7 +250,7 @@ public class MTCController
 			});
 
 			setOnCancelled(e -> updateMessage("You cancelled this transfer!"));
-			setOnFailed(e -> updateMessage("Something's not right.  Are you still connected to the internet?"));
+			setOnFailed(e -> updateMessage("Something's not right."));
 			setOnSucceeded(e -> updateMessage(String.format("Task succeeded, with %d failures: %s", fails.size(), fails)));
 
 			pb.progressProperty().bind(progressProperty());

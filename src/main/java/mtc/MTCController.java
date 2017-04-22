@@ -186,7 +186,7 @@ public class MTCController
 	 * 
 	 * @param msg The new message to add.
 	 */
-	private void printToConsole(String msg)
+	private synchronized void printToConsole(String msg)
 	{
 		console.appendText(String.format("(%s): %s%n", LocalDateTime.now().format(df), msg));
 	}

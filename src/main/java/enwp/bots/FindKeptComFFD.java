@@ -30,7 +30,7 @@ public final class FindKeptComFFD
 	/**
 	 * The ncd template to fill out
 	 */
-	private static final String ncd = WPStrings.makeNCDBotTemlpate(wiki.whoami());
+	private static final String ncd = WPStrings.makeNCDBotTemplate(wiki.whoami());
 	
 	/**
 	 * Main driver

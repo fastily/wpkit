@@ -20,7 +20,7 @@ public class FlagOI
 	/**
 	 * The Wiki object to use
 	 */
-	private static final Wiki wiki = Toolbox.getFastilyBot();
+	private static Wiki wiki = Toolbox.getFastilyBot();
 
 	/**
 	 * Main driver
@@ -35,6 +35,7 @@ public class FlagOI
 		l.removeAll(Toolbox.fetchLabsReportListAsFiles(wiki, "report4"));
 		l.removeAll(new HashSet<>(MQuery.exists(wiki, false, new ArrayList<>(l))));
 		
-		l.forEach(s -> wiki.addText(s, "\n{{Orphan image}}", "BOT: Noting that file has no inbound file usage", false));
+		for(String s : l)
+			wiki.addText(s, "\n{{Orphan image}}", "BOT: Noting that file has no inbound file usage", false);
 	}
 }

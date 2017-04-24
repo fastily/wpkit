@@ -13,12 +13,9 @@ import ctools.util.Toolbox;
 public final class WPStrings
 {
 	/**
-	 * Constructors disallowed
+	 * A date formatter for UTC times.
 	 */
-	private WPStrings()
-	{
-
-	}
+	public static final DateTimeFormatter iso8601dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
 	/**
 	 * Used as part of report headers.
@@ -36,12 +33,20 @@ public final class WPStrings
 	public static final String botNote = "\n{{subst:User:FastilyBot/BotNote}}";
 
 	/**
+	 * Constructors disallowed
+	 */
+	private WPStrings()
+	{
+	
+	}
+
+	/**
 	 * Generates an {@code Template:Ncd} template for a bot user.
 	 * 
 	 * @param wiki The bot username to use
 	 * @return The template.
 	 */
-	public static String makeNCDBotTemlpate(String user)
+	public static String makeNCDBotTemplate(String user)
 	{
 		return String.format("{{Now Commons|%%s|date=%s|bot=%s}}%n",
 				DateTimeFormatter.ISO_LOCAL_DATE.format(Toolbox.getUTCofNow()), user);

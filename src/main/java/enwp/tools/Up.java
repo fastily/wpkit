@@ -4,14 +4,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.stream.Stream;
 
 import ctools.util.Toolbox;
 import ctools.util.WikiX;
+import enwp.WPStrings;
 import fastily.jwiki.core.Wiki;
 import fastily.jwiki.util.FL;
 
@@ -40,19 +41,9 @@ public final class Up
 			+ "author=~~~\n}}\n\n=={{int:license-header}}==\n{{Self|Cc-by-sa-4.0}}\n\n[[Category:%s]]\n[[Category:Files by %s]]";
 
 	/**
-	 * The formatter to use for {@code date=} dates
-	 */
-	private static final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
-	/**
 	 * The template String for on-Wiki file names
 	 */
 	private static String fnBase = String.format("File:%%s %%d %s.%%s", DateTimeFormatter.ISO_DATE.format(LocalDate.now()));
-
-	/**
-	 * Logs failed uploads
-	 */
-	private static HashSet<String> fails = new HashSet<>();
 
 	/**
 	 * Main driver
@@ -62,6 +53,8 @@ public final class Up
 	 */
 	public static void main(String[] args) throws Throwable
 	{
+		ArrayList<String> fails = new ArrayList<>();
+		
 		Stream.of(args).map(Paths::get).filter(Files::isDirectory).forEach(d -> {
 			int i = 0;
 			String name = d.getFileName().toString();
@@ -71,7 +64,7 @@ public final class Up
 				for (Path f : FL.toSet(Files.list(d).filter(f -> Files.isRegularFile(f) && f.toString().matches(extRegex))))
 					if (!wiki.upload(f, String.format(fnBase, name, ++i, getExt(f)),
 							String.format(infoT, name,
-									dtf.format(LocalDateTime.ofInstant(Files.getLastModifiedTime(f).toInstant(), ZoneId.of("UTC"))), name,
+									WPStrings.iso8601dtf.format(ZonedDateTime.ofInstant(Files.getLastModifiedTime(f).toInstant(), ZoneOffset.UTC)), name,
 									wiki.whoami()),
 							""))
 						fails.add(f.toString());
@@ -82,12 +75,7 @@ public final class Up
 			}
 		});
 
-		if (!fails.isEmpty())
-		{
-			System.out.println("Failed on:");
-			for (String s : fails)
-				System.out.println("\t* " + s);
-		}
+		System.out.printf("Complete, with %s failures: %s%n", fails.size(), fails);
 	}
 
 	/**

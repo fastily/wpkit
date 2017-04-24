@@ -2,6 +2,7 @@ package mtc;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.regex.Pattern;
 
 import fastily.jwiki.util.FSystem;
 
@@ -67,6 +68,16 @@ public class MStrings
 	 * Speedy deletion F8 reason format string.
 	 */
 	protected static final String f8Fmt = "[[WP:CSD#F8|F8]]: Media file available on Commons: [[:%s]]";
+
+	/**
+	 * Matches caption sections in enwp text
+	 */
+	protected static final Pattern captionRegex = Pattern.compile("(?si)\\{\\|\\s*?class\\=\"wikitable.+?\\|\\}");
+
+	/**
+	 * The format String for a row in the Upload Log section.
+	 */
+	protected static final String uLFmt = "| %s || %d × %d || [[w:User:%s|%s]] || ''<nowiki>%s</nowiki>''%n|-%n";
 
 	/**
 	 * Constructors disallowed.

@@ -289,7 +289,7 @@ public class MTCController
 					break;
 			}
 
-			ArrayList<TransferFile> tol = mtc.filterAndResolve(fl);
+			ArrayList<MTC.TransferFile> tol = mtc.filterAndResolve(fl);
 			int tolSize = tol.size();
 
 			// Checkpoint - kill Task now if cancelled
@@ -306,7 +306,7 @@ public class MTCController
 			else
 				for (int i = 0; i < tol.size() && !isCancelled(); i++)
 				{
-					TransferFile to = tol.get(i);
+					MTC.TransferFile to = tol.get(i);
 
 					updateProgress(i, tolSize);
 					updateMessage(String.format("Transfer [%d/%d]: %s", i, tolSize, to.wpFN));

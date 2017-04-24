@@ -29,10 +29,9 @@ public class FilePRODSum
 	private static Wiki wiki = Toolbox.getFastilyBot();
 
 	/**
-	 * The date input format (read from PROD template) and date output format (standard signature format)
+	 * The date input format (read from PROD template)
 	 */
-	private static DateTimeFormatter dateInFmt = DateTimeFormatter.ofPattern("yyyyMMddHHmmssz"),
-			dateOutFmt = DateTimeFormatter.ofPattern("HH:mm, d MMMM YYYY (z)");
+	private static DateTimeFormatter dateInFmt = DateTimeFormatter.ofPattern("yyyyMMddHHmmssz");
 
 	/**
 	 * Matches the file PROD template.
@@ -63,7 +62,7 @@ public class FilePRODSum
 			{
 				Template t = ParsedItem.parse(wiki, k, TParse.extractTemplate(filePRODRegex, v)).tplates.get(0);
 				reportText += String.format("|-%n| %s%n| [[:%s]]%n| %s%n | %d%n",
-						dateOutFmt.format(ZonedDateTime.parse(t.get("timestamp").toString() + "UTC", dateInFmt)), k,
+						WPStrings.iso8601dtf.format(ZonedDateTime.parse(t.get("timestamp").toString() + "UTC", dateInFmt)), k,
 						t.get("concern").toString(), counts.get(k));
 			}
 			catch (Throwable e)

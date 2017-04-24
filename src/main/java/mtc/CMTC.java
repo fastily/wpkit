@@ -22,11 +22,6 @@ import ctools.util.Toolbox;
 public final class CMTC
 {
 	/**
-	 * The MTC instance for this class.
-	 */
-	private static MTC mtc;
-
-	/**
 	 * Main driver
 	 * 
 	 * @param args Program args
@@ -37,7 +32,7 @@ public final class CMTC
 
 		Wiki wiki = Toolbox.getFastilyClone();
 		// Do initial logins, and generate MTC regexes
-		mtc = new MTC(wiki);
+		MTC mtc = new MTC(wiki);
 		mtc.useTrackingCat = false;
 		mtc.dryRun = l.hasOption('d');
 
@@ -49,31 +44,21 @@ public final class CMTC
 			fl = wiki.getLinksOnPage(String.format("User:%s/MTCSources/List", wiki.whoami()), NS.FILE);
 		else
 			for (String s : l.getArgs())
-			{
-				NS ns = mtc.enwp.whichNS(s);
+			{				
+				NS ns = wiki.whichNS(s);
 				if (ns.equals(NS.FILE))
 					fl.add(s);
 				else if (ns.equals(NS.CATEGORY))
-					fl.addAll(mtc.enwp.getCategoryMembers(s, NS.FILE));
+					fl.addAll(wiki.getCategoryMembers(s, NS.FILE));
 				else if (ns.equals(NS.TEMPLATE))
-					fl.addAll(mtc.enwp.whatTranscludesHere(s, NS.FILE));
+					fl.addAll(wiki.whatTranscludesHere(s, NS.FILE));
 				else
-					fl.addAll(mtc.enwp.getUserUploads(s));
+					fl.addAll(wiki.getUserUploads(s));
 			}
 
-		procList(fl);
-	}
-
-	/**
-	 * Attempts to move files to Commons
-	 * 
-	 * @param titles The titles to try and move.
-	 */
-	private static void procList(ArrayList<String> titles)
-	{
-		ArrayList<TransferFile> tl = mtc.filterAndResolve(titles);
-		AtomicInteger i = new AtomicInteger();
+		ArrayList<MTC.TransferFile> tl = mtc.filterAndResolve(fl);
 		int total = tl.size();
+		AtomicInteger i = new AtomicInteger();
 
 		ArrayList<String> fails = FL.toAL(tl.stream().filter(to -> {
 			ColorLog.fyi(String.format("Processing item %d of %d", i.incrementAndGet(), total));

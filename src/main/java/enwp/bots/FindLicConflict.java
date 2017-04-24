@@ -22,11 +22,6 @@ public final class FindLicConflict
 	private static Wiki wiki = Toolbox.getFastilyBot();
 
 	/**
-	 * The configuration page with pages that should be skipped.
-	 */
-	private static String ignorePage = String.format("User:%s/Task5/Ignore", wiki.whoami());
-
-	/**
 	 * Main driver
 	 * 
 	 * @param args Program arguments, not used.
@@ -34,7 +29,9 @@ public final class FindLicConflict
 	public static void main(String[] args) throws Throwable
 	{
 		HashSet<String> fl = Toolbox.fetchLabsReportListAsFiles(wiki, "report2");
-		wiki.getLinksOnPage(ignorePage).stream().forEach(s -> fl.removeAll(wiki.whatTranscludesHere(s, NS.FILE)));
+		
+		for(String s : wiki.getLinksOnPage(String.format("User:%s/Task5/Ignore", wiki.whoami())))
+			fl.removeAll(wiki.whatTranscludesHere(s, NS.FILE));
 
 		for (String s : MQuery.exists(wiki, true, new ArrayList<>(fl)))
 			wiki.addText(s, "{{Wrong-license}}\n", "BOT: Noting possible conflict in copyright status", true);

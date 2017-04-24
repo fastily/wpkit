@@ -36,7 +36,7 @@ public final class MTCHelper
 	/**
 	 * The ncd template to fill out
 	 */
-	private static String ncdT = WPStrings.makeNCDBotTemlpate(wiki.whoami());
+	private static String ncdT = WPStrings.makeNCDBotTemplate(wiki.whoami());
 
 	/**
 	 * Main driver
@@ -47,19 +47,19 @@ public final class MTCHelper
 	{
 		HashSet<String> l = Toolbox.fetchLabsReportListAsFiles(wiki, "report1");
 		l.retainAll(WTP.mtc.getTransclusionSet(wiki, NS.FILE));
-		l.removeAll(WTP.keeplocal.getTransclusionList(wiki, NS.FILE)); // lots of in-line tags
+		l.removeAll(WTP.keeplocal.getTransclusionSet(wiki, NS.FILE)); // lots of in-line tags
 
 		WikiX.getFirstOnlySharedDuplicate(wiki, new ArrayList<>(l)).forEach((k, v) -> {
 			if (nowCommons.contains(k))
 				wiki.replaceText(k, tRegex, "BOT: File has already been copied to Commons");
 			else
 			{
-				String o_text = wiki.getPageText(k);
-				String n_text = o_text.replaceAll(tRegex, "");
-				if (o_text.equals(n_text)) // avoid in-line tags
+				String oText = wiki.getPageText(k);
+				String nText = oText.replaceAll(tRegex, "");
+				if (oText.equals(nText)) // avoid in-line tags
 					return;
 
-				wiki.edit(k, String.format(ncdT, v) + n_text, "BOT: File is available on Commons");
+				wiki.edit(k, String.format(ncdT, v) + nText, "BOT: File is available on Commons");
 			}
 		});
 	}

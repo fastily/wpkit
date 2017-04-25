@@ -3,6 +3,7 @@ package enwp.tools;
 import java.util.ArrayList;
 
 import ctools.util.Toolbox;
+import enwp.WPStrings;
 import fastily.jwiki.core.MQuery;
 import fastily.jwiki.core.NS;
 import fastily.jwiki.core.Wiki;
@@ -41,7 +42,7 @@ public final class OrphanedFU
 		});
 
 		MQuery.exists(wiki, true, ftl)
-				.forEach(s -> wiki.delete(s, "[[WP:CSD#G8|G8]]: [[Help:Talk page|Talk page]] of a deleted or non-existent page"));
+				.forEach(s -> wiki.delete(s, WPStrings.csdG8talk));
 
 		if (wiki.getCategorySize(cat) == 0)
 			wiki.delete(cat, "[[WP:CSD#G6|G6]]: Housekeeping and routine (non-controversial) cleanup");

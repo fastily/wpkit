@@ -11,6 +11,7 @@ import ctools.tplate.Template;
 import ctools.util.TParse;
 import ctools.util.Toolbox;
 import enwp.WPStrings;
+import enwp.WTP;
 import fastily.jwiki.core.MQuery;
 import fastily.jwiki.core.NS;
 import fastily.jwiki.core.Wiki;
@@ -36,7 +37,7 @@ public class FilePRODSum
 	/**
 	 * Matches the file PROD template.
 	 */
-	private static Pattern filePRODRegex = Pattern.compile(TParse.makeTemplateRegex(wiki, "Template:Proposed deletion/dated files"));
+	private static Pattern filePRODRegex = Pattern.compile(WTP.fprod.getRegex(wiki));
 
 	/**
 	 * The report text to output.

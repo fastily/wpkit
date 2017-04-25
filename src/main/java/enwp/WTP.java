@@ -16,6 +16,11 @@ import fastily.jwiki.core.Wiki;
 public final class WTP
 {
 	/**
+	 * Wraps {@code Template:Proposed deletion/dated files}
+	 */
+	public static final WTP fprod = new WTP("Template:Proposed deletion/dated files");
+	
+	/**
 	 * Wraps {@code Template:Copy to Wikimedia Commons}
 	 */
 	public static final WTP mtc = new WTP("Template:Copy to Wikimedia Commons");

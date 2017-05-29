@@ -19,3 +19,14 @@ This repository is also the home to
 2. In the `ctools` directory, run `./gradlew build -x test`
 3. Build the jar by running `./gradlew mtc`
 4. The JAR shoud now be available in `build/libs`
+
+### How To Run
+
+GUI:
+```
+java -jar build/libs/MTC-1.0.0.jar
+```
+Command line:
+```
+java -cp build/libs/MTC-1.0.0.jar mtc.CMTC -help
+```

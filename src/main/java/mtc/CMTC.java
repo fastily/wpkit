@@ -30,7 +30,7 @@ public final class CMTC
 	{
 		CommandLine l = FCLI.gnuParse(makeOptList(), args, "MTC [-help] [-f] [-d] [-s] [<titles|user|cat>]");
 
-		Wiki wiki = Toolbox.getFastilyClone();
+		Wiki wiki = Toolbox.getFSock();
 		// Do initial logins, and generate MTC regexes
 		MTC mtc = new MTC(wiki);
 		mtc.useTrackingCat = false;

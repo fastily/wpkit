@@ -199,10 +199,12 @@ public final class WikiX
 	 * @param user Pages with this user (without the {@code User:} prefix) as the top editor will be deleted.
 	 * @param reason The reason to use in the deletion log.
 	 * @param l The List of pages to work with.
+	 * 
+	 * @return A List of pages which were successfully deleted.
 	 */
-	public static void deleteByLastEditor(Wiki wiki, String user, String reason, ArrayList<String> l)
+	public static ArrayList<String> deleteByLastEditor(Wiki wiki, String user, String reason, ArrayList<String> l)
 	{
-		l.parallelStream().filter(s -> user.equals(getLastEditor(wiki, s))).forEach(s -> wiki.delete(s, reason));
+		return FL.toAL(l.parallelStream().filter(s -> user.equals(getLastEditor(wiki, s))).filter(s -> wiki.delete(s, reason)));
 	}
 
 	/**

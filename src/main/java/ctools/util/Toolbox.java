@@ -83,13 +83,13 @@ public final class Toolbox
 	}
 
 	/**
-	 * Gets a Wiki (from WikiGen) for FastilyClone at en.wikipedia.org.
+	 * Gets a Wiki (from WikiGen) for FSock at en.wikipedia.org.
 	 * 
 	 * @return A Wiki object, or null on error
 	 */
-	public static Wiki getFastilyClone()
+	public static Wiki getFSock()
 	{
-		return getUser("FastilyClone");
+		return getUser("FSock");
 	}
 
 	/**

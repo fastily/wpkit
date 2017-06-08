@@ -1,6 +1,5 @@
 package mtc;
 
-import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
@@ -490,7 +489,7 @@ public final class MTC
 			try
 			{
 				t += "\n== {{Original upload log}} ==\n"
-						+ String.format("{{Original description page|en.wikipedia|%s}}%n", URLEncoder.encode(enwp.nss(wpFN), "UTF-8"))
+						+ String.format("{{Original description page|en.wikipedia|%s}}%n", enwp.nss(wpFN))
 						+ "{| class=\"wikitable\"\n! {{int:filehist-datetime}} !! {{int:filehist-dimensions}} !! {{int:filehist-user}} "
 						+ "!! {{int:filehist-comment}}\n|-\n";
 			}

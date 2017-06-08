@@ -33,7 +33,7 @@ public class SimpleUpload
 	{
 		CommandLine l = FCLI.gnuParse(makeOptList(), args, "SimpleUpload [-c] [-d] [-h] files");
 
-		wiki = Toolbox.getFastilyClone();
+		wiki = Toolbox.getFSock();
 		if (l.hasOption('c'))
 			wiki = Toolbox.getCommons(wiki);
 

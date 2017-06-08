@@ -25,7 +25,7 @@ public final class DumpFD
 	/**
 	 * The Wiki object to use
 	 */
-	private static Wiki wiki = Toolbox.getFastilyClone();
+	private static Wiki wiki = Toolbox.getFSock();
 
 	/**
 	 * The source to fetch files from. This can be a category, template, or username.

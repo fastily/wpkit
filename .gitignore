@@ -18,3 +18,7 @@ Thumbs.db
 
 # Gradle
 .gradle/
+
+# IntelliJ IDEA
+.idea
+*.iml

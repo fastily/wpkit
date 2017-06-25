@@ -1,4 +1,4 @@
-package fastily.ctools.util;
+package fastily.wpkit.util;
 
 import java.util.ArrayList;
 import java.util.regex.Matcher;

@@ -1,11 +1,11 @@
-package fastily.enwp;
+package fastily.wpkit;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 
-import fastily.ctools.util.TParse;
 import fastily.jwiki.core.NS;
 import fastily.jwiki.core.Wiki;
+import fastily.wpkit.util.TParse;
 
 /**
  * Lists commonly used templates and contains methods to get regexes and transclusions for them.

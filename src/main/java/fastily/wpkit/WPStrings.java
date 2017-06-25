@@ -1,8 +1,8 @@
-package fastily.enwp;
+package fastily.wpkit;
 
 import java.time.format.DateTimeFormatter;
 
-import fastily.ctools.util.Toolbox;
+import fastily.wpkit.util.Toolbox;
 
 /**
  * Common, shared static Strings.

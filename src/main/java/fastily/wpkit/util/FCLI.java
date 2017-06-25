@@ -1,4 +1,4 @@
-package fastily.ctools.util;
+package fastily.wpkit.util;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;

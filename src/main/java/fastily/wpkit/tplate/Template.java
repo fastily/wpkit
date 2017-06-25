@@ -1,4 +1,4 @@
-package fastily.ctools.tplate;
+package fastily.wpkit.tplate;
 
 import java.util.Map;
 import java.util.TreeMap;
@@ -7,9 +7,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
-import fastily.ctools.util.WikiX;
 import fastily.jwiki.util.FL;
 import fastily.jwiki.util.GSONP;
+import fastily.wpkit.util.WikiX;
 
 /**
  * Represents a Template parsed from MediaWiki's <code>parse</code> module.

@@ -1,4 +1,4 @@
-package fastily.ctools.ui;
+package fastily.wpkit.ui;
 
 import fastily.jwiki.util.FSystem;
 import javafx.application.Application;

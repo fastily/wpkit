@@ -1,4 +1,4 @@
-package fastily.ctools.tplate;
+package fastily.wpkit.tplate;
 
 import java.util.ArrayList;
 import java.util.Collections;

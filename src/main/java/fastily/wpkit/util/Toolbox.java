@@ -1,4 +1,4 @@
-package fastily.ctools.util;
+package fastily.wpkit.util;
 
 import java.io.InputStream;
 import java.io.OutputStream;

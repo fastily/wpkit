@@ -10,7 +10,7 @@ import org.apache.commons.cli.Options;
 import fastily.jwiki.util.FSystem;
 
 /**
- * Static methods to assist with CLI.
+ * Static methods supporting CLI functionality.
  * 
  * @author Fastily
  * 
@@ -58,33 +58,47 @@ public final class FCLI
 
 	/**
 	 * Use the GNU parser to parse a list of args with the given option set. Auto-prints specified help message if
-	 * <tt>-help</tt> option is detected. Exits program if an error is detected.
+	 * {@code help} option is detected. Exits program if an error is detected.
 	 * 
 	 * @param ol The option group to use
 	 * @param args The argument list to parse
-	 * @param help The help message to print if <tt>-help</tt> is requested.
+	 * @param help The help message to print if {@code help} is requested.
 	 * @return A CommandLine Object.
 	 */
 	public static CommandLine gnuParse(Options ol, String[] args, String help)
 	{
+		CommandLine l = null;
+
 		try
 		{
-			CommandLine l = new DefaultParser().parse(ol, args);
-			if (l.hasOption("help"))
-			{
-				HelpFormatter hf = new HelpFormatter();
-				hf.setWidth(120);
-				hf.printHelp(help, ol);
-				System.exit(0);
-
-			}
-			return l;
+			l = new DefaultParser().parse(ol, args);
 		}
 		catch (Throwable e)
 		{
 			FSystem.errAndExit(e, null);
-			return null; // dead code to shut up compiler.
 		}
+
+		if (l.hasOption("help"))
+		{
+			HelpFormatter hf = new HelpFormatter();
+			hf.setWidth(120);
+			hf.printHelp(help, ol);
+			System.exit(0);
+		}
+		if (l.hasOption("wgen"))
+		{
+			try
+			{
+				WikiGen.main(args);
+			}
+			catch (Throwable e)
+			{
+				e.printStackTrace();
+			}
+			System.exit(0);
+		}
+
+		return l;
 	}
 
 	/**
@@ -96,6 +110,7 @@ public final class FCLI
 	{
 		Options ol = new Options();
 		ol.addOption("help", "help", false, "Print this help message and exit");
+		ol.addOption("wgen", "wgen", false, "Invoke the WikiGen utility and exit");
 		return ol;
 	}
 }

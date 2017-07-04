@@ -19,7 +19,6 @@ import fastily.jwiki.core.ColorLog;
 import fastily.jwiki.core.Wiki;
 import fastily.jwiki.util.FL;
 import fastily.jwiki.util.FSystem;
-import fastily.jwiki.util.WikiGen;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -186,8 +185,8 @@ public final class Toolbox
 
 	/**
 	 * Downloads a file and saves it to disk.
-	 * 
-	 * @param u The URL to download from
+	 * @param client The OkHttpClient to use perform network connections with.
+	 * @param u The url to download from
 	 * @param localpath The local path to save the file at.
 	 * @return True on success.
 	 */

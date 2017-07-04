@@ -49,7 +49,7 @@ public final class WPStrings
 	/**
 	 * Generates an {@code Template:Ncd} template for a bot user.
 	 * 
-	 * @param wiki The bot username to use
+	 * @param user The bot username to use
 	 * @return The template.
 	 */
 	public static String makeNCDBotTemplate(String user)

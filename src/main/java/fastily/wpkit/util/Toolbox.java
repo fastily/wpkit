@@ -8,7 +8,6 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -61,58 +60,6 @@ public final class Toolbox
 	}
 
 	/**
-	 * Gets the specified WikiGen user at en.wikipedia.org.
-	 * 
-	 * @param user The user to get a Wiki object for
-	 * @return A Wiki object, or null on error
-	 */
-	private static Wiki getUser(String user)
-	{
-		return WikiGen.wg.get(user, "en.wikipedia.org");
-	}
-
-	/**
-	 * Gets a Wiki (from WikiGen) for Fastily at en.wikipedia.org.
-	 * 
-	 * @return A Wiki object, or null on error
-	 */
-	public static Wiki getFastily()
-	{
-		return getUser("Fastily");
-	}
-
-	/**
-	 * Gets a Wiki (from WikiGen) for FSock at en.wikipedia.org.
-	 * 
-	 * @return A Wiki object, or null on error
-	 */
-	public static Wiki getFSock()
-	{
-		return getUser("FSock");
-	}
-
-	/**
-	 * Gets a Wiki (from WikiGen) for FastilyBot at en.wikipedia.org.
-	 * 
-	 * @return A Wiki object, or null on error
-	 */
-	public static Wiki getFastilyBot()
-	{
-		return getUser("FastilyBot");
-	}
-
-	/**
-	 * Derives a Wiki from {@code wiki} with the domain set to {@code commons.wikimedia.org}.
-	 * 
-	 * @param wiki The Wiki object to derive a new Commons Wiki from.
-	 * @return A Wiki pointing to Commons, or null on error.
-	 */
-	public static Wiki getCommons(Wiki wiki)
-	{
-		return wiki.getWiki("commons.wikimedia.org");
-	}
-
-	/**
 	 * Generates a ZonedDateTime of the current date and time.
 	 * 
 	 * @return The current date and time, in UTC.
@@ -142,45 +89,6 @@ public final class Toolbox
 	public static String dateAsDMY(TemporalAccessor d)
 	{
 		return DMY.format(d);
-	}
-
-	/**
-	 * Fetches the contents of a page, splits them by new line, and strips empty Strings and Strings starting with '&gt;'
-	 * 
-	 * @param wiki The Wiki object to use
-	 * @param title The title of the config page to parse
-	 * @return An unclosed String with the specified data.
-	 */
-	private static Stream<String> fetchRawConfig(Wiki wiki, String title)
-	{
-		return Stream.of(wiki.getPageText(title).split("\n")).filter(s -> !s.startsWith("<") && !s.isEmpty());
-	}
-
-	/**
-	 * Parses a config page with key-value pairs. Empty lines and lines starting with '&gt;' are ignored. Key-value pairs
-	 * should be split by {@code ;}, one pair per line.
-	 * 
-	 * @param wiki The Wiki object to use
-	 * @param title The title of the config page to parse
-	 * @return A HashMap with the parsed pairs.
-	 */
-	public static HashMap<String, String> fetchPairedConfig(Wiki wiki, String title)
-	{
-		return FL.toHM(
-				Stream.of(wiki.getPageText(title).split("\n")).filter(s -> !s.startsWith("<") && !s.isEmpty()).map(s -> s.split(";", 2)),
-				a -> a[0], a -> a[1]);
-	}
-
-	/**
-	 * Parses a config page with a list of items. Empty lines and lines starting with '&gt;' are ignored.
-	 * 
-	 * @param wiki The Wiki object to use
-	 * @param title The title of the config page to parse
-	 * @return A HashSet with the list of items.
-	 */
-	public static HashSet<String> fetchSimpleConfig(Wiki wiki, String title)
-	{
-		return FL.toSet(fetchRawConfig(wiki, title));
 	}
 
 	/**
@@ -279,43 +187,43 @@ public final class Toolbox
 
 		return x;
 	}
-
+	
 	/**
-	 * Fetch a simple report from fastilybot's toollabs dumps.
+	 * Fetches the contents of a page, splits them by new line, and strips empty Strings and Strings starting with '&gt;'
 	 * 
 	 * @param wiki The Wiki object to use
-	 * @param report The name of the report, without the {@code .txt} extension.
-	 * @return A String Array with each item in the report, or the empty Array if something went wrong.
+	 * @param title The title of the config page to parse
+	 * @return An unclosed String with the specified data.
 	 */
-	public static String[] fetchLabsReportList(Wiki wiki, String report)
+	private static Stream<String> fetchRawConfig(Wiki wiki, String title)
 	{
-		try
-		{
-			Response r = wiki.apiclient.client.newCall(
-					new Request.Builder().url(String.format("https://tools.wmflabs.org/fastilybot/r/%s.txt", report)).get().build())
-					.execute();
-
-			if (r.isSuccessful())
-				return r.body().string().split("\n");
-		}
-		catch (Throwable e)
-		{
-			e.printStackTrace();
-		}
-
-		return new String[0];
+		return Stream.of(wiki.getPageText(title).split("\n")).filter(s -> !s.startsWith("<") && !s.isEmpty());
 	}
 
 	/**
-	 * Fetch a simple report from fastilybot's toollabs dumps. Auto-formats each item in the report by adding a
-	 * {@code File:} prefix and by replacing underscores with spaces.
+	 * Parses a config page with key-value pairs. Empty lines and lines starting with '&gt;' are ignored. Key-value pairs
+	 * should be split by {@code ;}, one pair per line.
 	 * 
 	 * @param wiki The Wiki object to use
-	 * @param report The name of the report, without the {@code .txt} extension.
-	 * @return A String HashSet with each item in the report, or the empty HashSet if something went wrong.
+	 * @param title The title of the config page to parse
+	 * @return A HashMap with the parsed pairs.
 	 */
-	public static HashSet<String> fetchLabsReportListAsFiles(Wiki wiki, String report)
+	public static HashMap<String, String> fetchPairedConfig(Wiki wiki, String title)
 	{
-		return FL.toSet(Arrays.stream(fetchLabsReportList(wiki, report)).map(s -> "File:" + s.replace('_', ' ')));
+		return FL.toHM(
+				Stream.of(wiki.getPageText(title).split("\n")).filter(s -> !s.startsWith("<") && !s.isEmpty()).map(s -> s.split(";", 2)),
+				a -> a[0], a -> a[1]);
+	}
+
+	/**
+	 * Parses a config page with a list of items. Empty lines and lines starting with '&gt;' are ignored.
+	 * 
+	 * @param wiki The Wiki object to use
+	 * @param title The title of the config page to parse
+	 * @return A HashSet with the list of items.
+	 */
+	public static HashSet<String> fetchSimpleConfig(Wiki wiki, String title)
+	{
+		return FL.toSet(fetchRawConfig(wiki, title));
 	}
 }

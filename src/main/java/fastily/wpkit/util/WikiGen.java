@@ -59,9 +59,9 @@ public final class WikiGen
 	{
 		Cipher c = Cipher.getInstance("AES");
 		c.init(Cipher.DECRYPT_MODE, new SecretKeySpec(Files.readAllBytes(findConfig(pf)), "AES"));
-		
-		GSONP.jp.parse(new String(c.doFinal(Files.readAllBytes(findConfig(px))), "UTF-8")).getAsJsonObject()
-		.entrySet().forEach(e -> master.put(e.getKey(), e.getValue().getAsString()));
+
+		GSONP.jp.parse(new String(c.doFinal(Files.readAllBytes(findConfig(px))), "UTF-8")).getAsJsonObject().entrySet()
+				.forEach(e -> master.put(e.getKey(), e.getValue().getAsString()));
 	}
 
 	/**
@@ -92,9 +92,9 @@ public final class WikiGen
 			else
 				c.printf("Entered passwords do not match!%n");
 
-			if(!c.readLine("Continue? (y/N): ").trim().toLowerCase().matches("(?i)(y|yes)"))
+			if (!c.readLine("Continue? (y/N): ").trim().toLowerCase().matches("(?i)(y|yes)"))
 				break;
-			
+
 			c.printf("%n");
 		}
 

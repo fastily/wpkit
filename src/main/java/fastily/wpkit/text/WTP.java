@@ -16,6 +16,11 @@ import fastily.wpkit.util.TParse;
 public final class WTP
 {
 	/**
+	 * Wraps {@code Template:FfD}
+	 */
+	public static final WTP ffd = new WTP("Template:Ffd");
+	
+	/**
 	 * Wraps {@code Template:Proposed deletion/dated files}
 	 */
 	public static final WTP fprod = new WTP("Template:Proposed deletion/dated files");

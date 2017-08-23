@@ -1,6 +1,7 @@
 package fastily.wpkit.tp;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 
 /**
  * Represents wikitext. May contain Strings and templates.
@@ -45,7 +46,37 @@ public class WikiText
 		else
 			throw new IllegalArgumentException("What is '" + o + "' ?");
 	}
-	
+
+	/**
+	 * Recursively finds WTemplate objects contained by this WikiText.
+	 * 
+	 * @return A List of all WTemplate objects in this WikiText.
+	 */
+	public ArrayList<WTemplate> getTemplatesR()
+	{
+		ArrayList<WTemplate> wtl = new ArrayList<>();
+		getTemplatesR(wtl);
+
+		return wtl;
+	}
+
+	/**
+	 * Recursively finds WTemplate objects contained by this WikiText.
+	 * 
+	 * @param wtl Any WTemplate objects found will be added to this List.
+	 * 
+	 * @see #getTemplatesR()
+	 */
+	private void getTemplatesR(ArrayList<WTemplate> wtl)
+	{
+		l.stream().filter(o -> o instanceof WTemplate).map(o -> (WTemplate) o).forEach(t -> {
+			for (WikiText wt : t.params.values())
+				wt.getTemplatesR(wtl);
+
+			wtl.add(t);
+		});
+	}
+
 	/**
 	 * Render this WikiText object as a String.
 	 */

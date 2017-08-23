@@ -1,6 +1,7 @@
 package fastily.wpkit.tp;
 
 import java.io.StringReader;
+import java.util.HashMap;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
@@ -24,31 +25,63 @@ import fastily.jwiki.util.GSONP;
 public class WParser
 {
 	/**
-	 * Parses the specified page into WikiText and WTemplates.
+	 * Runs a parse query for wikitext/pages and then parses the result into a WikiText object.
 	 * 
 	 * @param wiki The Wiki object to use
-	 * @param title The page to parse
-	 * @return A WikiText representation of {@code title}
-	 * @throws Throwable On parse error.
+	 * @param queryParams Parameters to POST to the server
+	 * @return A WikiText object, or null on error.
 	 */
-	public static WikiText parse(Wiki wiki, String title) throws Throwable
+	private static WikiText parse(Wiki wiki, HashMap<String, String> queryParams)
 	{
-		WikiText root = new WikiText();
-
-		XMLEventReader r = XMLInputFactory.newInstance()
-				.createXMLEventReader(new StringReader(GSONP.gString(GSONP.getNestedJO(
-						GSONP.jp.parse(wiki.basicGET("parse", "prop", "parsetree", "page", title).body().string()).getAsJsonObject(),
-						FL.toSAL("parse", "parsetree")), "*")));
-		while (r.hasNext())
+		queryParams.put("prop", "parsetree");
+		try
 		{
-			XMLEvent e = r.nextEvent();
+			XMLEventReader r = XMLInputFactory.newInstance()
+					.createXMLEventReader(new StringReader(GSONP
+							.gString(GSONP.getNestedJO(GSONP.jp.parse(wiki.basicPOST("parse", queryParams).body().string()).getAsJsonObject(),
+									FL.toSAL("parse", "parsetree")), "*")));
 
-			if (e.isStartElement() && nameIs(e.asStartElement(), "template"))
-				root.append(parseTemplate(r, root));
-			else if (e.isCharacters())
-				root.append(cToStr(e));
+			WikiText root = new WikiText();
+			while (r.hasNext())
+			{
+				XMLEvent e = r.nextEvent();
+
+				if (e.isStartElement() && nameIs(e.asStartElement(), "template"))
+					root.append(parseTemplate(r, root));
+				else if (e.isCharacters())
+					root.append(cToStr(e));
+			}
+			return root;
 		}
-		return root;
+		catch (Throwable e)
+		{
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	/**
+	 * Parses the text of a page into a WikiText object.
+	 * 
+	 * @param wiki The Wiki to use
+	 * @param page The title of the page to parse.
+	 * @return A WikiText representation of {@code page}, or null on error.
+	 */
+	public static WikiText parsePage(Wiki wiki, String page)
+	{
+		return parse(wiki, FL.pMap("page", page));
+	}
+
+	/**
+	 * Parses the text of a page into a WikiText object.
+	 * 
+	 * @param wiki The Wiki to use
+	 * @param text The wikitext to parse
+	 * @return A WikiText representation of {@code text}, or null on error.
+	 */
+	public static WikiText parseText(Wiki wiki, String text)
+	{
+		return parse(wiki, FL.pMap("text", text, "contentmodel", "wikitext"));
 	}
 
 	/**

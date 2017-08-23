@@ -1,9 +1,7 @@
 package fastily.wpkit.tp;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.TreeMap;
-
-import fastily.wpkit.util.WikiX;
 
 /**
  * Represents a parsed, wiki-text template.
@@ -21,12 +19,12 @@ public class WTemplate
 	/**
 	 * This WTemplate's title
 	 */
-	protected String title = "";
+	public String title = "";
 
 	/**
 	 * The Map tracking this object's parameters.
 	 */
-	protected final TreeMap<String, WikiText> params = new TreeMap<>(WikiX.tpParamCmp);
+	protected LinkedHashMap<String, WikiText> params = new LinkedHashMap<>();
 
 	/**
 	 * Creates a new, empty WTemplate object.
@@ -44,6 +42,26 @@ public class WTemplate
 	protected WTemplate(WikiText parent)
 	{
 		this.parent = parent;
+	}
+	
+	/**
+	 * Test if the specified key {@code k} exists in this WTemplate.
+	 * @param k The key to check
+	 * @return True if there is a mapping for {@code k} in this WTemplate.
+	 */
+	public boolean has(String k)
+	{
+		return params.containsKey(k);
+	}
+	
+	/**
+	 * Gets the specified WikiText value associated with key {@code k} in this WTemplate.
+	 * @param k The key to get WikiText for.
+	 * @return The WikiText, or null if there is no mappnig for {@code k}
+	 */
+	public WikiText get(String k)
+	{
+		return params.get(k);
 	}
 
 	/**
@@ -70,14 +88,6 @@ public class WTemplate
 	{
 		params.remove(k);
 	}
-	
-	public void append(String key, Object value) // TODO: Fixme - typing; do I even need this?
-	{
-		if (params.containsKey(key))
-			params.get(key).append(value);
-		else
-			put(key, value);
-	}
 
 	/**
 	 * Removes this WTemplate from its parent WikiText object, if applicable.
@@ -90,7 +100,7 @@ public class WTemplate
 		parent.l.remove(this);
 		parent = null;
 	}
-	
+
 	/**
 	 * Generates a String (wikitext) representation of this Template.
 	 * 

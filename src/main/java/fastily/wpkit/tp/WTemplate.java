@@ -1,5 +1,6 @@
 package fastily.wpkit.tp;
 
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -43,19 +44,22 @@ public class WTemplate
 	{
 		this.parent = parent;
 	}
-	
+
 	/**
-	 * Test if the specified key {@code k} exists in this WTemplate.
+	 * Test if the specified key {@code k} exists in this WTemplate. This does not check whether the parameter is empty
+	 * or not.
+	 * 
 	 * @param k The key to check
 	 * @return True if there is a mapping for {@code k} in this WTemplate.
 	 */
 	public boolean has(String k)
 	{
-		return params.containsKey(k);
+		return params.containsKey(k) && !params.get(k).l.isEmpty();
 	}
-	
+
 	/**
 	 * Gets the specified WikiText value associated with key {@code k} in this WTemplate.
+	 * 
 	 * @param k The key to get WikiText for.
 	 * @return The WikiText, or null if there is no mappnig for {@code k}
 	 */
@@ -81,10 +85,24 @@ public class WTemplate
 	}
 
 	/**
-	 * Removes the mapping for the specified key, {@code k} 
+	 * Appends {@code o} to the end of the WikiText associated with {@code k}
+	 * @param k The key to associate new text with.
+	 * @param o True 
+	 */
+	public void append(String k, Object o)
+	{
+		if(has(k))
+			params.get(k).append(o);
+		else
+			put(k, o);
+	}
+	
+	/**
+	 * Removes the mapping for the specified key, {@code k}
+	 * 
 	 * @param k Removes the mapping for this key, if possible
 	 */
-	public void removeParam(String k)
+	public void remove(String k)
 	{
 		params.remove(k);
 	}
@@ -94,13 +112,32 @@ public class WTemplate
 	 */
 	public void drop()
 	{
-		if(parent == null)
+		if (parent == null)
 			return;
-		
+
 		parent.l.remove(this);
 		parent = null;
 	}
 
+	/**
+	 * Re-map the a key to a new name.
+	 * @param oldK The old name
+	 * @param newK The new name
+	 */
+	public void remap(String oldK, String newK)
+	{
+		params.put(newK, params.remove(oldK));
+	}
+	
+	/**
+	 * Get the keyset (all parameters) for this WTemplate.  The resulting keyset does not back the internal Map.
+	 * @return The keyset for this WTemplate.
+	 */
+	public HashSet<String> keySet()
+	{
+		return new HashSet<>(params.keySet());
+	}
+	
 	/**
 	 * Generates a String (wikitext) representation of this Template.
 	 * 

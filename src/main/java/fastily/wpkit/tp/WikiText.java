@@ -3,6 +3,8 @@ package fastily.wpkit.tp;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 
+import fastily.jwiki.util.FL;
+
 /**
  * Represents wikitext. May contain Strings and templates.
  * 
@@ -48,6 +50,15 @@ public class WikiText
 	}
 
 	/**
+	 * Find top-level WTemplates contained by this WikiText
+	 * @return A List of top-level WTemplates in this WikiText.
+	 */
+	public ArrayList<WTemplate> getTemplates()
+	{
+		return FL.toAL(l.stream().filter(o -> o instanceof WTemplate).map(o -> (WTemplate) o));
+	}
+	
+	/**
 	 * Recursively finds WTemplate objects contained by this WikiText.
 	 * 
 	 * @return A List of all WTemplate objects in this WikiText.
@@ -59,7 +70,7 @@ public class WikiText
 
 		return wtl;
 	}
-
+	
 	/**
 	 * Recursively finds WTemplate objects contained by this WikiText.
 	 * 

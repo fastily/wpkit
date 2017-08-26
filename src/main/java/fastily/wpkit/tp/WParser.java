@@ -106,10 +106,10 @@ public class WParser
 				switch (se.getName().getLocalPart())
 				{
 					case "title":
-						t.title = getNextElementText(r);
+						t.title = getNextElementText(r).trim();
 						break;
 					case "name":
-						lastNameParsed = parseTKey(r, se);
+						lastNameParsed = parseTKey(r, se).trim();
 						break;
 					case "equals":
 						getNextElementText(r);
@@ -228,5 +228,19 @@ public class WParser
 	private static boolean nameIs(EndElement e, String n)
 	{
 		return e.getName().getLocalPart().equals(n);
+	}
+	
+	public static void main(String[] args) throws Throwable
+	{
+//		WikiText wt = WParser.parsePage(new Wiki("en.wikipedia.org"), "User:Fastily/TestX");
+		Wiki wiki = new Wiki("en.wikipedia.org");
+		WikiText wt = WParser.parseText(wiki, wiki.getPageText("User:Fastily/TestX"));
+		
+		System.out.println(wt);
+
+		System.out.println("\n-------------------------------\n");
+		System.out.println(wt.getTemplatesR());
+
+		// System.err.println(WParser.parse(new Wiki("en.wikipedia.org"), "User:Fastily/TestX"));
 	}
 }

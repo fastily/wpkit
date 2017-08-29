@@ -11,7 +11,7 @@ import fastily.jwiki.util.FSystem;
  * @author Fastily
  *
  */
-public class ReportUtils
+public class StrUtil
 {
 	/**
 	 * A date formatter for UTC times.
@@ -21,7 +21,7 @@ public class ReportUtils
 	/**
 	 * Constructors disallowed
 	 */
-	private ReportUtils()
+	private StrUtil()
 	{
 
 	}
@@ -31,18 +31,29 @@ public class ReportUtils
 	 * 
 	 * @param header A header/lead string to apply at the beginning of the returned String.
 	 * @param titles The titles to use
-	 * @param doEscape Set as true to escape titles. i.e. adds a {@code :} before each link so that files and
-	 *           categories are properly escaped and appear as links.
+	 * @param doEscape Set as true to escape titles. i.e. adds a {@code :} before each link so that files and categories
+	 *           are properly escaped and appear as links.
 	 * @return A String with the titles as a linked, unordered list, in Wiki-text.
 	 */
 	public static String listify(String header, Collection<String> titles, boolean doEscape)
 	{
 		String fmtStr = "* [[" + (doEscape ? ":" : "") + "%s]]" + FSystem.lsep;
 
-		String x = "" + header;
+		StringBuilder x = new StringBuilder(header);
 		for (String s : titles)
-			x += String.format(fmtStr, s);
+			x.append(String.format(fmtStr, s));
 
-		return x;
+		return x.toString();
+	}
+
+	/**
+	 * Capitalize a String.
+	 * 
+	 * @param s The String to capitalize
+	 * @return A new String created from {@code s}
+	 */
+	public static String cap(String s)
+	{
+		return s.length() <= 1 ? s.toUpperCase() : "" + Character.toUpperCase(s.charAt(0)) + s.substring(1);
 	}
 }

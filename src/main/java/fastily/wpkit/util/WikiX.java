@@ -2,7 +2,6 @@ package fastily.wpkit.util;
 
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -21,11 +20,6 @@ import fastily.jwiki.util.Tuple;
  */
 public final class WikiX
 {
-	/**
-	 * Template title and parameter comparator.  Useful when storing data about templates in Collections.
-	 */
-	public static final Comparator<String> tpParamCmp = (o1, o2) -> o1.replace('_', ' ').compareToIgnoreCase(o2.replace('_', ' '));
-	
 	/**
 	 * Constructors disallowed
 	 */
@@ -190,34 +184,6 @@ public final class WikiX
 	{
 		ArrayList<String> texts = FL.toAL(wiki.getRevisions(title, -1, false, start, end).stream().map(r -> r.text));
 		return FL.toAL(l.stream().filter(s -> texts.stream().noneMatch(t -> t.matches("(?si).*?\\[\\[:??(\\Q" + s + "\\E)\\]\\].*?"))));
-	}
-
-	/**
-	 * Deletes pages in {@code l} on {@code wiki} with {@code reason} if the last editor of that page was {@code user}
-	 * 
-	 * @param wiki The Wiki object to use
-	 * @param user Pages with this user (without the {@code User:} prefix) as the top editor will be deleted.
-	 * @param reason The reason to use in the deletion log.
-	 * @param l The List of pages to work with.
-	 * 
-	 * @return A List of pages which were successfully deleted.
-	 */
-	public static ArrayList<String> deleteByLastEditor(Wiki wiki, String user, String reason, ArrayList<String> l)
-	{
-		return FL.toAL(l.parallelStream().filter(s -> user.equals(getLastEditor(wiki, s))).filter(s -> wiki.delete(s, reason)));
-	}
-
-	/**
-	 * Deletes pages in {@code cat} on {@code wiki} with {@code reason} if the last editor of that page was {@code user}.
-	 * 
-	 * @param wiki The Wiki object to use
-	 * @param user Pages with this user (without the {@code User:} prefix) as the top editor will be deleted.
-	 * @param reason The reason to use in the deletion log.
-	 * @param cat The category to use, including the {@code Category:} prefix.
-	 */
-	public static void deleteByLastEditorInCat(Wiki wiki, String user, String reason, String cat)
-	{
-		deleteByLastEditor(wiki, user, reason, wiki.getCategoryMembers(cat));
 	}
 	
 	/**

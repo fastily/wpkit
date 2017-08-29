@@ -229,18 +229,4 @@ public class WParser
 	{
 		return e.getName().getLocalPart().equals(n);
 	}
-	
-	public static void main(String[] args) throws Throwable
-	{
-//		WikiText wt = WParser.parsePage(new Wiki("en.wikipedia.org"), "User:Fastily/TestX");
-		Wiki wiki = new Wiki("en.wikipedia.org");
-		WikiText wt = WParser.parseText(wiki, wiki.getPageText("User:Fastily/TestX"));
-		
-		System.out.println(wt);
-
-		System.out.println("\n-------------------------------\n");
-		System.out.println(wt.getTemplatesR());
-
-		// System.err.println(WParser.parse(new Wiki("en.wikipedia.org"), "User:Fastily/TestX"));
-	}
 }

@@ -4,6 +4,10 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import fastily.jwiki.core.NS;
+import fastily.jwiki.core.Wiki;
+import fastily.wpkit.text.StrUtil;
+
 /**
  * Represents a parsed, wiki-text template.
  * 
@@ -46,6 +50,20 @@ public class WTemplate
 	}
 
 	/**
+	 * Normalize the title of the WTemplate, according to {@code wiki}.  In other words, remove the 'Template:' namespace, convert the 
+	 * @param wiki The Wiki to normalize against.
+	 */
+	public void normalizeTitle(Wiki wiki)
+	{
+		if(wiki.whichNS(title).equals(NS.TEMPLATE))
+			title = wiki.nss(title);
+		title = StrUtil.cap(title).replace('_', ' ');
+		
+//		title = title.length() <= 1 ? title.toUpperCase() : "" + Character.toUpperCase(title.charAt(0)) + title.substring(1);
+
+	}
+	
+	/**
 	 * Test if the specified key {@code k} exists in this WTemplate. This does not check whether the parameter is empty
 	 * or not.
 	 * 
@@ -56,7 +74,7 @@ public class WTemplate
 	{
 		return params.containsKey(k) && !params.get(k).l.isEmpty();
 	}
-
+	
 	/**
 	 * Gets the specified WikiText value associated with key {@code k} in this WTemplate.
 	 * 
@@ -106,7 +124,7 @@ public class WTemplate
 	{
 		params.remove(k);
 	}
-
+	
 	/**
 	 * Removes this WTemplate from its parent WikiText object, if applicable.
 	 */

@@ -1,6 +1,5 @@
 package fastily.wpkit.util;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -168,22 +167,6 @@ public final class WikiX
 		results.add(new Triple<>(curr.x, curr.y, text.substring(curr.z)));
 
 		return results;
-	}
-
-	/**
-	 * Determine if a set of link(s) has existed on a page over a given time period.
-	 * 
-	 * @param wiki The Wiki object to use
-	 * @param title The title to query
-	 * @param l The list of link(s) to look for in the history of <code>title</code>.
-	 * @param start The time to start looking at (inclusive). Optional - set null to disable.
-	 * @param end The time to stop the search at (exclusive). Optional - set null to disable.
-	 * @return A list of link(s) that were found at some point in the page's history.
-	 */
-	public static ArrayList<String> detLinksInHist(Wiki wiki, String title, ArrayList<String> l, Instant start, Instant end)
-	{
-		ArrayList<String> texts = FL.toAL(wiki.getRevisions(title, -1, false, start, end).stream().map(r -> r.text));
-		return FL.toAL(l.stream().filter(s -> texts.stream().noneMatch(t -> t.matches("(?si).*?\\[\\[:??(\\Q" + s + "\\E)\\]\\].*?"))));
 	}
 	
 	/**

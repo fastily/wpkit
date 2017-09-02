@@ -51,13 +51,14 @@ public class WikiText
 
 	/**
 	 * Find top-level WTemplates contained by this WikiText
+	 * 
 	 * @return A List of top-level WTemplates in this WikiText.
 	 */
 	public ArrayList<WTemplate> getTemplates()
 	{
 		return FL.toAL(l.stream().filter(o -> o instanceof WTemplate).map(o -> (WTemplate) o));
 	}
-	
+
 	/**
 	 * Recursively finds WTemplate objects contained by this WikiText.
 	 * 
@@ -70,7 +71,7 @@ public class WikiText
 
 		return wtl;
 	}
-	
+
 	/**
 	 * Recursively finds WTemplate objects contained by this WikiText.
 	 * 
@@ -89,13 +90,26 @@ public class WikiText
 	}
 
 	/**
-	 * Render this WikiText object as a String.
+	 * Render this WikiText object as a String. Trims whitespace by default.
 	 */
 	public String toString()
 	{
-		String x = "";
+		return toString(true);
+	}
+
+	/**
+	 * Render this WikiText as a String.
+	 * 
+	 * @param doTrim If true, then trim whitespace.
+	 * @return A String representation of this WikiText.
+	 */
+	public String toString(boolean doTrim)
+	{
+		StringBuilder b = new StringBuilder("");
 		for (Object o : l)
-			x += o;
-		return x;
+			b.append(o);
+
+		String out = b.toString();
+		return doTrim ? out.trim() : out;
 	}
 }

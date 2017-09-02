@@ -50,19 +50,18 @@ public class WTemplate
 	}
 
 	/**
-	 * Normalize the title of the WTemplate, according to {@code wiki}.  In other words, remove the 'Template:' namespace, convert the 
+	 * Normalize the title of the WTemplate, according to {@code wiki}. In other words, remove the 'Template:' namespace,
+	 * convert, capitalize the first letter, convert underscores to spaces.
+	 * 
 	 * @param wiki The Wiki to normalize against.
 	 */
-	public void normalizeTitle(Wiki wiki)
+	public void normalizeTitle(Wiki wiki) //TODO: Account for non-template NS
 	{
-		if(wiki.whichNS(title).equals(NS.TEMPLATE))
+		if (wiki.whichNS(title).equals(NS.TEMPLATE))
 			title = wiki.nss(title);
 		title = StrUtil.cap(title).replace('_', ' ');
-		
-//		title = title.length() <= 1 ? title.toUpperCase() : "" + Character.toUpperCase(title.charAt(0)) + title.substring(1);
-
 	}
-	
+
 	/**
 	 * Test if the specified key {@code k} exists in this WTemplate. This does not check whether the parameter is empty
 	 * or not.
@@ -74,12 +73,12 @@ public class WTemplate
 	{
 		return params.containsKey(k) && !params.get(k).l.isEmpty();
 	}
-	
+
 	/**
 	 * Gets the specified WikiText value associated with key {@code k} in this WTemplate.
 	 * 
 	 * @param k The key to get WikiText for.
-	 * @return The WikiText, or null if there is no mappnig for {@code k}
+	 * @return The WikiText, or null if there is no mapping for {@code k}
 	 */
 	public WikiText get(String k)
 	{
@@ -104,17 +103,18 @@ public class WTemplate
 
 	/**
 	 * Appends {@code o} to the end of the WikiText associated with {@code k}
+	 * 
 	 * @param k The key to associate new text with.
-	 * @param o True 
+	 * @param o True
 	 */
 	public void append(String k, Object o)
 	{
-		if(has(k))
+		if (has(k))
 			params.get(k).append(o);
 		else
 			put(k, o);
 	}
-	
+
 	/**
 	 * Removes the mapping for the specified key, {@code k}
 	 * 
@@ -124,7 +124,7 @@ public class WTemplate
 	{
 		params.remove(k);
 	}
-	
+
 	/**
 	 * Removes this WTemplate from its parent WikiText object, if applicable.
 	 */
@@ -139,6 +139,7 @@ public class WTemplate
 
 	/**
 	 * Re-map the a key to a new name.
+	 * 
 	 * @param oldK The old name
 	 * @param newK The new name
 	 */
@@ -146,16 +147,17 @@ public class WTemplate
 	{
 		params.put(newK, params.remove(oldK));
 	}
-	
+
 	/**
-	 * Get the keyset (all parameters) for this WTemplate.  The resulting keyset does not back the internal Map.
+	 * Get the keyset (all parameters) for this WTemplate. The resulting keyset does not back the internal Map.
+	 * 
 	 * @return The keyset for this WTemplate.
 	 */
 	public HashSet<String> keySet()
 	{
 		return new HashSet<>(params.keySet());
 	}
-	
+
 	/**
 	 * Generates a String (wikitext) representation of this Template.
 	 * 

@@ -89,7 +89,7 @@ public final class FCLI
 		{
 			try
 			{
-				WikiGen.main(args);
+				WGen.main(args);
 			}
 			catch (Throwable e)
 			{

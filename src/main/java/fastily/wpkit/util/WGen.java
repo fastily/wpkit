@@ -21,12 +21,12 @@ import fastily.jwiki.util.FSystem;
 public class WGen
 {
 	/**
-	 * The default file names to save credentials under.
+	 * The default filenames to save credentials under.
 	 */
 	private static Path px = Paths.get(".px.txt"), homePX = Paths.get(System.getProperty("user.home") + FSystem.psep + px);
 
 	/**
-	 * Cache saving Wiki objects so we don't do multiple log-ins by accident.
+	 * Cache Wiki objects to avoid multiple logins.
 	 */
 	private static HashMap<String, Wiki> cache = new HashMap<>();
 
@@ -57,7 +57,7 @@ public class WGen
 			else
 				c.printf("ERROR: Entered passwords do not match!%n");
 
-			if (!c.readLine("Continue? (y/N): ").trim().toLowerCase().matches("(?i)(y|yes)"))
+			if (!c.readLine("Continue? (y/N): ").trim().matches("(?i)(y|yes)"))
 				break;
 
 			c.printf("%n");
@@ -77,7 +77,7 @@ public class WGen
 	}
 
 	/**
-	 * Gets a the PX for a user.
+	 * Gets a the password for a user.
 	 * 
 	 * @param user The username to get a password for.
 	 * @return The key associated with {@code user}

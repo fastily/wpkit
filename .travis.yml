@@ -1,0 +1,13 @@
+dist: trusty
+sudo: required
+language: java
+
+jdk:
+  - openjdk8
+
+before_script:
+  - git clone https://github.com/fastily/jwiki.git && ./jwiki/gradlew -x test build publishToMavenLocal
+
+notifications:
+  email: false
+  

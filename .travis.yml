@@ -7,7 +7,9 @@ jdk:
 
 before_install:
   - git clone https://github.com/fastily/jwiki.git
-  - ./jwiki/gradlew -x test build publishToMavenLocal
+  - cd jwiki
+  - ./gradlew -x test build publishToMavenLocal
+  - cd ../
 
 notifications:
   email: false

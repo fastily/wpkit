@@ -2,14 +2,10 @@ package fastily.wpkit.util;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 
 import fastily.jwiki.core.MQuery;
-import fastily.jwiki.core.NS;
 import fastily.jwiki.core.Wiki;
 import fastily.jwiki.util.FL;
-import fastily.jwiki.util.Triple;
-import fastily.jwiki.util.Tuple;
 
 /**
  * Miscellaneous Wiki-related routines.
@@ -40,88 +36,6 @@ public final class WikiX
 	}
 
 	/**
-	 * Recursively searches a category for members.
-	 * 
-	 * @param wiki The Wiki object to use
-	 * @param root The root/parent category to start searching in
-	 * @return A Tuple in the form: ( categories visited, members found )
-	 */
-	public static Tuple<HashSet<String>, HashSet<String>> getCategoryMembersR(Wiki wiki, String root)
-	{
-		HashSet<String> seen = new HashSet<>(), l = new HashSet<>();
-		getCategoryMembersR(wiki, root, seen, l);
-
-		return new Tuple<>(seen, l);
-	}
-
-	/**
-	 * Recursively searches a category for members.
-	 * 
-	 * @param wiki The Wiki object to use
-	 * @param root The root/parent category to start searching in
-	 * @param seen Lists the categories visited. Tracking this avoids circular self-categorizing categories.
-	 * @param l Lists the category members encountered.
-	 */
-	private static void getCategoryMembersR(Wiki wiki, String root, HashSet<String> seen, HashSet<String> l)
-	{
-		seen.add(root);
-
-		ArrayList<String> results = wiki.getCategoryMembers(root);
-		ArrayList<String> cats = wiki.filterByNS(results, NS.CATEGORY);
-
-		results.removeAll(cats); // cats go in seen
-		l.addAll(results);
-
-		for (String s : cats)
-		{
-			if (seen.contains(s))
-				continue;
-
-			getCategoryMembersR(wiki, s, seen, l);
-		}
-	}
-
-	/**
-	 * Get the page author of a page. This is based on the first available public revision to a page.
-	 * 
-	 * @param wiki The Wiki object to use
-	 * @param title The title to query
-	 * @return The page author, without the {@code User:} prefix, or null on error.
-	 */
-	public static String getPageAuthor(Wiki wiki, String title)
-	{
-		try
-		{
-			return wiki.getRevisions(title, 1, true, null, null).get(0).user;
-		}
-		catch (Throwable e)
-		{
-			e.printStackTrace();
-			return null;
-		}
-	}
-
-	/**
-	 * Get the most recent editor of a page.
-	 * 
-	 * @param wiki The Wiki object to use
-	 * @param title The title to query
-	 * @return The most recent editor to a page, without the {@code User:} prefix, or null on error.
-	 */
-	public static String getLastEditor(Wiki wiki, String title)
-	{
-		try
-		{
-			return wiki.getRevisions(title, 1, false, null, null).get(0).user;
-		}
-		catch (Throwable e)
-		{
-			e.printStackTrace();
-			return null;
-		}
-	}
-
-	/**
 	 * Gets the first shared (non-local) duplicate for each file with a duplicate. Filters out files which do not have
 	 * duplicates.
 	 * 
@@ -138,35 +52,6 @@ public final class WikiX
 		});
 
 		return l;
-	}
-
-	/**
-	 * Lists section headers on a page. This method takes inputs from {@code getSectionHeaders()} and
-	 * {@code getPageText()}
-	 * 
-	 * @param sectionData A response from {@code getSectionHeaders()}.
-	 * @param text The text from the same page, via {@code getPageText()}
-	 * @return A List with a Triple containing [ Header Level , Header Title, The Full Header and Section Text ]
-	 */
-	public static ArrayList<Triple<Integer, String, String>> listPageSections(ArrayList<Triple<Integer, String, Integer>> sectionData,
-			String text)
-	{
-		ArrayList<Triple<Integer, String, String>> results = new ArrayList<>();
-
-		if (sectionData.isEmpty())
-			return results;
-
-		Triple<Integer, String, Integer> curr;
-		for (int i = 0; i < sectionData.size() - 1; i++)
-		{
-			curr = sectionData.get(i);
-			results.add(new Triple<>(curr.x, curr.y, text.substring(curr.z, sectionData.get(i + 1).z)));
-		}
-
-		curr = sectionData.get(sectionData.size() - 1);
-		results.add(new Triple<>(curr.x, curr.y, text.substring(curr.z)));
-
-		return results;
 	}
 	
 	/**

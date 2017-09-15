@@ -8,6 +8,7 @@ import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 
 import fastily.jwiki.util.FSystem;
+import fastily.jwiki.util.WGen;
 
 /**
  * Static methods supporting CLI functionality.

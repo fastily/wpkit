@@ -2,10 +2,11 @@ package fastily.wpkit.text;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.regex.Pattern;
 
 import fastily.jwiki.core.NS;
 import fastily.jwiki.core.Wiki;
-import fastily.wpkit.util.TParse;
+import fastily.jwiki.util.FL;
 
 /**
  * Lists commonly used templates and contains methods to get regexes and transclusions for them.
@@ -16,15 +17,20 @@ import fastily.wpkit.util.TParse;
 public final class WTP
 {
 	/**
+	 * A capturing group that matches any reserved regex operator character in the Java Pattern API.
+	 */
+	private static final String rrc = "([" + Pattern.quote("()[]{}<>\\^-=$!|?*+.") + "])";
+
+	/**
 	 * Wraps {@code Template:FfD}
 	 */
 	public static final WTP ffd = new WTP("Template:Ffd");
-	
+
 	/**
 	 * Wraps {@code Template:Proposed deletion/dated files}
 	 */
 	public static final WTP fprod = new WTP("Template:Proposed deletion/dated files");
-	
+
 	/**
 	 * Wraps {@code Template:Copy to Wikimedia Commons}
 	 */
@@ -83,7 +89,7 @@ public final class WTP
 	 */
 	public String getRegex(Wiki wiki)
 	{
-		return rgx != null ? rgx : (rgx = TParse.makeTemplateRegex(wiki, title));
+		return rgx != null ? rgx : (rgx = makeTemplateRegex(wiki, title));
 	}
 
 	/**
@@ -108,5 +114,21 @@ public final class WTP
 	public HashSet<String> getTransclusionSet(Wiki wiki, NS... ns)
 	{
 		return new HashSet<>(getTransclusionList(wiki, ns));
+	}
+
+	/**
+	 * Constructs a regular expression which will match the specified template and its parameters.
+	 * 
+	 * @param wiki The wiki object to use
+	 * @param tplate The template (including namespace) to generate a regex for.
+	 * @return A regex matching the specified template, its redirects, and parameters.
+	 */
+	private static String makeTemplateRegex(Wiki wiki, String tplate) //TODO: refactor usage
+	{
+		ArrayList<String> l = wiki.whatLinksHere(tplate, true);
+		l.add(tplate);
+
+		return String.format("(?si)\\{\\{\\s*?(%s)\\s*?(\\||\\{\\{.+?\\}\\}|.+?)*?\\}\\}",
+				FL.pipeFence(FL.toAL(l.stream().map(s -> wiki.nss(s).replaceAll(rrc, "\\\\" + "$1").replaceAll("( |_)", "( |_)")))));
 	}
 }

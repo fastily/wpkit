@@ -1,5 +1,6 @@
 package fastily.wpkit.util;
 
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -16,23 +17,16 @@ import fastily.jwiki.util.FL;
 public final class WikiX
 {
 	/**
+	 * A date formatter for UTC times.
+	 */
+	public static final DateTimeFormatter iso8601dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+	/**
 	 * Constructors disallowed
 	 */
 	private WikiX()
 	{
 
-	}
-
-	/**
-	 * Strips namespaces from a list of titles for a given Wiki.
-	 * 
-	 * @param wiki The wiki object to use
-	 * @param l The titles which will have their namespace prefixes removed by <code>wiki</code>.
-	 * @return A new list of titles, with their namespace prefixes removed.
-	 */
-	public static ArrayList<String> stripNamespaces(Wiki wiki, ArrayList<String> l)
-	{
-		return FL.toAL(l.stream().map(wiki::nss));
 	}
 
 	/**

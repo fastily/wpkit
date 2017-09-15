@@ -1,4 +1,4 @@
-package fastily.wpkit.text;
+package fastily.wpkit;
 
 import java.util.ArrayList;
 import java.util.HashSet;

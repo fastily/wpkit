@@ -1,4 +1,4 @@
-package fastily.wpkit.util;
+package fastily.wpkit;
 
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;

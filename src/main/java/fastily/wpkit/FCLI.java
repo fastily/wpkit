@@ -8,7 +8,6 @@ import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 
 import fastily.jwiki.util.FSystem;
-import fastily.jwiki.util.WGen;
 
 /**
  * Static methods supporting CLI functionality.
@@ -86,18 +85,6 @@ public final class FCLI
 			hf.printHelp(help, ol);
 			System.exit(0);
 		}
-		if (l.hasOption("wgen"))
-		{
-			try
-			{
-				WGen.main(args);
-			}
-			catch (Throwable e)
-			{
-				e.printStackTrace();
-			}
-			System.exit(0);
-		}
 
 		return l;
 	}
@@ -111,7 +98,6 @@ public final class FCLI
 	{
 		Options ol = new Options();
 		ol.addOption("help", "help", false, "Print this help message and exit");
-		ol.addOption("wgen", "wgen", false, "Invoke the WikiGen utility and exit");
 		return ol;
 	}
 }

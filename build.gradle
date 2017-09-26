@@ -5,7 +5,7 @@ apply plugin: 'maven-publish'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
 
-version="0.0.1"
+version="0.0.2"
 description="${project.name} build script"
 group="fastily"
 
@@ -16,7 +16,7 @@ repositories {
 
 dependencies {
     api 'commons-cli:commons-cli:1.4'
-    api 'fastily:jwiki:1.4.0'
+    api 'fastily:jwiki:1.4.1'
 }
 
 def pomConfig = {
